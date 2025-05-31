@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+{% set hide_header = true %}
+
+{% block title %}Login - Lievik{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 class="auth-title">Welcome Back</h2>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="messages">
+                    {% for category, message in messages %}
+                        <div class="message message-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('main.login') }}">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+        </form>
+
+        <div class="auth-links">
+            Don't have an account? <a href="{{ url_for('main.register') }}">Create one here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

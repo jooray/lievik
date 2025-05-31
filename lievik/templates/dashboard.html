@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Lievik{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <h1>Welcome back{% if current_user.username %}, {{ current_user.username }}{% endif %}! 🌱</h1>
+            <p class="text-muted">Your marketing content orchestrator dashboard</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Active Channels</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Content Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Pending Stories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Notifications</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Quick Actions</h3>
+            <p class="text-muted mb-3">Get started with setting up your content orchestration</p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="#" class="btn btn-primary">Add Content Source</a>
+                <a href="#" class="btn btn-secondary">Create Channel</a>
+                <a href="#" class="btn btn-secondary">View Content</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
