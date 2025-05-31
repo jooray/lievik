@@ -5,20 +5,13 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 main_bp = Blueprint('main', __name__)
 
-
 @main_bp.route('/')
 def index():
     """Home page with dashboard overview."""
     if current_user.is_authenticated:
         return render_template('dashboard.html')
     else:
-        return jsonify({
-            'message': 'Lievik Marketing Content Orchestrator',
-            'version': '0.1.0',
-            'status': 'running',
-            'login_url': url_for('main.login'),
-            'register_url': url_for('main.register')
-        })
+        return redirect(url_for('main.login'))
 
 
 @main_bp.route('/health')
@@ -150,3 +143,220 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
+
+@main_bp.route('/api/ingestion/trigger', methods=['POST'])
+@login_required
+def trigger_content_ingestion():
+    """Manually trigger content ingestion for all sources or specific sources."""
+    try:
+        data = request.get_json() or {}
+        source_ids = data.get('source_ids', [])
+
+        from lievik.core.content_ingestion import ContentIngestionService
+        from lievik.models import Source
+
+        service = ContentIngestionService()
+        results = []
+
+        if source_ids:
+            # Ingest from specific sources
+            for source_id in source_ids:
+                source = Source.query.get(source_id)
+                if source and source.is_active:
+                    try:
+                        result = service.ingest_from_source(source)
+                        results.append({
+                            'source_id': source_id,
+                            'source_name': source.name,
+                            'status': 'success',
+                            'items_processed': result.get('items_processed', 0)
+                        })
+                    except Exception as e:
+                        results.append({
+                            'source_id': source_id,
+                            'source_name': source.name,
+                            'status': 'error',
+                            'error': str(e)
+                        })
+                else:
+                    results.append({
+                        'source_id': source_id,
+                        'status': 'error',
+                        'error': 'Source not found or inactive'
+                    })
+        else:
+            # Ingest from all active sources
+            sources = Source.query.filter_by(is_active=True).all()
+            for source in sources:
+                try:
+                    result = service.ingest_from_source(source)
+                    results.append({
+                        'source_id': source.id,
+                        'source_name': source.name,
+                        'status': 'success',
+                        'items_processed': result.get('items_processed', 0)
+                    })
+                except Exception as e:
+                    results.append({
+                        'source_id': source.id,
+                        'source_name': source.name,
+                        'status': 'error',
+                        'error': str(e)
+                    })
+
+        return jsonify({
+            'message': 'Content ingestion triggered',
+            'results': results,
+            'total_sources': len(results)
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to trigger content ingestion: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/ingestion/status')
+@login_required
+def get_ingestion_status():
+    """Get status of content ingestion jobs."""
+    try:
+        from lievik.app import scheduler
+
+        if scheduler is None:
+            return jsonify({'error': 'Scheduler not initialized'}), 500
+
+        # Get information about the content ingestion job
+        job = scheduler.get_job('content_ingestion')
+
+        if job is None:
+            return jsonify({'error': 'Content ingestion job not found'}), 404
+
+        return jsonify({
+            'job_id': job.id,
+            'job_name': job.name,
+            'next_run_time': job.next_run_time.isoformat() if job.next_run_time else None,
+            'trigger': str(job.trigger),
+            'pending': job.pending,
+            'max_instances': job.max_instances
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to get ingestion status: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/sources')
+@login_required
+def get_sources():
+    """Get all content sources."""
+    try:
+        from lievik.models import Source
+        sources = Source.query.all()
+
+        sources_data = []
+        for source in sources:
+            sources_data.append({
+                'id': source.id,
+                'name': source.name,
+                'source_type': source.source_type,
+                'url': source.url,
+                'is_active': source.is_active,
+                'created_at': source.created_at.isoformat() if source.created_at else None,
+                'last_ingestion': source.last_ingestion.isoformat() if source.last_ingestion else None
+            })
+
+        return jsonify({
+            'sources': sources_data,
+            'count': len(sources_data)
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to get sources: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/crew/process', methods=['POST'])
+@login_required
+def trigger_crew_processing():
+    """Manually trigger CrewAI processing for content items."""
+    try:
+        data = request.get_json() or {}
+        content_item_ids = data.get('content_item_ids', [])
+        channel_ids = data.get('channel_ids', [])
+
+        from lievik.core.content_ingestion import ContentIngestionService
+
+        service = ContentIngestionService()
+        results = service.process_existing_content_with_crew(
+            content_item_ids=content_item_ids if content_item_ids else None,
+            channel_ids=channel_ids if channel_ids else None
+        )
+
+        return jsonify({
+            'message': 'CrewAI processing triggered',
+            'results': results
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to trigger CrewAI processing: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/crew/status')
+@login_required
+def get_crew_status():
+    """Get status information about CrewAI processing."""
+    try:
+        from lievik.models import ContentItem, Channel
+        from datetime import datetime, timedelta
+
+        # Get recent content items counts
+        now = datetime.utcnow()
+        last_24h = now - timedelta(hours=24)
+        last_week = now - timedelta(days=7)
+
+        recent_items = ContentItem.query.filter(ContentItem.created_at >= last_24h).count()
+        weekly_items = ContentItem.query.filter(ContentItem.created_at >= last_week).count()
+        total_items = ContentItem.query.count()
+
+        active_channels = Channel.query.filter_by(is_active=True).count()
+        total_channels = Channel.query.count()
+
+        return jsonify({
+            'content_items': {
+                'last_24h': recent_items,
+                'last_week': weekly_items,
+                'total': total_items
+            },
+            'channels': {
+                'active': active_channels,
+                'total': total_channels
+            },
+            'crew_ai': {
+                'global_preprocessing_enabled': True,
+                'channel_evaluation_enabled': True,
+                'processing_mode': 'automatic'
+            }
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to get CrewAI status: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/status')
+def api_status():
+    """API status endpoint."""
+    return jsonify({
+        'message': 'Lievik Marketing Content Orchestrator',
+        'version': '0.1.0',
+        'status': 'running',
+        'login_url': url_for('main.login'),
+        'register_url': url_for('main.register')
+    })

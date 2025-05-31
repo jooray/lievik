@@ -35,11 +35,10 @@ Lievik is a web application designed to streamline and automate marketing conten
 
 #### 3.1. High-Level Components
 
-1.  **Content Ingestion Daemon:** A background process responsible for fetching, parsing, and performing initial AI-driven preprocessing of content.
-2.  **Web Application:** Flask backend serving a Svelte frontend, providing the user interface for channel management, content curation, and system configuration.
-3.  **Database:** SQL database (MySQL or PostgreSQL) storing all persistent data, including content, channel configurations, user data, and AI crew configurations.
-4.  **CrewAI Engine:** Integrated within both the daemon and web application backend to execute AI agent tasks.
-5.  **Vector Store:** For enabling RAG capabilities, storing embeddings of content and stories.
+1.  **Web Application with Integrated Content Ingestion:** Flask backend serving a Svelte frontend, providing the user interface for channel management, content curation, and system configuration. Includes APScheduler for background content ingestion tasks that can run both on schedule and on-demand.
+2.  **Database:** SQL database (MySQL or PostgreSQL) storing all persistent data, including content, channel configurations, user data, and AI crew configurations.
+3.  **CrewAI Engine:** Integrated within the web application backend to execute AI agent tasks for both content preprocessing and channel-specific evaluations.
+4.  **Vector Store:** For enabling RAG capabilities, storing embeddings of content and stories.
 
 #### 3.2. Technology Stack
 
@@ -47,6 +46,7 @@ Lievik is a web application designed to streamline and automate marketing conten
 *   **Frontend:** Svelte
 *   **Database:** SQLAlchemy (for MySQL/PostgreSQL abstraction)
 *   **AI Orchestration:** CrewAI
+*   **Background Tasks:** APScheduler (integrated within Flask)
 *   **Nostr Integration:** `nostr-sdk` (Python)
 *   **Web Content Parsing:** `trafilatura`
 *   **Dependency Management:** Poetry
@@ -83,7 +83,7 @@ Lievik is a web application designed to streamline and automate marketing conten
 
 ### 4. Core Modules & Components
 
-#### 4.1. Content Ingestion Daemon
+#### 4.1. Content Ingestion Service
 
 *   **Responsibilities:**
     *   Periodically fetch new events from configured Nostr sources (npubs). (Extensible for RSS etc.)
@@ -94,11 +94,11 @@ Lievik is a web application designed to streamline and automate marketing conten
         *   Detect initial language of the content.
     *   Store raw `ContentItems` and `ProcessedWebContent` in the database.
     *   Trigger per-channel evaluation for each new, processed `ContentItem`.
-*   **Scheduling:** Cron job (e.g., hourly or daily).
+*   **Execution:** APScheduler background tasks within Flask application, supporting both scheduled (hourly/daily) and on-demand execution (e.g., user-triggered refresh).
 
 #### 4.2. Per-Channel Content Evaluation
 
-*   **Trigger:** Invoked by the Ingestion Daemon for each new `ContentItem`.
+*   **Trigger:** Invoked by the Content Ingestion Service for each new `ContentItem`.
 *   **Process:**
     1.  For the given `ContentItem`, iterate through all active `Channels` defined by the user.
     2.  For each `Channel`:

@@ -36,8 +36,149 @@
                 <a href="#" class="btn btn-primary">Add Content Source</a>
                 <a href="#" class="btn btn-secondary">Create Channel</a>
                 <a href="#" class="btn btn-secondary">View Content</a>
+                <button id="trigger-ingestion" class="btn btn-outline-primary">Trigger Ingestion</button>
+                <button id="trigger-crew" class="btn btn-outline-secondary">Process with AI</button>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>System Status</h3>
+            <div id="system-status">
+                <p>Loading system status...</p>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Load dashboard data
+document.addEventListener('DOMContentLoaded', function() {
+    loadStats();
+    loadSystemStatus();
+    setupActionButtons();
+});
+
+function loadStats() {
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading stats:', data.error);
+                return;
+            }
+
+            const statCards = document.querySelectorAll('.stat-card .stat-value');
+            if (statCards.length >= 4) {
+                statCards[0].textContent = data.active_channels || 0;
+                statCards[1].textContent = data.content_items || 0;
+                statCards[2].textContent = '0'; // Pending stories - to be implemented
+                statCards[3].textContent = '0'; // Notifications - to be implemented
+            }
+        })
+        .catch(error => console.error('Error loading stats:', error));
+}
+
+function loadSystemStatus() {
+    Promise.all([
+        fetch('/api/ingestion/status'),
+        fetch('/api/crew/status')
+    ])
+    .then(responses => Promise.all(responses.map(r => r.json())))
+    .then(([ingestionStatus, crewStatus]) => {
+        const statusDiv = document.getElementById('system-status');
+
+        let html = '<div class="row">';
+
+        // Ingestion status
+        html += '<div class="col-md-6">';
+        html += '<h5>Content Ingestion</h5>';
+        if (ingestionStatus.error) {
+            html += `<p class="text-danger">Error: ${ingestionStatus.error}</p>`;
+        } else {
+            html += `<p>Next run: ${ingestionStatus.next_run_time ? new Date(ingestionStatus.next_run_time).toLocaleString() : 'Not scheduled'}</p>`;
+            html += `<p>Status: ${ingestionStatus.pending ? 'Running' : 'Idle'}</p>`;
+        }
+        html += '</div>';
+
+        // CrewAI status
+        html += '<div class="col-md-6">';
+        html += '<h5>AI Processing</h5>';
+        if (crewStatus.error) {
+            html += `<p class="text-danger">Error: ${crewStatus.error}</p>`;
+        } else {
+            html += `<p>Content items (24h): ${crewStatus.content_items?.last_24h || 0}</p>`;
+            html += `<p>Active channels: ${crewStatus.channels?.active || 0}</p>`;
+            html += `<p>AI Status: ${crewStatus.crew_ai?.global_preprocessing_enabled ? 'Enabled' : 'Disabled'}</p>`;
+        }
+        html += '</div>';
+
+        html += '</div>';
+        statusDiv.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error loading system status:', error);
+        document.getElementById('system-status').innerHTML = '<p class="text-danger">Failed to load system status</p>';
+    });
+}
+
+function setupActionButtons() {
+    // Trigger content ingestion
+    document.getElementById('trigger-ingestion').addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = 'Running...';
+
+        fetch('/api/ingestion/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Ingestion failed: ' + data.error);
+            } else {
+                alert(`Ingestion completed! Processed ${data.total_sources} sources.`);
+                loadStats(); // Refresh stats
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ingestion failed: ' + error.message);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.textContent = 'Trigger Ingestion';
+        });
+    });
+
+    // Trigger CrewAI processing
+    document.getElementById('trigger-crew').addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = 'Processing...';
+
+        fetch('/api/crew/process', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('AI processing failed: ' + data.error);
+            } else {
+                alert(`AI processing completed! Processed ${data.results.items_processed} items.`);
+                loadStats(); // Refresh stats
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('AI processing failed: ' + error.message);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.textContent = 'Process with AI';
+        });
+    });
+}
+</script>
 {% endblock %}

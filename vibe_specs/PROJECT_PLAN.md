@@ -26,40 +26,43 @@ This plan outlines the steps to develop the Minimum Viable Product (MVP) for Lie
         *   Ensure CrewAI telemetry is disabled (`CREWAI_DISABLE_TELEMETRY = 'true'`, `OTEL_SDK_DISABLED = 'true'`).
     *   **Goal:** The application can be configured to use different LLM providers.
 
-**Phase 2: Content Ingestion Daemon**
+**Phase 2: Content Ingestion Service (APScheduler Integration)**
 
-*   **Task 2.1: Nostr Data Fetching**
+*   **Task 2.1: APScheduler Setup & Basic Content Ingestion**
     *   **Role:** Backend Developer (Python)
     *   **Task:**
-        *   Implement a script/module using `nostr-sdk` to fetch events from a configurable list of Nostr `npubs` and relays.
+        *   Integrate APScheduler into the Flask application.
+        *   Implement a basic content ingestion service using `nostr-sdk` to fetch events from configurable Nostr `npubs` and relays.
         *   Store raw event data, link URLs, and publication dates into the `ContentItems` table, associated with a `Source`.
-    *   **Goal:** Daemon can connect to Nostr, fetch events for specified `npubs`, and store them.
+        *   Create endpoints/methods to trigger content ingestion both on schedule and on-demand (e.g., from UI refresh button).
+    *   **Goal:** Flask app can schedule and execute content ingestion tasks, fetch events from Nostr sources, and store them in the database.
 
-*   **Task 2.2: Web Content Parsing**
+*   **Task 2.2: Web Content Parsing Integration**
     *   **Role:** Backend Developer (Python)
-    *   **Task:** Integrate `trafilatura` to extract main content, title from URLs found in Nostr events. Store this in `ProcessedWebContent`.
-    *   **Goal:** Linked web pages are parsed, and their content is stored.
+    *   **Task:** Integrate `trafilatura` within the content ingestion service to extract main content, title from URLs found in Nostr events. Store this in `ProcessedWebContent`.
+    *   **Goal:** Linked web pages are parsed automatically during content ingestion and their content is stored.
 
 *   **Task 2.3: Global Content Preprocessing Crew - Initial Setup**
     *   **Role:** CrewAI Specialist, Backend Developer (Python)
     *   **Task:**
         *   Define the initial YAML configuration for the "Global Content Preprocessing Crew" (Web Scraper Agent, Summarizer Agent, Distance Evaluation Agent - as per ARCHITECTURE.md 5.1). Store this in a seed file.
         *   Implement logic to load this default global crew configuration into the `CrewConfigurations` table on first app setup.
-        *   Develop the core logic for these agents:
+        *   Develop the core logic for these agents within the content ingestion service:
             *   Summarizer Agent: Basic LLM call to summarize text.
             *   Distance Evaluation Agent: Takes user's free-text description of projects/websites (from a placeholder user setting for now) and content details to estimate "actual distance" using an LLM.
-    *   **Goal:** A basic Global Content Preprocessing Crew can be instantiated and its agents can perform their core tasks (summarization, initial distance evaluation).
+    *   **Goal:** A basic Global Content Preprocessing Crew can be instantiated and its agents can perform their core tasks (summarization, initial distance evaluation) within the scheduled content ingestion.
 
-*   **Task 2.4: Daemon Main Loop & Scheduling**
+*   **Task 2.4: Scheduler Configuration & Content Ingestion Pipeline**
     *   **Role:** Backend Developer (Python)
     *   **Task:**
-        *   Structure the daemon to:
+        *   Configure APScheduler to run content ingestion tasks on a regular schedule (configurable via environment variables).
+        *   Structure the complete content ingestion pipeline:
             1.  Fetch new Nostr events.
             2.  For each event, parse links (if any).
             3.  Execute the Global Content Preprocessing Crew (summarization, actual distance evaluation, initial language detection - can be a simple placeholder for now).
             4.  Store `ContentItems` and `ProcessedWebContent`.
-        *   Set up basic scheduling (e.g., a cron job or a simple loop for development).
-    *   **Goal:** The daemon can run periodically, ingest Nostr content, perform initial processing, and store results in the database.
+        *   Add Flask routes to manually trigger content ingestion (for user-initiated refresh).
+    *   **Goal:** The Flask application can run scheduled content ingestion and allow manual triggering from the web interface.
 
 **Phase 3: Channel Management & Per-Channel Evaluation (MVP Focus)**
 

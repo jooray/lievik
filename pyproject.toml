@@ -18,6 +18,9 @@ psycopg2-binary = "^2.9.10"
 trafilatura = "^2.0.0"
 nostr-sdk = "^0.42.1"
 crewai = {extras = ["tools"], version = "^0.121.1"}
+apscheduler = "^3.10.4"
+langchain = "^0.3.25"
+langchain-community = "^0.3.24"
 
 
 [build-system]
