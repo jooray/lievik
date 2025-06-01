@@ -13,6 +13,7 @@ from crewai import Agent, Task, Crew, Process
 import yaml
 
 from lievik.core.llm_service import get_llm
+from lievik.core.crew_utils import parse_crew_json_output, extract_json_content_field, create_error_json
 from lievik.models import ContentItem, Channel, ProcessedWebContent, CrewConfiguration
 from lievik.app import db
 
@@ -113,21 +114,7 @@ class GlobalContentPreprocessingCrew:
         """
         try:
             # Get the actual content text, not raw JSON
-            content_text = content_item.raw_content or ''
-
-            # If content looks like JSON (starts with '{'), try to parse it
-            if content_text.strip().startswith('{'):
-                try:
-                    import json
-                    parsed_json = json.loads(content_text)
-                    # If it's a Nostr event, extract the content field
-                    if 'content' in parsed_json:
-                        content_text = parsed_json['content']
-                        # Replace literal \n with actual newlines
-                        content_text = content_text.replace('\\n', '\n')
-                except json.JSONDecodeError:
-                    # If parsing fails, use the original text
-                    pass
+            content_text = extract_json_content_field(content_item.raw_content)
 
             # Prepare inputs for the crew - ensure all template variables are provided
             crew_inputs = {
@@ -169,19 +156,16 @@ class GlobalContentPreprocessingCrew:
             logger.info(f"Processing content item {content_item.id} through Global Content Preprocessing Crew")
             result = self.crew.kickoff(inputs=crew_inputs)
 
-            # Parse the result - expecting JSON format
-            try:
-                if hasattr(result, 'raw'):
-                    result_text = result.raw
-                else:
-                    result_text = str(result)
+            # Parse the crew output using utility function
+            parsed_result, stored_json_string = parse_crew_json_output(
+                result,
+                context=f"content_item_{content_item.id}"
+            )
 
-                # Try to parse as JSON
-                parsed_result = json.loads(result_text)
-
-                # Extract structured data
+            if parsed_result:
+                # Successfully parsed JSON
                 return {
-                    'crew_result_json': result_text,
+                    'crew_result_json': stored_json_string,
                     'enhanced_short': parsed_result.get('enhanced_short', ''),
                     'enhanced_medium': parsed_result.get('enhanced_medium', ''),
                     'enhanced_long': parsed_result.get('enhanced_long', ''),
@@ -194,16 +178,14 @@ class GlobalContentPreprocessingCrew:
                     'web_summary': parsed_result.get('web_summary', ''),
                     'web_content_id': web_content_analysis.get('web_content_id')
                 }
-
-            except json.JSONDecodeError:
-                # If not JSON, store raw result
-                logger.warning(f"Crew result for content item {content_item.id} is not valid JSON, storing as raw text")
+            else:
+                # Failed to parse JSON
                 return {
-                    'crew_result_json': result_text,
+                    'crew_result_json': stored_json_string,
                     'enhanced_short': '',
                     'enhanced_medium': '',
                     'enhanced_long': '',
-                    'analysis': {'raw_result': result_text},
+                    'analysis': {'error': 'Failed to parse LLM output as JSON', 'raw_output': stored_json_string},
                     'quality_score': 0,
                     'web_enhanced_short': '',
                     'web_enhanced_medium': '',
@@ -213,9 +195,9 @@ class GlobalContentPreprocessingCrew:
                 }
 
         except Exception as e:
-            logger.error(f"Error processing content item {content_item.id} with Global Content Preprocessing Crew: {e}")
+            logger.error(f"Error processing content item {content_item.id} with Global Content Preprocessing Crew: {e}", exc_info=True)
             return {
-                'crew_result_json': json.dumps({'error': str(e)}),
+                'crew_result_json': create_error_json(e),
                 'enhanced_short': '',
                 'enhanced_medium': '',
                 'enhanced_long': '',
@@ -379,21 +361,7 @@ class ChannelContentEvaluationCrew:
         """
         try:
             # Get the actual content text, not raw JSON
-            content_text = content_item.raw_content or ''
-
-            # If content looks like JSON (starts with '{'), try to parse it
-            if content_text.strip().startswith('{'):
-                try:
-                    import json
-                    parsed_json = json.loads(content_text)
-                    # If it's a Nostr event, extract the content field
-                    if 'content' in parsed_json:
-                        content_text = parsed_json['content']
-                        # Replace literal \n with actual newlines
-                        content_text = content_text.replace('\\n', '\n')
-                except json.JSONDecodeError:
-                    # If parsing fails, use the original text
-                    pass
+            content_text = extract_json_content_field(content_item.raw_content)
 
             # Prepare inputs for the crew - use enhanced content from ContentItem
             crew_inputs = {
@@ -413,17 +381,14 @@ class ChannelContentEvaluationCrew:
             logger.info(f"Evaluating content item {content_item.id} for channel {self.channel.name}")
             result = self.crew.kickoff(inputs=crew_inputs)
 
-            # Parse the result - expecting JSON format
-            try:
-                if hasattr(result, 'raw'):
-                    result_text = result.raw
-                else:
-                    result_text = str(result)
+            # Parse the crew output using utility function
+            parsed_result, stored_json_string = parse_crew_json_output(
+                result,
+                context=f"channel_{self.channel.id}_content_{content_item.id}"
+            )
 
-                # Try to parse as JSON
-                parsed_result = json.loads(result_text)
-
-                # Extract structured data for database storage
+            if parsed_result:
+                # Successfully parsed JSON
                 return {
                     'relevance_score': parsed_result.get('relevance_score', 0),
                     'language_acceptability_score': parsed_result.get('language_acceptability_score', 0),
@@ -431,26 +396,24 @@ class ChannelContentEvaluationCrew:
                     'reasoning': parsed_result.get('reasoning', ''),
                     'recommendation': parsed_result.get('recommendation', 'review'),
                     'suggested_adaptations': parsed_result.get('suggested_adaptations', []),
-                    'evaluation_result_json': result_text,
+                    'evaluation_result_json': stored_json_string,
                     'status': 'completed'
                 }
-
-            except json.JSONDecodeError:
-                # If not JSON, store raw result and use default scores
-                logger.warning(f"Channel evaluation result for content item {content_item.id} and channel {self.channel.name} is not valid JSON")
+            else:
+                # Failed to parse JSON
                 return {
                     'relevance_score': 5,  # Default middle score
                     'language_acceptability_score': 5,
                     'final_affinity_score': 5,
-                    'reasoning': 'Unable to parse structured evaluation result',
+                    'reasoning': 'Unable to parse structured evaluation result from LLM output.',
                     'recommendation': 'review',
                     'suggested_adaptations': [],
-                    'evaluation_result_json': result_text,
+                    'evaluation_result_json': stored_json_string,
                     'status': 'completed_with_warnings'
                 }
 
         except Exception as e:
-            logger.error(f"Error evaluating content item {content_item.id} for channel {self.channel.name}: {e}")
+            logger.error(f"Error evaluating content item {content_item.id} for channel {self.channel.name}: {e}", exc_info=True)
             return {
                 'relevance_score': 0,
                 'language_acceptability_score': 0,
@@ -458,7 +421,7 @@ class ChannelContentEvaluationCrew:
                 'reasoning': f'Evaluation failed: {str(e)}',
                 'recommendation': 'skip',
                 'suggested_adaptations': [],
-                'evaluation_result_json': json.dumps({'error': str(e)}),
+                'evaluation_result_json': create_error_json(e),
                 'status': 'error'
             }
 
