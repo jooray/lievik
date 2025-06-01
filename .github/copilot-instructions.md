@@ -1,0 +1,3 @@
+# GitHub Copilot Instructions for Lievik Project
+
+This is a Flask-based application that uses Poetry for dependency management. **Always use `poetry run` prefix for all Python commands and scripts** - never use `python` or `pip` directly. The Flask app factory is in `lievik/app.py` as `create_app()`, and you can run the development server with `poetry run python run.py`. For Flask commands like database migrations, set the FLASK_APP environment variable: `FLASK_APP=lievik.app:create_app poetry run flask db migrate` or `FLASK_APP=lievik.app:create_app poetry run flask db upgrade`. All custom scripts in the `scripts/` directory should be executed with `poetry run python scripts/script_name.py`.

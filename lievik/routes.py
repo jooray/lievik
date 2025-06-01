@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, current_app # Import current_app
 from lievik.app import db
 from lievik.models import User, Channel, ContentItem, ChannelContentAffinity
 from flask_login import login_user, logout_user, login_required, current_user
@@ -19,7 +19,8 @@ def health_check():
     """Health check endpoint."""
     try:
         # Test database connection
-        db.session.execute('SELECT 1')
+        from sqlalchemy import text
+        db.session.execute(text('SELECT 1'))
         db_status = 'connected'
     except Exception as e:
         db_status = f'error: {str(e)}'
@@ -145,76 +146,7 @@ def logout():
     return redirect(url_for('main.index'))
 
 
-@main_bp.route('/api/ingestion/trigger', methods=['POST'])
-@login_required
-def trigger_content_ingestion():
-    """Manually trigger content ingestion for all sources or specific sources."""
-    try:
-        data = request.get_json() or {}
-        source_ids = data.get('source_ids', [])
 
-        from lievik.core.content_ingestion import ContentIngestionService
-        from lievik.models import Source
-
-        service = ContentIngestionService()
-        results = []
-
-        if source_ids:
-            # Ingest from specific sources
-            for source_id in source_ids:
-                source = Source.query.get(source_id)
-                if source and source.is_active:
-                    try:
-                        result = service.ingest_from_source(source)
-                        results.append({
-                            'source_id': source_id,
-                            'source_name': source.name,
-                            'status': 'success',
-                            'items_processed': result.get('items_processed', 0)
-                        })
-                    except Exception as e:
-                        results.append({
-                            'source_id': source_id,
-                            'source_name': source.name,
-                            'status': 'error',
-                            'error': str(e)
-                        })
-                else:
-                    results.append({
-                        'source_id': source_id,
-                        'status': 'error',
-                        'error': 'Source not found or inactive'
-                    })
-        else:
-            # Ingest from all active sources
-            sources = Source.query.filter_by(is_active=True).all()
-            for source in sources:
-                try:
-                    result = service.ingest_from_source(source)
-                    results.append({
-                        'source_id': source.id,
-                        'source_name': source.name,
-                        'status': 'success',
-                        'items_processed': result.get('items_processed', 0)
-                    })
-                except Exception as e:
-                    results.append({
-                        'source_id': source.id,
-                        'source_name': source.name,
-                        'status': 'error',
-                        'error': str(e)
-                    })
-
-        return jsonify({
-            'message': 'Content ingestion triggered',
-            'results': results,
-            'total_sources': len(results)
-        })
-
-    except Exception as e:
-        return jsonify({
-            'error': f'Failed to trigger content ingestion: {str(e)}'
-        }), 500
 
 
 @main_bp.route('/api/ingestion/status')
@@ -245,65 +177,6 @@ def get_ingestion_status():
     except Exception as e:
         return jsonify({
             'error': f'Failed to get ingestion status: {str(e)}'
-        }), 500
-
-
-@main_bp.route('/api/sources')
-@login_required
-def get_sources():
-    """Get all content sources."""
-    try:
-        from lievik.models import Source
-        sources = Source.query.all()
-
-        sources_data = []
-        for source in sources:
-            sources_data.append({
-                'id': source.id,
-                'name': source.name,
-                'source_type': source.source_type,
-                'url': source.url,
-                'is_active': source.is_active,
-                'created_at': source.created_at.isoformat() if source.created_at else None,
-                'last_ingestion': source.last_ingestion.isoformat() if source.last_ingestion else None
-            })
-
-        return jsonify({
-            'sources': sources_data,
-            'count': len(sources_data)
-        })
-
-    except Exception as e:
-        return jsonify({
-            'error': f'Failed to get sources: {str(e)}'
-        }), 500
-
-
-@main_bp.route('/api/crew/process', methods=['POST'])
-@login_required
-def trigger_crew_processing():
-    """Manually trigger CrewAI processing for content items."""
-    try:
-        data = request.get_json() or {}
-        content_item_ids = data.get('content_item_ids', [])
-        channel_ids = data.get('channel_ids', [])
-
-        from lievik.core.content_ingestion import ContentIngestionService
-
-        service = ContentIngestionService()
-        results = service.process_existing_content_with_crew(
-            content_item_ids=content_item_ids if content_item_ids else None,
-            channel_ids=channel_ids if channel_ids else None
-        )
-
-        return jsonify({
-            'message': 'CrewAI processing triggered',
-            'results': results
-        })
-
-    except Exception as e:
-        return jsonify({
-            'error': f'Failed to trigger CrewAI processing: {str(e)}'
         }), 500
 
 
@@ -360,3 +233,255 @@ def api_status():
         'login_url': url_for('main.login'),
         'register_url': url_for('main.register')
     })
+
+
+@main_bp.route('/api/content/ingest', methods=['POST'])
+@login_required
+def trigger_content_ingestion():
+    """Manually trigger content ingestion for all sources."""
+    try:
+        from lievik.core.content_ingestion import content_ingestion_service
+
+        # Run content ingestion for current user
+        results = content_ingestion_service.ingest_all_sources(user_id=current_user.id)
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Content ingestion completed',
+            'results': results
+        })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Content ingestion failed: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/content/ingest/source/<int:source_id>', methods=['POST'])
+@login_required
+def trigger_source_ingestion(source_id):
+    """Manually trigger content ingestion for a specific source."""
+    try:
+        from lievik.core.content_ingestion import content_ingestion_service
+        from lievik.models import Source
+
+        # Get the source and verify ownership
+        source = Source.query.filter_by(id=source_id, user_id=current_user.id).first()
+        if not source:
+            return jsonify({
+                'status': 'error',
+                'message': 'Source not found or access denied'
+            }), 404
+
+        # Run content ingestion for this specific source
+        results = content_ingestion_service.ingest_from_source(source)
+
+        return jsonify({
+            'status': 'success',
+            'message': f'Content ingestion completed for source: {source.name}',
+            'results': results
+        })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Source ingestion failed: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/content/process', methods=['POST'])
+@login_required
+def trigger_content_crew_processing():
+    """Manually trigger CrewAI processing for existing content items."""
+    try:
+        from lievik.core.content_ingestion import content_ingestion_service
+
+        data = request.get_json() or {}
+        content_item_ids = data.get('content_item_ids')  # Optional: specific items
+        channel_ids = data.get('channel_ids')  # Optional: specific channels
+
+        # Run CrewAI processing
+        results = content_ingestion_service.process_existing_content_with_crew(
+            content_item_ids=content_item_ids,
+            channel_ids=channel_ids
+        )
+
+        return jsonify({
+            'status': 'success',
+            'message': 'CrewAI processing completed',
+            'results': results
+        })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'CrewAI processing failed: {str(e)}'
+        }), 500
+
+
+@main_bp.route('/api/scheduler/control', methods=['POST'])
+@login_required
+def control_scheduler():
+    """Control the content ingestion scheduler (start/stop/restart)."""
+    try:
+        from lievik.app import scheduler
+
+        data = request.get_json() or {}
+        action = data.get('action', '').lower()
+
+        if scheduler is None:
+            return jsonify({'error': 'Scheduler not initialized'}), 500
+
+        if action == 'start':
+            if scheduler.running:
+                return jsonify({'message': 'Scheduler is already running', 'status': 'running'})
+            scheduler.start()
+            return jsonify({'message': 'Scheduler started successfully', 'status': 'running'})
+
+        elif action == 'stop':
+            if not scheduler.running:
+                return jsonify({'message': 'Scheduler is already stopped', 'status': 'stopped'})
+            scheduler.shutdown(wait=False)
+            return jsonify({'message': 'Scheduler stopped successfully', 'status': 'stopped'})
+
+        elif action == 'restart':
+            if scheduler.running:
+                scheduler.shutdown(wait=False)
+            # Reinitialize scheduler
+            from lievik.app import init_scheduler
+            from flask import current_app
+            init_scheduler(current_app)
+            return jsonify({'message': 'Scheduler restarted successfully', 'status': 'running'})
+
+        elif action == 'pause_job':
+            job_id = data.get('job_id', 'content_ingestion')
+            scheduler.pause_job(job_id)
+            return jsonify({'message': f'Job {job_id} paused successfully', 'status': 'paused'})
+
+        elif action == 'resume_job':
+            job_id = data.get('job_id', 'content_ingestion')
+            scheduler.resume_job(job_id)
+            return jsonify({'message': f'Job {job_id} resumed successfully', 'status': 'running'})
+
+        else:
+            return jsonify({'error': f'Unknown action: {action}. Valid actions: start, stop, restart, pause_job, resume_job'}), 400
+
+    except Exception as e:
+        return jsonify({'error': f'Scheduler control failed: {str(e)}'}), 500
+
+
+@main_bp.route('/api/scheduler/status')
+@login_required
+def get_detailed_scheduler_status():
+    """Get detailed status of the content ingestion scheduler."""
+    try:
+        from lievik.app import scheduler
+        from flask import current_app
+
+        if scheduler is None:
+            return jsonify({'error': 'Scheduler not initialized'}), 500
+
+        # Get scheduler status
+        status_data = {
+            'scheduler_running': scheduler.running,
+            'scheduler_state': scheduler.state,
+            'timezone': str(scheduler.timezone)
+        }
+
+        # Get job information
+        jobs = []
+        for job in scheduler.get_jobs():
+            job_data = {
+                'id': job.id,
+                'name': job.name,
+                'next_run_time': job.next_run_time.isoformat() if job.next_run_time else None,
+                'trigger': str(job.trigger),
+                'pending': job.pending,
+                'max_instances': job.max_instances,
+                'coalesce': job.coalesce,
+                'misfire_grace_time': job.misfire_grace_time
+            }
+            jobs.append(job_data)
+
+        status_data['jobs'] = jobs
+
+        # Get last ingestion results if available
+        last_time = current_app.config.get('LAST_INGESTION_TIME')
+        last_results = current_app.config.get('LAST_INGESTION_RESULTS')
+        last_error = current_app.config.get('LAST_INGESTION_ERROR')
+
+        if last_time:
+            status_data['last_ingestion'] = {
+                'time': last_time.isoformat(),
+                'results': last_results,
+                'error': last_error
+            }
+
+        # Get configuration
+        status_data['configuration'] = {
+            'schedule_type': current_app.config.get('INGESTION_SCHEDULE_TYPE'),
+            'interval_hours': current_app.config.get('INGESTION_INTERVAL_HOURS'),
+            'cron_schedule': current_app.config.get('INGESTION_CRON_SCHEDULE'),
+            'max_instances': current_app.config.get('INGESTION_MAX_INSTANCES'),
+            'coalesce': current_app.config.get('INGESTION_COALESCE'),
+            'misfire_grace_time': current_app.config.get('INGESTION_MISFIRE_GRACE_TIME'),
+            'process_content_immediately': current_app.config.get('PROCESS_CONTENT_IMMEDIATELY')
+        }
+
+        return jsonify(status_data)
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to get scheduler status: {str(e)}'}), 500
+
+
+@main_bp.route('/api/content/pipeline/trigger', methods=['POST'])
+@login_required
+def trigger_full_content_pipeline():
+    """
+    Manually trigger the complete content ingestion pipeline as specified in Task 2.4.
+    This triggers the background job immediately and returns without waiting for completion.
+    """
+    try:
+        from lievik.app import scheduler
+        from datetime import datetime # Import datetime
+
+        if scheduler is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Scheduler not initialized'
+            }), 500
+
+        data = request.get_json() or {}
+        # user_only = data.get('user_only', True) # This parameter is not used by the scheduled job directly
+
+        job = scheduler.get_job('content_ingestion')
+
+        if job is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'Content ingestion job not found in scheduler'
+            }), 404
+
+        # Check if job is already running (APScheduler's pending attribute might not be reliable for this)
+        # It's better to rely on max_instances=1 and let the scheduler handle it.
+        # If you need more sophisticated check, it would require external state tracking.
+
+        # Trigger the job to run immediately by setting its next_run_time to now
+        now_in_scheduler_tz = datetime.now(scheduler.timezone)
+        scheduler.modify_job('content_ingestion', next_run_time=now_in_scheduler_tz)
+        current_app.logger.info(f"Manual trigger: Modified 'content_ingestion' job to run at {now_in_scheduler_tz}")
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Content ingestion pipeline triggered to run now via scheduler.',
+            'job_status': 'triggered',
+            'next_run_time_set_to': now_in_scheduler_tz.isoformat()
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Failed to trigger content pipeline: {e}", exc_info=True)
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to trigger source refresh: {str(e)}'
+        }), 500

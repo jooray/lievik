@@ -36,8 +36,8 @@
                 <a href="#" class="btn btn-primary">Add Content Source</a>
                 <a href="#" class="btn btn-secondary">Create Channel</a>
                 <a href="#" class="btn btn-secondary">View Content</a>
-                <button id="trigger-ingestion" class="btn btn-outline-primary">Trigger Ingestion</button>
-                <button id="trigger-crew" class="btn btn-outline-secondary">Process with AI</button>
+                <button id="trigger-pipeline" class="btn btn-outline-primary">Trigger source refresh</button>
+                <button id="scheduler-control" class="btn btn-outline-warning">Scheduler Control</button>
             </div>
         </div>
 
@@ -80,23 +80,50 @@ function loadStats() {
 
 function loadSystemStatus() {
     Promise.all([
-        fetch('/api/ingestion/status'),
+        fetch('/api/scheduler/status'),
         fetch('/api/crew/status')
     ])
     .then(responses => Promise.all(responses.map(r => r.json())))
-    .then(([ingestionStatus, crewStatus]) => {
+    .then(([schedulerStatus, crewStatus]) => {
         const statusDiv = document.getElementById('system-status');
 
         let html = '<div class="row">';
 
-        // Ingestion status
+        // Enhanced Scheduler Status (Task 2.4)
         html += '<div class="col-md-6">';
-        html += '<h5>Content Ingestion</h5>';
-        if (ingestionStatus.error) {
-            html += `<p class="text-danger">Error: ${ingestionStatus.error}</p>`;
+        html += '<h5>Content Ingestion Pipeline</h5>';
+        if (schedulerStatus.error) {
+            html += `<p class="text-danger">Error: ${schedulerStatus.error}</p>`;
         } else {
-            html += `<p>Next run: ${ingestionStatus.next_run_time ? new Date(ingestionStatus.next_run_time).toLocaleString() : 'Not scheduled'}</p>`;
-            html += `<p>Status: ${ingestionStatus.pending ? 'Running' : 'Idle'}</p>`;
+            // Scheduler status
+            const status = schedulerStatus.scheduler_running ? 'Running' : 'Stopped';
+            const statusClass = schedulerStatus.scheduler_running ? 'text-success' : 'text-warning';
+            html += `<p>Scheduler: <span class="${statusClass}">${status}</span></p>`;
+
+            // Job information
+            if (schedulerStatus.jobs && schedulerStatus.jobs.length > 0) {
+                const job = schedulerStatus.jobs.find(j => j.id === 'content_ingestion');
+                if (job) {
+                    html += `<p>Next run: ${job.next_run_time ? new Date(job.next_run_time).toLocaleString() : 'Not scheduled'}</p>`;
+                    html += `<p>Job status: ${job.pending ? 'Running' : 'Idle'}</p>`;
+                }
+            }
+
+            // Configuration info
+            if (schedulerStatus.configuration) {
+                const config = schedulerStatus.configuration;
+                html += `<p>Schedule: ${config.schedule_type === 'cron' ? config.cron_schedule : config.interval_hours + 'h'}</p>`;
+            }
+
+            // Last ingestion results
+            if (schedulerStatus.last_ingestion) {
+                const lastRun = new Date(schedulerStatus.last_ingestion.time).toLocaleString();
+                html += `<p>Last run: ${lastRun}</p>`;
+                if (schedulerStatus.last_ingestion.results) {
+                    const results = schedulerStatus.last_ingestion.results;
+                    html += `<small>Items: ${results.new_content_items || 0}, Pages: ${results.processed_web_pages || 0}</small>`;
+                }
+            }
         }
         html += '</div>';
 
@@ -122,61 +149,72 @@ function loadSystemStatus() {
 }
 
 function setupActionButtons() {
-    // Trigger content ingestion
-    document.getElementById('trigger-ingestion').addEventListener('click', function() {
+    // Trigger full content pipeline (Task 2.4) - Async version
+    document.getElementById('trigger-pipeline').addEventListener('click', function() {
         this.disabled = true;
-        this.textContent = 'Running...';
+        this.textContent = 'Starting refresh...';
 
-        fetch('/api/ingestion/trigger', {
+        fetch('/api/content/pipeline/trigger', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({})
+            body: JSON.stringify({user_only: true})
         })
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert('Ingestion failed: ' + data.error);
+            if (data.status === 'error') {
+                showStatusNotification('Failed to start source refresh: ' + data.message, 'error');
+            } else if (data.status === 'warning') {
+                showStatusNotification('Source refresh already running: ' + data.message, 'warning');
             } else {
-                alert(`Ingestion completed! Processed ${data.total_sources} sources.`);
-                loadStats(); // Refresh stats
+                showStatusNotification('Source refresh started! ' + data.message + ' Monitor progress in the System Status section below.', 'success');
+                // Refresh status immediately and set up periodic updates
+                loadSystemStatus();
+                // Auto-refresh status every 10 seconds for the next 2 minutes
+                const refreshInterval = setInterval(() => {
+                    loadSystemStatus();
+                }, 10000);
+                setTimeout(() => clearInterval(refreshInterval), 120000); // Stop after 2 minutes
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Ingestion failed: ' + error.message);
+            showStatusNotification('Failed to start source refresh: ' + error.message, 'error');
         })
         .finally(() => {
             this.disabled = false;
-            this.textContent = 'Trigger Ingestion';
+            this.textContent = 'Trigger source refresh';
         });
     });
 
-    // Trigger CrewAI processing
-    document.getElementById('trigger-crew').addEventListener('click', function() {
-        this.disabled = true;
-        this.textContent = 'Processing...';
+    // Scheduler control (Task 2.4)
+    document.getElementById('scheduler-control').addEventListener('click', function() {
+        const action = prompt('Enter action: start, stop, restart, pause_job, resume_job', 'restart');
+        if (!action) return;
 
-        fetch('/api/crew/process', {
+        this.disabled = true;
+        this.textContent = 'Controlling...';
+
+        fetch('/api/scheduler/control', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({})
+            body: JSON.stringify({action: action})
         })
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                alert('AI processing failed: ' + data.error);
+                showStatusNotification('Scheduler control failed: ' + data.error, 'error');
             } else {
-                alert(`AI processing completed! Processed ${data.results.items_processed} items.`);
-                loadStats(); // Refresh stats
+                showStatusNotification('Scheduler control: ' + data.message, 'success');
+                loadSystemStatus();
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('AI processing failed: ' + error.message);
+            showStatusNotification('Scheduler control failed: ' + error.message, 'error');
         })
         .finally(() => {
             this.disabled = false;
-            this.textContent = 'Process with AI';
+            this.textContent = 'Scheduler Control';
         });
     });
 }

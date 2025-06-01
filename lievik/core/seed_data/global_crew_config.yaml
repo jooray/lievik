@@ -1,0 +1,152 @@
+agents:
+  - role: Web Scraper Agent
+    goal: Analyze content and extract web information if links are present
+    backstory: |
+      You are an expert content analyzer who can work with both raw text content and web pages.
+      When URLs are present, you excel at extracting and cleaning web content. When working with
+      raw text only, you analyze and categorize the content effectively.
+    allow_delegation: false
+    verbose: true
+
+  - role: Summarizer Agent
+    goal: Create concise and informative summaries of content
+    backstory: |
+      You are a skilled content analyst who excels at distilling complex information into
+      clear, concise summaries. You understand how to capture the key points and value
+      propositions while maintaining the original meaning and intent.
+    allow_delegation: false
+    verbose: true
+
+  - role: Content Enhancement Agent
+    goal: Create enhanced versions of content in different lengths suitable for various marketing channels
+    backstory: |
+      You are a master content strategist who excels at adapting content for different formats
+      and audiences. You can create compelling short-form teasers, informative medium-length
+      posts, and comprehensive long-form content while maintaining the core message and value.
+    allow_delegation: false
+    verbose: true
+
+  - role: Distance Evaluation Agent
+    goal: Evaluate the actual relevance distance of content based on user's projects and interests
+    backstory: |
+      You are a personal content relevance analyst who understands the user's projects,
+      interests, and business focus. You can assess how closely related content is to
+      the user's work and adjust relevance scores accordingly.
+    allow_delegation: false
+    verbose: true
+
+tasks:
+  - description: |
+      Analyze the provided content. If a link URL is provided, note it but focus on the raw content.
+      Extract and categorize the main information from the content.
+
+      Raw content: {content}
+      Link URL (if any): {link_url}
+
+      Note: Web content may or may not be available. Work with what is provided.
+    expected_output: |
+      A JSON response containing the processed content:
+      {
+          "has_link": true/false,
+          "has_web_content": true/false,
+          "main_content": "the raw content provided or extracted main points",
+          "extracted_title": "title if found or generated from content",
+          "content_type": "article/blog/news/social/announcement/other",
+          "key_information": ["key point 1", "key point 2", "..."]
+      }
+    agent: Web Scraper Agent
+
+  - description: |
+      Create a comprehensive analysis and summary of the content.
+      Consider the raw content and any processed information from the previous task.
+
+      Original content: {content}
+      Source information: {source_info}
+      Publication date: {publication_date}
+
+      Use the processed content from the previous task to create your summary.
+    expected_output: |
+      A JSON response with analysis and summary:
+      {
+          "summary": "Comprehensive 2-3 sentence summary of the content",
+          "topics": ["topic1", "topic2", "topic3"],
+          "entities": ["person1", "company1", "product1"],
+          "sentiment": "positive/negative/neutral/mixed",
+          "language_detected": "en/sk/cs/other",
+          "marketing_potential": 7,
+          "target_audience": "description of likely audience",
+          "key_points": ["point1", "point2", "point3"],
+          "content_purpose": "inform/promote/educate/entertain/announce"
+      }
+    agent: Summarizer Agent
+
+  - description: |
+      Create three enhanced versions of the content suitable for different marketing channels:
+      1. Short version (1-2 sentences, ~280 chars) - perfect for social media
+      2. Medium version (1 paragraph, ~500 chars) - ideal for chat groups and quick updates
+      3. Long version (2-3 paragraphs) - suitable for newsletters and blog posts
+
+      Use the analysis from previous tasks to craft compelling, channel-appropriate content.
+      Maintain the core message while adapting tone and detail level for each format.
+
+      IMPORTANT: Do NOT include hashtags in any version.
+    expected_output: |
+      A JSON response with enhanced content variations:
+      {
+          "enhanced_short": "Compelling 1-2 sentence version for social media without hashtags",
+          "enhanced_medium": "Informative paragraph version for chat groups without hashtags",
+          "enhanced_long": "Detailed 2-3 paragraph version for newsletters without hashtags",
+          "call_to_action": "suggested CTA if applicable"
+      }
+    agent: Content Enhancement Agent
+
+  - description: |
+      Evaluate the actual distance/relevance of this content based on the source distance and content analysis.
+      Consider how closely this content relates to the user's projects, interests, and business focus.
+
+      Source information with original distance: {source_info}
+      Content analysis from previous tasks will be available in context.
+
+      User's focus areas (configurable - these are examples):
+      - Digital security and privacy
+      - Technology education
+      - Cryptocurrency and Bitcoin
+      - Personal projects and services
+
+      Quality score should be based on:
+      - Content relevance to user's interests
+      - Information value and uniqueness
+      - Marketing potential
+      - Overall content quality
+    expected_output: |
+      Final comprehensive JSON output combining all analysis and enhancements:
+      {
+          "analysis": {
+              "summary": "content summary from previous task",
+              "topics": ["topic1", "topic2"],
+              "entities": ["entity1", "entity2"],
+              "sentiment": "positive/negative/neutral",
+              "language_detected": "en/sk/cs/other",
+              "marketing_potential": 7,
+              "target_audience": "description",
+              "key_points": ["point1", "point2"],
+              "content_purpose": "inform/promote/educate/entertain/announce"
+          },
+          "enhanced_short": "short version from previous task",
+          "enhanced_medium": "medium version from previous task",
+          "enhanced_long": "long version from previous task",
+          "quality_score": 8.5,
+          "distance_evaluation": {
+              "original_distance": 1.0,
+              "relevance_score": 8,
+              "actual_distance": 0.8,
+              "reasoning": "explanation of distance adjustment"
+          },
+          "processing_summary": {
+              "content_type": "article/blog/news/social/other",
+              "has_web_content": true/false,
+              "processing_quality": "high/medium/low",
+              "recommendation": "process/skip/review"
+          }
+      }
+    agent: Distance Evaluation Agent

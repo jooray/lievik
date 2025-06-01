@@ -39,6 +39,7 @@ class Source(db.Model):
     type = Column(String(20), nullable=False)  # 'nostr', 'rss', etc.
     identifier = Column(String(255), nullable=False)  # npub, URL, etc.
     base_distance = Column(Float, default=0.5)  # Base relevance distance
+    description = Column(Text, nullable=True)  # New field for source description
     created_at = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=True)
 
@@ -47,18 +48,34 @@ class Source(db.Model):
 
 
 class ContentItem(db.Model):
-    """Raw ingested content items."""
+    """Represents a content item ingested from a source."""
     __tablename__ = 'content_items'
 
     id = Column(Integer, primary_key=True)
     source_id = Column(Integer, ForeignKey('sources.id'), nullable=False)
-    original_id_on_source = Column(String(255))  # e.g., Nostr event ID
+    content_identifier = Column(String(500))  # Universal identifier - Nostr event ID, RSS GUID/URL, etc.
     raw_content = Column(Text)
     link_url = Column(String(500))
     publication_date = Column(DateTime)
     initial_distance = Column(Float)  # From source base_distance
     language_detected = Column(String(10))
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # CrewAI processing results for the content itself (not web links)
+    crew_result_json = db.Column(db.Text)  # Full JSON result from Global Preprocessing Crew
+    enhanced_short = db.Column(db.Text)  # Short enhanced version of the content
+    enhanced_medium = db.Column(db.Text)  # Medium enhanced version of the content
+    enhanced_long = db.Column(db.Text)  # Long enhanced version of the content
+    quality_score = db.Column(db.Float)  # Quality score from crew evaluation
+
+    content_metadata = db.Column(db.JSON)
+
+    # Add new field for tracking processing status
+    processing_status = db.Column(db.String(50), default='pending', nullable=False)
+    # Status values: 'pending', 'processing', 'completed', 'failed', 'retry'
+    processing_error = db.Column(db.Text, nullable=True)
+    processing_attempts = db.Column(db.Integer, default=0, nullable=False)
+    last_processing_attempt = db.Column(db.DateTime, nullable=True)
 
     # Relationships
     processed_web_content_id = Column(Integer, ForeignKey('processed_web_content.id'))
@@ -78,6 +95,14 @@ class ProcessedWebContent(db.Model):
     summary_text = Column(Text)
     processing_date = Column(DateTime, default=datetime.utcnow)
     language_detected = Column(String(10))
+    # JSON string storing global crew analysis and enhanced content
+    crew_result_json = Column(Text, nullable=True)  # JSON storing analysis and enhancements
+    enhanced_short = Column(Text, nullable=True)  # Short form variation
+    enhanced_medium = Column(Text, nullable=True) # Medium form variation
+    enhanced_long = Column(Text, nullable=True)   # Long form variation
+    quality_score = Column(Float, nullable=True)  # Quality score for the web content
+    content_metadata = Column(db.JSON)
+    # Relationship: content_items backref
 
 
 class ChannelType(db.Model):

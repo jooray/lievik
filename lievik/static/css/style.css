@@ -236,6 +236,95 @@ select:focus {
     color: #1e40af;
 }
 
+/* Status Notification */
+.status-notification {
+    margin: 1rem 0;
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 1px solid;
+    animation: slideInDown 0.3s ease-out;
+}
+
+.status-notification.success {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.status-notification.warning {
+    background-color: #fffbeb;
+    border-color: #fed7aa;
+    color: #9a3412;
+}
+
+.status-notification.error {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.status-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.status-notification.success .status-icon::before {
+    content: "✓";
+}
+
+.status-notification.warning .status-icon::before {
+    content: "⚠";
+}
+
+.status-notification.error .status-icon::before {
+    content: "✗";
+}
+
+.status-message {
+    flex: 1;
+    font-weight: 500;
+}
+
+.status-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    transition: all 0.2s;
+}
+
+.status-close:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Links */
 a {
     color: var(--primary-green);

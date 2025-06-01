@@ -12,7 +12,6 @@ class Config:
     OTEL_SDK_DISABLED = 'true'
 
     # LLM API Keys (optional, can be set per crew configuration)
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     VENICE_API_KEY = os.getenv('VENICE_API_KEY')
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
@@ -23,33 +22,46 @@ class Config:
             'default_model': os.getenv('OLLAMA_DEFAULT_MODEL', 'llama3')
         },
         'venice': {
-            'api_base': os.getenv('VENICE_API_BASE', 'https://api.venice.ai/v1'), # As per spec
+            'api_base': os.getenv('VENICE_API_BASE', 'https://api.venice.ai/api/v1'), # As per spec
             'api_key_env': 'VENICE_API_KEY', # Environment variable name for the key
-            'default_model': os.getenv('VENICE_DEFAULT_MODEL', 'qwen3-235b:strip_thinking_response=true')
+            'default_model': os.getenv('VENICE_DEFAULT_MODEL', 'openai/qwen3-235b:strip_thinking_response=true')  # Add openai/ prefix for LiteLLM
         },
         'openai': {
             'api_base': os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1'),
             'api_key_env': 'OPENAI_API_KEY',
             'default_model': os.getenv('OPENAI_DEFAULT_MODEL', 'gpt-4o')
-        },
-        'gemini': { # Added based on existing API key
-            'api_key_env': 'GEMINI_API_KEY',
-            'default_model': os.getenv('GEMINI_DEFAULT_MODEL', 'gemini-1.5-pro-latest')
         }
         # Add other providers as needed
     }
 
     # Default LLM provider and model to use if not specified at agent level
     DEFAULT_LLM_PROVIDER = os.getenv('DEFAULT_LLM_PROVIDER', 'venice') # e.g., 'ollama', 'venice'
-    DEFAULT_LLM_MODEL = os.getenv('DEFAULT_LLM_MODEL') # If None, uses provider's default_model
+    DEFAULT_LLM_MODEL = os.getenv('DEFAULT_LLM_MODEL', None) # If None, uses provider's default_model
 
     # Content Ingestion Settings
     INGESTION_INTERVAL_HOURS = int(os.getenv('INGESTION_INTERVAL_HOURS', '1'))
     MAX_CONTENT_AGE_DAYS = int(os.getenv('MAX_CONTENT_AGE_DAYS', '30'))
 
+    # Enhanced Scheduler Configuration for Task 2.4
+    INGESTION_SCHEDULE_TYPE = os.getenv('INGESTION_SCHEDULE_TYPE', 'interval')  # 'interval' or 'cron'
+    INGESTION_CRON_SCHEDULE = os.getenv('INGESTION_CRON_SCHEDULE', '0 */1 * * *')  # Default: every hour
+    INGESTION_MAX_INSTANCES = int(os.getenv('INGESTION_MAX_INSTANCES', '1'))
+    INGESTION_COALESCE = os.getenv('INGESTION_COALESCE', 'true').lower() == 'true'
+    INGESTION_MISFIRE_GRACE_TIME = int(os.getenv('INGESTION_MISFIRE_GRACE_TIME', '300'))  # 5 minutes
+
+    # Content Processing Configuration
+    PROCESS_CONTENT_IMMEDIATELY = os.getenv('PROCESS_CONTENT_IMMEDIATELY', 'true').lower() == 'true'
+    CREW_PROCESSING_TIMEOUT = int(os.getenv('CREW_PROCESSING_TIMEOUT', '300'))  # 5 minutes
+    CREW_PROCESSING_RETRY_ATTEMPTS = int(os.getenv('CREW_PROCESSING_RETRY_ATTEMPTS', '2'))
+
     # APScheduler Configuration
     SCHEDULER_API_ENABLED = True
     SCHEDULER_TIMEZONE = os.getenv('SCHEDULER_TIMEZONE', 'UTC')
+    SCHEDULER_JOB_DEFAULTS = {
+        'coalesce': INGESTION_COALESCE,
+        'max_instances': INGESTION_MAX_INSTANCES,
+        'misfire_grace_time': INGESTION_MISFIRE_GRACE_TIME
+    }
 
 
 class DevelopmentConfig(Config):
