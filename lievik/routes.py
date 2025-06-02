@@ -1,9 +1,37 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, current_app # Import current_app
 from lievik.app import db
-from lievik.models import User, Channel, ContentItem, ChannelContentAffinity
+from lievik.models import User, Channel, ContentItem, ChannelContentAffinity, ChannelType, CrewConfiguration
 from flask_login import login_user, logout_user, login_required, current_user
 
 main_bp = Blueprint('main', __name__)
+
+def _serialize_channel(channel):
+    return {
+        'id': channel.id,
+        'name': channel.name,
+        'user_id': channel.user_id,
+        'description_by_user': channel.description_by_user,
+        'target_persona': channel.target_persona,
+        'language': channel.language,
+        'channel_type_id': channel.channel_type_id,
+        'channel_type': channel.channel_type.name if channel.channel_type else None,
+        'crew_configuration_id': channel.crew_configuration_id,
+        'crew_configuration_name': channel.crew_configuration.name if channel.crew_configuration else None,
+        'icon_url': channel.icon_url,
+        'is_active': channel.is_active,
+        'created_at': channel.created_at.isoformat() if channel.created_at else None
+    }
+
+def _serialize_channel_type(channel_type):
+    return {
+        'id': channel_type.id,
+        'name': channel_type.name,
+        'description': channel_type.description,
+        'default_crew_configuration_id': channel_type.default_crew_configuration_id,
+        'default_crew_configuration_name': channel_type.default_crew_configuration.name if channel_type.default_crew_configuration else None,
+        # Consider adding a count of channels using this type, if useful, though it might require an extra query.
+        # 'channel_count': len(channel_type.channels) # Example, might be performance intensive
+    }
 
 @main_bp.route('/')
 def index():
@@ -31,28 +59,194 @@ def health_check():
     })
 
 
-@main_bp.route('/api/channels')
+@main_bp.route('/api/channels', methods=['GET'])
+@login_required
 def get_channels():
     """Get all channels for the current user."""
-    # For now, return all channels (authentication will be added later)
-    channels = Channel.query.all()
+    channels = Channel.query.filter_by(user_id=current_user.id).all()
+    channel_data = [_serialize_channel(c) for c in channels]
+    return jsonify({'channels': channel_data, 'count': len(channel_data)})
 
-    channel_data = []
-    for channel in channels:
-        channel_data.append({
-            'id': channel.id,
-            'name': channel.name,
-            'description': channel.description_by_user,
-            'language': channel.language,
-            'type': channel.channel_type.name if channel.channel_type else None,
-            'is_active': channel.is_active,
-            'created_at': channel.created_at.isoformat() if channel.created_at else None
-        })
 
-    return jsonify({
-        'channels': channel_data,
-        'count': len(channel_data)
-    })
+@main_bp.route('/api/channels', methods=['POST'])
+@login_required
+def create_channel():
+    """Create a new channel for the current user."""
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No input data provided'}), 400
+
+    required_fields = ['name', 'language', 'channel_type_id']
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+    channel_type = ChannelType.query.get(data.get('channel_type_id'))
+    if not channel_type:
+        return jsonify({'error': 'ChannelType not found'}), 404
+
+    crew_id = data.get('crew_configuration_id')
+    if not crew_id:
+        crew_id = channel_type.default_crew_configuration_id
+
+    if not crew_id:
+        return jsonify({'error': 'Crew configuration ID is required and no default is set for the channel type'}), 400
+
+    if not CrewConfiguration.query.get(crew_id):
+        return jsonify({'error': 'Selected CrewConfiguration not found'}), 404
+
+    new_channel = Channel(
+        name=data['name'],
+        language=data['language'],
+        channel_type_id=data['channel_type_id'],
+        user_id=current_user.id,
+        crew_configuration_id=crew_id,
+        description_by_user=data.get('description_by_user'),
+        target_persona=data.get('target_persona'),
+        icon_url=data.get('icon_url'),
+        is_active=data.get('is_active', True)
+    )
+    db.session.add(new_channel)
+    db.session.commit()
+    return jsonify(_serialize_channel(new_channel)), 201
+
+
+@main_bp.route('/api/channels/<int:channel_id>', methods=['GET'])
+@login_required
+def get_channel(channel_id):
+    """Get a specific channel by ID."""
+    channel = Channel.query.filter_by(id=channel_id, user_id=current_user.id).first_or_404()
+    return jsonify(_serialize_channel(channel))
+
+
+@main_bp.route('/api/channels/<int:channel_id>', methods=['PUT'])
+@login_required
+def update_channel(channel_id):
+    """Update a specific channel by ID."""
+    channel = Channel.query.filter_by(id=channel_id, user_id=current_user.id).first_or_404()
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No input data provided'}), 400
+
+    channel.name = data.get('name', channel.name)
+    channel.language = data.get('language', channel.language)
+    channel.description_by_user = data.get('description_by_user', channel.description_by_user)
+    channel.target_persona = data.get('target_persona', channel.target_persona)
+    channel.icon_url = data.get('icon_url', channel.icon_url)
+
+    if 'is_active' in data and isinstance(data['is_active'], bool):
+        channel.is_active = data['is_active']
+
+    if data.get('channel_type_id'):
+        new_channel_type_id = data.get('channel_type_id')
+        if not ChannelType.query.get(new_channel_type_id):
+            return jsonify({'error': 'New ChannelType not found'}), 404
+        channel.channel_type_id = new_channel_type_id
+
+    if data.get('crew_configuration_id'):
+        new_crew_config_id = data.get('crew_configuration_id')
+        if not CrewConfiguration.query.get(new_crew_config_id):
+            return jsonify({'error': 'New CrewConfiguration not found'}), 404
+        channel.crew_configuration_id = new_crew_config_id
+
+    db.session.commit()
+    return jsonify(_serialize_channel(channel))
+
+
+@main_bp.route('/api/channels/<int:channel_id>', methods=['DELETE'])
+@login_required
+def delete_channel(channel_id):
+    """Delete a specific channel by ID."""
+    channel = Channel.query.filter_by(id=channel_id, user_id=current_user.id).first_or_404()
+    db.session.delete(channel)
+    db.session.commit()
+    return jsonify({'message': 'Channel deleted successfully'}), 200
+
+
+# ChannelType CRUD operations
+@main_bp.route('/api/channel-types', methods=['GET'])
+@login_required
+def get_channel_types():
+    """Get all channel types."""
+    channel_types = ChannelType.query.all()
+    types_data = [_serialize_channel_type(ct) for ct in channel_types]
+    return jsonify({'channel_types': types_data, 'count': len(types_data)})
+
+
+@main_bp.route('/api/channel-types', methods=['POST'])
+@login_required
+def create_channel_type():
+    """Create a new channel type."""
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No input data provided'}), 400
+
+    if 'name' not in data:
+        return jsonify({'error': 'Missing required field: name'}), 400
+
+    if ChannelType.query.filter_by(name=data['name']).first():
+        return jsonify({'error': 'ChannelType name already exists'}), 409
+
+    crew_config_id = data.get('default_crew_configuration_id')
+    if crew_config_id and not CrewConfiguration.query.get(crew_config_id):
+        return jsonify({'error': 'Default CrewConfiguration not found'}), 404
+
+    new_channel_type = ChannelType(
+        name=data['name'],
+        description=data.get('description'),
+        default_crew_configuration_id=crew_config_id
+    )
+    db.session.add(new_channel_type)
+    db.session.commit()
+    return jsonify(_serialize_channel_type(new_channel_type)), 201
+
+
+@main_bp.route('/api/channel-types/<int:channel_type_id>', methods=['GET'])
+@login_required
+def get_channel_type(channel_type_id):
+    """Get a specific channel type by ID."""
+    channel_type = ChannelType.query.get_or_404(channel_type_id)
+    return jsonify(_serialize_channel_type(channel_type))
+
+
+@main_bp.route('/api/channel-types/<int:channel_type_id>', methods=['PUT'])
+@login_required
+def update_channel_type(channel_type_id):
+    """Update a specific channel type by ID."""
+    channel_type = ChannelType.query.get_or_404(channel_type_id)
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No input data provided'}), 400
+
+    new_name = data.get('name', channel_type.name)
+    if new_name != channel_type.name and ChannelType.query.filter_by(name=new_name).first():
+        return jsonify({'error': 'New ChannelType name already exists'}), 409
+    channel_type.name = new_name
+
+    channel_type.description = data.get('description', channel_type.description)
+
+    if 'default_crew_configuration_id' in data:
+        new_crew_config_id = data.get('default_crew_configuration_id')
+        if new_crew_config_id is not None and not CrewConfiguration.query.get(new_crew_config_id):
+            return jsonify({'error': 'New default CrewConfiguration not found'}), 404
+        channel_type.default_crew_configuration_id = new_crew_config_id
+
+    db.session.commit()
+    return jsonify(_serialize_channel_type(channel_type))
+
+
+@main_bp.route('/api/channel-types/<int:channel_type_id>', methods=['DELETE'])
+@login_required
+def delete_channel_type(channel_type_id):
+    """Delete a specific channel type by ID."""
+    channel_type = ChannelType.query.get_or_404(channel_type_id)
+
+    if Channel.query.filter_by(channel_type_id=channel_type_id).first():
+        return jsonify({'error': 'Cannot delete ChannelType: It is currently in use by one or more Channels'}), 409
+
+    db.session.delete(channel_type)
+    db.session.commit()
+    return jsonify({'message': 'ChannelType deleted successfully'}), 200
 
 
 @main_bp.route('/api/content-items')

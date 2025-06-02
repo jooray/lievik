@@ -6,6 +6,7 @@ Creates tables and adds initial data.
 
 import os
 import sys
+import yaml
 
 # Add the project root to the Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -152,6 +153,24 @@ tasks:
         )
         db.session.add(signal_crew)
 
+        # Create Chat Reminder crew configuration from YAML
+        chat_reminder_crew_config_path = os.path.join(project_root, 'lievik', 'core', 'seed_data', 'chat_reminder_crew_config.yaml')
+        try:
+            with open(chat_reminder_crew_config_path, 'r') as f:
+                chat_reminder_yaml_content = f.read()
+
+            chat_reminder_crew = CrewConfiguration(
+                name="Chat Reminder Template",
+                is_global=False,
+                config_yaml=chat_reminder_yaml_content
+            )
+            db.session.add(chat_reminder_crew)
+            print("Added Chat Reminder Crew Configuration.")
+        except FileNotFoundError:
+            print(f"ERROR: chat_reminder_crew_config.yaml not found at {chat_reminder_crew_config_path}", file=sys.stderr)
+        except Exception as e:
+            print(f"ERROR: Could not load or create Chat Reminder Crew Configuration: {e}", file=sys.stderr)
+
         # Commit crews first so we can reference them
         db.session.commit()
 
@@ -176,6 +195,19 @@ tasks:
             default_crew_configuration_id=signal_crew.id
         )
         db.session.add(social_type)
+
+        # Create Chat Reminder ChannelType if its crew was loaded
+        chat_reminder_crew_from_db = CrewConfiguration.query.filter_by(name="Chat Reminder Template").first()
+        if chat_reminder_crew_from_db:
+            chat_reminder_channel_type = ChannelType(
+                name="Chat Reminder",
+                description="Channel for sending chat-based reminders and notifications.",
+                default_crew_configuration_id=chat_reminder_crew_from_db.id
+            )
+            db.session.add(chat_reminder_channel_type)
+            print("Added Chat Reminder Channel Type.")
+        else:
+            print("Skipped creating Chat Reminder Channel Type because its crew configuration was not found or not committed.", file=sys.stderr)
 
         # Create a default user for development
         default_user = User(

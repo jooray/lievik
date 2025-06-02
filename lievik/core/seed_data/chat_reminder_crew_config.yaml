@@ -1,0 +1,64 @@
+# Default Crew Configuration for "Chat Reminder" Channel Type
+
+description: "A crew designed to evaluate content for a chat reminder channel, checking relevance, language, and formulating a short post."
+
+agents:
+  - name: Relevance Agent
+    role: "Relevance Assessor"
+    goal: "Evaluate if the provided content is relevant to the channel's purpose and audience."
+    backstory: "An AI assistant specialized in understanding content context and channel focus to determine relevance for quick, actionable reminders."
+    llm:
+      provider: "default" # Will be resolved by the LLM service (e.g., Ollama, Gemini)
+      config:
+        temperature: 0.5
+    allow_delegation: false
+    verbose: true
+    # Tools can be added here if needed in the future, e.g., a tool to fetch channel description
+
+  - name: Language Agent
+    role: "Language Compatibility Checker"
+    goal: "Verify if the content's language is compatible with the channel's defined language and assess overall linguistic quality for a brief reminder."
+    backstory: "An AI assistant focused on language nuances, ensuring that content shared in a channel matches its language settings and is clearly understandable."
+    llm:
+      provider: "default"
+      config:
+        temperature: 0.3
+    allow_delegation: false
+    verbose: true
+    # Tools can be added here if needed, e.g., a translation tool or a more advanced grammar checker
+
+  - name: Post Formulation Agent
+    role: "Reminder Post Crafter"
+    goal: "Based on the relevant content and language checks, formulate a concise and engaging post suitable for a chat reminder."
+    backstory: "An AI copywriter that excels at creating short, impactful messages from larger pieces of content, perfect for reminders and notifications."
+    llm:
+      provider: "default"
+      config:
+        temperature: 0.7
+    allow_delegation: false
+    verbose: true
+    # Tools can be added here, e.g., a tool to check character limits for specific platforms
+
+tasks:
+  - name: Assess Relevance
+    description: "Review the content summary and the channel's purpose. Provide a relevance score (0.0-1.0) and a brief justification."
+    agent: "Relevance Agent"
+    expected_output: "A JSON object containing 'relevance_score' (float) and 'justification' (string)."
+    # Input parameters for this task will be content_summary and channel_description
+
+  - name: Check Language
+    description: "Compare the content's language with the channel's language. Provide a language compatibility score (0.0-1.0) and note any issues."
+    agent: "Language Agent"
+    expected_output: "A JSON object containing 'language_compatibility_score' (float) and 'notes' (string)."
+    # Input parameters: content_language, channel_language
+
+  - name: Formulate Reminder Post
+    description: "Using the original content and relevance assessment, draft a short reminder post (1-2 sentences)."
+    agent: "Post Formulation Agent"
+    expected_output: "A string containing the suggested reminder post."
+    # Input parameters: original_content_summary, relevance_justification
+    context: # Tasks that need to be completed before this one
+      - Assess Relevance
+      - Check Language
+
+process: "sequential" # Tasks will be executed in the order they are defined
