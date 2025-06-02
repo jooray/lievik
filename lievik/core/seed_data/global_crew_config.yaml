@@ -43,7 +43,8 @@ tasks:
       Raw content: {content}
       Link URL (if any): {link_url}
 
-      Note: Web content may or may not be available. Work with what is provided.
+      Note: Web content may or may not be available. Work with what is provided. If content contains nevent, npub or nprofile,
+      are links to another nostr post, or mention of another user (npub or nprofile).
     expected_output: |
       A JSON response containing the processed content:
       {
@@ -95,8 +96,7 @@ tasks:
       {
           "enhanced_short": "Compelling 1-2 sentence version for social media without hashtags",
           "enhanced_medium": "Informative paragraph version for chat groups without hashtags",
-          "enhanced_long": "Detailed 2-3 paragraph version for newsletters without hashtags",
-          "call_to_action": "suggested CTA if applicable"
+          "enhanced_long": "Detailed 2-3 paragraph version for newsletters without hashtags"
       }
     agent: Content Enhancement Agent
 
