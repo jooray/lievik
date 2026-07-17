@@ -1,0 +1,17 @@
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <div class="flex items-center gap-3">
+      <%= link_to @channel, class: "text-gray-400 hover:text-gray-500" do %>
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+      <% end %>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Channel</h1>
+    </div>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Update relevance criteria for <%= @channel.name %>
+    </p>
+  </div>
+
+  <%= render "form", channel: @channel %>
+</div>

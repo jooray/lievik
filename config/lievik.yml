@@ -1,0 +1,79 @@
+# Lievik Application Configuration
+default: &default
+  nostr:
+    relays:
+      - wss://relay.nsec.app
+      - wss://nos.lol
+      - wss://relay.primal.net
+      - wss://nostr.cypherpunk.today
+      - wss://relay.nostr.band
+    # NIP-46 login/pairing relays. The app subscribes on ALL of these at once and
+    # Amber publishes the connect/get_public_key replies to the same set, so more
+    # healthy relays = more chances the handshake completes if one is flaky. Keep
+    # only relays verified to accept WS + relay ephemeral kind-24133 events.
+    # relay.nsec.app (the canonical bunker relay) is omitted while it returns 502;
+    # re-add it once it recovers.
+    auth_relays:
+      - wss://nos.lol
+      - wss://relay.primal.net
+      - wss://nostr.mom
+    fetch_timeout: 10
+
+  ingestion:
+    schedule_minutes: 30
+    default_import_days: 30
+
+  ai:
+    # Ollama (local)
+    #provider: ollama
+    #endpoint: http://localhost:11434/v1
+    #models:
+    #  classification: mistral-small:24b
+
+    # Venice AI (cloud)
+    provider: venice
+    endpoint: https://api.venice.ai/api/v1
+    models:
+      classification: deepseek-v4-flash
+      link_summarization: deepseek-v4-flash
+      rag_chat: claude-sonnet-4-6
+      query_rewriting: deepseek-v4-flash
+      channel_proposal: claude-sonnet-4-6
+      content_generation: claude-sonnet-4-6
+      content_refinement: claude-sonnet-4-6
+      content_humanization: claude-sonnet-4-6
+
+  rag:
+    # Ollama embedding settings
+    embedding:
+      ollama_url: http://localhost:11434/api/embeddings
+      model: nomic-embed-text
+      dimensions: 768
+      # Max characters to send for embedding (adjust based on model's context limit)
+      # nomic-embed-text supports ~8k tokens, but non-ASCII chars use multiple tokens
+      # Using 6000 chars for safety with international text
+      max_chars: 6000
+
+    # Vector store backend: auto | ruby | pgvector
+    vector_backend: auto
+
+    # Retrieval settings
+    retrieval:
+      max_events: 20
+      min_similarity: 0.3
+      context_max_chars: 4000
+
+    # Query rewriting - preprocess queries with LLM for better retrieval
+    query_rewriting:
+      enabled: true
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  ai:
+    provider: mock
+
+production:
+  <<: *default

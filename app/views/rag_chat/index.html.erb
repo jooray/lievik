@@ -1,0 +1,82 @@
+<div class="max-w-7xl mx-auto flex flex-col h-[calc(100vh-8rem)]" data-controller="rag-chat" data-rag-chat-stream-url-value="<%= rag_chat_ask_stream_path %>">
+  <!-- Header -->
+  <div class="flex-shrink-0 pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ask Your Content</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Chat with your indexed events using natural language.
+          <span class="font-medium"><%= @embedded_count %> of <%= @total_count %></span> events indexed.
+        </p>
+      </div>
+      <button type="button" data-action="click->rag-chat#clearChat" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+        Clear chat
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="flex-1 overflow-y-auto py-4 space-y-6" data-rag-chat-target="messageList">
+    <% if @embedded_count == 0 %>
+      <!-- Empty state -->
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center max-w-md">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No events indexed yet</h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            New events will be automatically indexed when ingested. You can also manually reindex from your
+            <%= link_to "settings", edit_user_path, class: "text-purple-600 dark:text-purple-400 hover:underline" %>.
+          </p>
+        </div>
+      </div>
+    <% else %>
+      <!-- Welcome message -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2">
+          <div class="max-w-3xl px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+            <p class="text-sm">
+              Hi! I can help you search through your <%= @embedded_count %> indexed events. Try asking questions like:
+            </p>
+            <ul class="mt-2 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              <li>&bull; What are the main topics discussed recently?</li>
+              <li>&bull; Summarize discussions about [topic]</li>
+              <li>&bull; What did [person] say about [topic]?</li>
+            </ul>
+          </div>
+        </div>
+        <div class="lg:col-span-1"></div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Input Area -->
+  <div class="flex-shrink-0 py-4">
+    <div class="relative max-w-4xl mx-auto">
+      <textarea
+        data-rag-chat-target="input"
+        data-action="input->rag-chat#autoResize"
+        rows="1"
+        class="block w-full resize-none rounded-full border-0 bg-gray-100 dark:bg-gray-700 dark:text-white shadow-lg outline-none focus:outline-none focus:shadow-xl focus:bg-gray-50 dark:focus:bg-gray-600 transition-all pl-5 pr-14 py-4 text-base placeholder-gray-400"
+        placeholder="Ask a question..."
+        <% if @embedded_count == 0 %>disabled<% end %>
+      ></textarea>
+      <button
+        type="button"
+        data-rag-chat-target="submitButton"
+        data-action="click->rag-chat#submit"
+        class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center justify-center p-2.5 bg-purple-600 text-white rounded-full hover:bg-purple-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        <% if @embedded_count == 0 %>disabled<% end %>
+      >
+        <svg data-rag-chat-target="loadingSpinner" class="hidden h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <svg data-rag-chat-target="submitIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

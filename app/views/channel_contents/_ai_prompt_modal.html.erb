@@ -1,0 +1,53 @@
+<% show = local_assigns.fetch(:show, false) %>
+<% error = local_assigns[:error] %>
+
+<div data-content-builder-target="modal" class="<%= show ? '' : 'hidden' %> fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" data-action="click->content-builder#closeAiModal"></div>
+
+    <!-- Modal panel - needs relative positioning and z-index to appear above overlay -->
+    <div class="relative z-10 bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg w-full">
+      <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
+              AI Edit
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Tell the AI how you want to modify the content. It will apply your changes while keeping the content accurate to the source events.
+              </p>
+            </div>
+
+            <% if error %>
+              <div class="mt-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                <p class="text-sm text-red-700 dark:text-red-300"><%= error %></p>
+              </div>
+            <% end %>
+
+            <%= form_with url: refine_channel_content_path(@channel, @channel_content), method: :post, class: "mt-4" do |f| %>
+              <%= f.text_area :user_prompt,
+                  placeholder: "E.g., 'Make it more concise', 'Add a stronger call-to-action', 'Translate to Slovak'...",
+                  class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm",
+                  rows: 4,
+                  data: { content_builder_target: "promptInput" } %>
+
+              <div class="mt-4 flex justify-end gap-3">
+                <button type="button" data-action="click->content-builder#closeAiModal" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  Cancel
+                </button>
+                <%= f.submit "Apply Changes", class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer", data: { turbo_submits_with: "Processing..." } %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

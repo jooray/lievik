@@ -1,0 +1,125 @@
+<div class="space-y-4">
+  <% if @dev_logs.any? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+        <h3 class="font-medium text-sm text-gray-900 dark:text-white">Developer Logs ( <%= @dev_logs.total_count %> )</h3>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @dev_logs.each do |log| %>
+          <li class="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-r <%= case log.log_type
+                  when 'ai_request' then 'from-blue-500 to-indigo-500'
+                  when 'ai_response' then 'from-green-500 to-emerald-500'
+                  when 'ingestion_event' then 'from-purple-500 to-pink-500'
+                  when 'rating_error', 'ingestion_error' then 'from-red-500 to-rose-500'
+                  else 'from-gray-500 to-gray-600'
+                end %> flex items-center justify-center text-white">
+                  <% case log.log_type %>
+                  <% when 'ai_request' %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" /></svg>
+                  <% when 'ai_response' %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <% when 'ingestion_event' %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                  <% when 'rating_error', 'ingestion_error' %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <% else %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <% end %>
+                </span>
+                <span class="text-[9px] font-semibold uppercase tracking-tight text-center leading-tight <%= case log.log_type
+                  when 'ai_request' then 'text-blue-600 dark:text-blue-400'
+                  when 'ai_response' then 'text-green-600 dark:text-green-400'
+                  when 'ingestion_event' then 'text-purple-600 dark:text-purple-400'
+                  when 'rating_error', 'ingestion_error' then 'text-red-600 dark:text-red-400'
+                  else 'text-gray-600 dark:text-gray-400'
+                end %>">
+                  <%= log.log_type.tr('_', "\n") %>
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white"><%= log.message %></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <%= log.created_at.strftime("%H:%M:%S") %>
+                  <% if log.details.present? %>
+                    <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full dark:bg-blue-900 dark:text-blue-200">
+                      JSON Details
+                    </span>
+                  <% end %>
+                </p>
+                <% if log.details.present? %>
+                  <details class="mt-2 p-2 bg-gray-50 dark:bg-gray-900 rounded text-xs">
+                    <summary class="cursor-pointer font-medium text-blue-600 dark:text-blue-400">View Details</summary>
+                    <div class="mt-2 space-y-2">
+                      <% if log.log_type == 'ai_request' %>
+                        <% if log.details['system_prompt'] || log.details['system_prompt_preview'] %>
+                          <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                            <div class="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-1">System Prompt</div>
+                            <pre class="text-xs text-blue-800 dark:text-blue-200 whitespace-pre-wrap overflow-auto max-h-96"><%= log.details['system_prompt'] || log.details['system_prompt_preview'] %></pre>
+                          </div>
+                        <% end %>
+                        <% if log.details['user_prompt'] %>
+                          <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded border border-purple-200 dark:border-purple-800">
+                            <div class="text-xs font-semibold text-purple-900 dark:text-purple-300 mb-1">User Prompt</div>
+                            <pre class="text-xs text-purple-800 dark:text-purple-200 whitespace-pre-wrap overflow-auto max-h-96"><%= log.details['user_prompt'] %></pre>
+                          </div>
+                        <% end %>
+                        <% if log.details['content'] || log.details['content_preview'] %>
+                          <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
+                            <div class="text-xs font-semibold text-gray-900 dark:text-gray-300 mb-1">Content Being Evaluated</div>
+                            <pre class="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap overflow-auto max-h-96"><%= log.details['content'] || log.details['content_preview'] %></pre>
+                          </div>
+                        <% end %>
+                      <% elsif log.log_type == 'ai_response' %>
+                        <% if log.details['parsed_score'] || log.details['parsed_reason'] %>
+                          <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
+                            <% if log.details['parsed_score'] %>
+                              <div class="mb-2">
+                                <span class="text-xs font-semibold text-green-900 dark:text-green-300">Score:</span>
+                                <span class="ml-2 px-2 py-1 bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100 rounded font-bold"><%= log.details['parsed_score'] %>%</span>
+                              </div>
+                            <% end %>
+                            <% if log.details['parsed_reason'] %>
+                              <div>
+                                <span class="text-xs font-semibold text-green-900 dark:text-green-300">Reason:</span>
+                                <p class="text-xs text-green-800 dark:text-green-200 mt-1"><%= log.details['parsed_reason'] %></p>
+                              </div>
+                            <% end %>
+                          </div>
+                        <% end %>
+                        <% if log.details['raw_response'] %>
+                          <details class="mt-2">
+                            <summary class="cursor-pointer text-xs font-medium text-gray-600 dark:text-gray-400">Raw Response</summary>
+                            <pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-40 text-xs"><%= log.details['raw_response'] %></pre>
+                          </details>
+                        <% end %>
+                      <% else %>
+                        <pre class="p-3 bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-40"><%= JSON.pretty_generate(log.details) %></pre>
+                      <% end %>
+                    </div>
+                  </details>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+      <% if @dev_logs.current_page < @dev_logs.total_pages %>
+        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+          <%= link_to "Load More", dev_logs_activity_log_path(@activity_log, page: @dev_logs.next_page),
+                      class: "text-sm text-purple-600 hover:text-purple-500 font-medium" %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-8">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No developer logs</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Run rating/ingestion jobs to see detailed logs.</p>
+    </div>
+  <% end %>
+</div>

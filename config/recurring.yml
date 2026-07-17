@@ -1,0 +1,48 @@
+# examples:
+#   periodic_cleanup:
+#     class: CleanSoftDeletedRecordsJob
+#     queue: background
+#     args: [ 1000, { batch_size: 500 } ]
+#     schedule: every hour
+#   periodic_cleanup_with_command:
+#     command: "SoftDeletedRecord.due.delete_all"
+#     priority: 2
+#     schedule: at 5am every day
+
+development:
+  refresh_all_sources:
+    class: RefreshAllSourcesJob
+    schedule: every hour
+
+  cleanup_stale_activity_logs:
+    command: "ActivityLog.mark_stale_as_failed!"
+    schedule: every 5 minutes
+
+  cleanup_expired_nostr_auth_sessions:
+    command: "NostrAuthSession.cleanup_expired!"
+    schedule: every hour
+
+  ensure_nip46_supervisor:
+    command: "Nip46SupervisorJob.ensure_running if NostrAuthSession.active.where(authenticated_pubkey: nil).exists?"
+    schedule: every minute
+
+production:
+  refresh_all_sources:
+    class: RefreshAllSourcesJob
+    schedule: every 30 minutes
+
+  cleanup_stale_activity_logs:
+    command: "ActivityLog.mark_stale_as_failed!"
+    schedule: every 5 minutes
+
+  cleanup_expired_nostr_auth_sessions:
+    command: "NostrAuthSession.cleanup_expired!"
+    schedule: every hour
+
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: every hour at minute 12
+
+  ensure_nip46_supervisor:
+    command: "Nip46SupervisorJob.ensure_running if NostrAuthSession.active.where(authenticated_pubkey: nil).exists?"
+    schedule: every minute

@@ -1,0 +1,75 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Developer Logs</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Detailed logging from AI rating and ingestion processes
+      </p>
+    </div>
+    <%= link_to activity_logs_path, class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to Activity
+    <% end %>
+  </div>
+
+  <% if @dev_logs.any? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+        <h3 class="font-medium text-sm text-gray-900 dark:text-white">All Developer Logs (<%= @dev_logs.total_count %>)</h3>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @dev_logs.each do |log| %>
+          <li class="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <div class="flex items-start gap-3">
+              <span class="flex-shrink-0 px-2 py-1 rounded text-xs font-medium <%= case log.log_type
+                when 'ai_request' then 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                when 'ai_response' then 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                when 'ingestion_event' then 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                when 'rating_error', 'ingestion_error' then 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                else 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+              end %>">
+                <%= log.log_type.humanize %>
+              </span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white"><%= log.message %></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <%= log.created_at.strftime("%b %d, %Y at %H:%M:%S") %>
+                  <% if log.parent.present? %>
+                    &middot;
+                    <% if log.parent.is_a?(ActivityLog) %>
+                      <%= link_to "View Activity", dev_logs_activity_log_path(log.parent), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                    <% end %>
+                  <% end %>
+                </p>
+                <% if log.details.present? %>
+                  <details class="mt-2 p-2 bg-gray-50 dark:bg-gray-900 rounded text-xs">
+                    <summary class="cursor-pointer font-medium text-blue-600 dark:text-blue-400">View Details</summary>
+                    <pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-60 text-xs"><%= JSON.pretty_generate(log.details) %></pre>
+                  </details>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+
+      <% if @dev_logs.total_pages > 1 %>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-700">
+          <%= paginate @dev_logs %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-10 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No developer logs</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Run rating or ingestion jobs to see detailed logs here.
+      </p>
+    </div>
+  <% end %>
+</div>

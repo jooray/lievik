@@ -1,0 +1,86 @@
+<div class="max-w-7xl mx-auto flex flex-col h-[calc(100vh-8rem)]"
+     data-controller="channel-ai-chat"
+     data-channel-ai-chat-stream-url-value="<%= channel_ai_chat_stream_path %>"
+     data-channel-ai-chat-bulk-create-url-value="<%= channel_ai_bulk_create_path %>"
+     data-channel-ai-chat-channels-url-value="<%= channels_path %>">
+
+  <!-- Header -->
+  <div class="flex-shrink-0 pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Add Channels</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Describe what channels you need and AI will propose configurations.
+          <% if @existing_channels_count > 0 %>
+            You have <span class="font-medium"><%= @existing_channels_count %></span> existing channel<%= @existing_channels_count == 1 ? '' : 's' %>.
+          <% end %>
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" data-action="click->channel-ai-chat#clearChat" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          Clear chat
+        </button>
+        <%= link_to channels_path, class: "text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
+          Back to channels
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content: Chat + Proposal side by side -->
+  <div class="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden mt-4">
+
+    <!-- Left: Chat Area -->
+    <div class="flex-1 flex flex-col min-w-0 lg:max-w-[60%]">
+      <!-- Messages -->
+      <div class="flex-1 overflow-y-auto py-4 space-y-4" data-channel-ai-chat-target="messageList">
+        <!-- Welcome message -->
+        <div class="px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+          <p class="text-sm">
+            Tell me what marketing channels you need and I'll propose configurations. For example:
+          </p>
+          <ul class="mt-2 text-sm text-gray-600 dark:text-gray-300 space-y-1">
+            <li>&bull; "Create newsletter channels for my Privacy and Security courses, in Slovak"</li>
+            <li>&bull; "I need a Signal group channel for Bitcoin news in English"</li>
+            <li>&bull; "Set up 3 channels: newsletter, Telegram group, and social media — all about Nostr development"</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="flex-shrink-0 py-4">
+        <div class="relative">
+          <textarea
+            data-channel-ai-chat-target="input"
+            data-action="input->channel-ai-chat#autoResize keydown->channel-ai-chat#handleKeydown"
+            rows="1"
+            class="block w-full resize-none rounded-2xl border-0 bg-gray-100 dark:bg-gray-700 dark:text-white shadow-lg outline-none focus:outline-none focus:shadow-xl focus:bg-gray-50 dark:focus:bg-gray-600 transition-all px-5 pr-14 py-4 text-base placeholder-gray-400"
+            placeholder="Describe the channels you need..."
+          ></textarea>
+          <button
+            type="button"
+            data-channel-ai-chat-target="submitButton"
+            data-action="click->channel-ai-chat#submit"
+            class="absolute right-2 bottom-2 inline-flex items-center justify-center p-2.5 bg-purple-600 text-white rounded-full hover:bg-purple-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            <svg data-channel-ai-chat-target="loadingSpinner" class="hidden h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg data-channel-ai-chat-target="submitIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Proposal Cards Area -->
+    <div class="lg:w-[40%] flex-shrink-0 overflow-y-auto hidden" data-channel-ai-chat-target="proposalArea">
+      <div data-channel-ai-chat-target="proposalContent">
+        <!-- Proposal cards rendered here by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,217 @@
+<%= turbo_stream_from "activity_logs_#{current_user.id}" %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Welcome back, <%= current_user.display_name_or_npub %>
+      </p>
+    </div>
+    <% if @channels_count > 0 %>
+      <%= button_to "Rate All Unrated", rate_all_path, method: :post, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700" %>
+    <% end %>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Sources</dt>
+              <dd class="text-lg font-semibold text-gray-900 dark:text-white"><%= @sources_count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-5 py-3">
+        <%= link_to "View all", sources_path, class: "text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500" %>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Channels</dt>
+              <dd class="text-lg font-semibold text-gray-900 dark:text-white"><%= @channels_count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-5 py-3">
+        <%= link_to "View all", channels_path, class: "text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500" %>
+      </div>
+    </div>
+
+    <%= link_to events_path, class: "block bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow" do %>
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Events</dt>
+              <dd class="text-lg font-semibold text-gray-900 dark:text-white"><%= @events_count %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-5 py-3">
+        <span class="text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500">View all events</span>
+      </div>
+    <% end %>
+
+    <%= link_to rag_chat_path, class: "block bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow" do %>
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Ask Content</dt>
+              <dd class="text-lg font-semibold text-gray-900 dark:text-white"><%= @embedded_count %>/<%= @events_count %> indexed</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 dark:bg-gray-700 px-5 py-3">
+        <span class="text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-500">Ask your content</span>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Active Jobs Progress -->
+  <div data-controller="job-progress" class="<%= 'hidden' unless @active_jobs.any? %> bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+    <div class="flex items-center gap-3 mb-3">
+      <svg class="h-5 w-5 text-purple-600 dark:text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <h2 class="text-sm font-medium text-purple-800 dark:text-purple-200">Background Jobs Running</h2>
+    </div>
+    <div id="job_progress_container" data-job-progress-target="container" class="space-y-2">
+      <% @active_jobs.each do |job| %>
+        <%= render "activity_logs/job_progress_card", job: job %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Getting Started -->
+  <% if @sources_count <= 1 && @channels_count == 0 %>
+    <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6">
+      <h2 class="text-lg font-medium text-purple-800 dark:text-purple-200">Get Started</h2>
+      <p class="mt-2 text-sm text-purple-700 dark:text-purple-300">
+        Welcome to Lievik! Here's how to get started:
+      </p>
+      <ol class="mt-4 space-y-3 text-sm text-purple-700 dark:text-purple-300">
+        <li class="flex items-start gap-3">
+          <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 font-medium text-xs">1</span>
+          <span><strong>Add Sources:</strong> Add Nostr accounts (npubs) whose content you want to curate. This includes your own account and accounts you follow.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 font-medium text-xs">2</span>
+          <span><strong>Create Channels:</strong> Set up channels for your marketing outputs (newsletters, chat groups, etc.) with custom relevance criteria.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 font-medium text-xs">3</span>
+          <span><strong>Curate Content:</strong> AI will rate content relevance for each channel. Mark content as used when you publish it.</span>
+        </li>
+      </ol>
+      <div class="mt-6 flex gap-3">
+        <%= link_to "Add Source", new_source_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700" %>
+        <%= link_to "Create Channel", new_channel_path, class: "inline-flex items-center px-4 py-2 border border-purple-300 dark:border-purple-600 text-sm font-medium rounded-md text-purple-700 dark:text-purple-300 bg-white dark:bg-transparent hover:bg-purple-50 dark:hover:bg-purple-900/20" %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Recent Events Feed -->
+  <% if @recent_events.any? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Recent Events</h2>
+        <%= link_to "View all", events_path, class: "text-sm text-purple-600 dark:text-purple-400 hover:underline" %>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @recent_events.each do |event| %>
+          <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div data-controller="event-expander">
+                  <% if event.content.length > 300 %>
+                    <p data-event-expander-target="short" class="text-sm text-gray-900 dark:text-gray-100">
+                      <%= render_nostr_content(truncate(event.content, length: 300)) %>
+                    </p>
+                    <p data-event-expander-target="full" class="hidden text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                      <%= render_nostr_content(event.content) %>
+                    </p>
+                    <button type="button" data-event-expander-target="button" data-action="click->event-expander#toggle" class="mt-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
+                      Show more
+                    </button>
+                  <% else %>
+                    <p class="text-sm text-gray-900 dark:text-gray-100">
+                      <%= render_nostr_content(event.content) %>
+                    </p>
+                  <% end %>
+                </div>
+                <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                  <span>From <%= event.source.name || event.source.identifier.truncate(20) %></span>
+                  <span>&middot;</span>
+                  <span><%= time_ago_in_words(event.published_at) %> ago</span>
+                  <span>&middot;</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= event.original? ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' %>">
+                    <%= event.event_type.capitalize %>
+                  </span>
+                  <span>&middot;</span>
+                  <%= link_to "View details", event_path(event), class: "text-purple-600 dark:text-purple-400 hover:underline" %>
+                </div>
+                <% chips = top_relevant_channels(event) %>
+                <% if chips.any? %>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <% chips.each do |ce| %>
+                      <%= link_to channel_path(ce.channel, selected_event: event.id), class: "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium #{relevance_score_class(ce.relevance_score)} hover:ring-1 hover:ring-purple-400 transition-all" do %>
+                        <%= ce.channel.name %> <%= ce.relevance_score %>%
+                      <% end %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+      <div class="bg-gray-50 dark:bg-gray-700 px-5 py-3 text-center">
+        <%= link_to "View all events", events_path, class: "text-sm text-purple-600 dark:text-purple-400 hover:underline" %>
+      </div>
+    </div>
+  <% elsif @sources_count > 0 %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-10 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No events yet</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Add sources and refresh them to start ingesting content.
+      </p>
+    </div>
+  <% end %>
+</div>

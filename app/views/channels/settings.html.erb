@@ -1,0 +1,240 @@
+<div class="max-w-2xl mx-auto space-y-6">
+  <div class="flex items-center gap-3">
+    <%= link_to @channel, class: "text-gray-400 hover:text-gray-500" do %>
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+    <% end %>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Channel Settings</h1>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-1"><%= @channel.name %></h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-6"><%= @channel.description %></p>
+
+      <%= form_with model: @channel, url: update_settings_channel_path(@channel), method: :patch, local: true, class: "space-y-6" do |form| %>
+
+        <!-- Relevance Threshold -->
+        <div>
+          <label for="threshold" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Relevance Threshold
+          </label>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            Only show events with a relevance score at or above this threshold.
+          </p>
+
+          <div class="flex items-center gap-4">
+            <input
+              type="range"
+              id="threshold"
+              name="channel[settings][relevance_threshold]"
+              min="0"
+              max="100"
+              step="5"
+              value="<%= @channel.settings['relevance_threshold'] || 50 %>"
+              class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+              oninput="document.getElementById('threshold-value').textContent = this.value + '%'"
+            >
+            <span id="threshold-value" class="text-lg font-medium text-gray-900 dark:text-white min-w-[4rem] text-right">
+              <%= @channel.settings['relevance_threshold'] || 50 %>%
+            </span>
+          </div>
+
+          <div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+            <span>Show everything (0%)</span>
+            <span>Only high relevance (100%)</span>
+          </div>
+        </div>
+
+        <!-- Channel Type (Future Feature) -->
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Channel Type
+          </label>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            How you interact with this channel's content.
+          </p>
+
+          <div class="space-y-2">
+            <label class="flex items-start p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+              <input
+                type="radio"
+                name="channel[settings][channel_type]"
+                value="pull"
+                checked="<%= (@channel.settings['channel_type'] || 'pull') == 'pull' %>"
+                class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+              >
+              <div class="ml-3">
+                <span class="block text-sm font-medium text-gray-900 dark:text-white">
+                  Pull (Manual)
+                </span>
+                <span class="block text-xs text-gray-500 dark:text-gray-400">
+                  You manually check and select content when needed
+                </span>
+              </div>
+            </label>
+
+            <label class="flex items-start p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-not-allowed opacity-50">
+              <input
+                type="radio"
+                name="channel[settings][channel_type]"
+                value="proactive"
+                disabled
+                class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+              >
+              <div class="ml-3">
+                <span class="block text-sm font-medium text-gray-900 dark:text-white">
+                  Proactive (Coming Soon)
+                </span>
+                <span class="block text-xs text-gray-500 dark:text-gray-400">
+                  Receive reminders when relevant content is available
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Content Generation Settings -->
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Content Generation Settings</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Configure how AI generates content for this channel.
+          </p>
+
+          <div class="space-y-4">
+            <div>
+              <label for="content_language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Content Language
+              </label>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                The language AI should use when generating content. Leave empty to use the channel's default language.
+              </p>
+              <%= form.text_field :content_language,
+                  placeholder: "e.g., Slovak, English, German...",
+                  class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+            </div>
+
+            <div>
+              <label for="content_style" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Writing Style
+              </label>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Describe the tone and style for generated content.
+              </p>
+              <%= form.text_field :content_style,
+                  placeholder: "e.g., Professional but approachable, casual and friendly...",
+                  class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+            </div>
+
+            <div class="flex items-start">
+              <input type="hidden" name="channel[settings][humanize_output]" value="false">
+              <input type="checkbox" id="humanize_output" name="channel[settings][humanize_output]"
+                     value="true" <%= @channel.humanize_output? ? "checked" : "" %>
+                     class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500 dark:bg-gray-700 mt-1">
+              <div class="ml-3">
+                <label for="humanize_output" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Humanize AI Output
+                </label>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Runs a second pass to remove AI-sounding patterns and make content sound more natural.
+                </p>
+              </div>
+            </div>
+
+            <div data-controller="template-selector">
+              <label for="content_prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Content Formatting Instructions
+              </label>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Detailed instructions for how AI should format and structure generated content.
+              </p>
+
+              <% if current_user.content_templates_list.any? %>
+                <div class="mb-3 flex items-center gap-2">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Load from template:</span>
+                  <% current_user.content_templates_list.each_with_index do |template, index| %>
+                    <button type="button"
+                            class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900 hover:text-purple-700 dark:hover:text-purple-300"
+                            data-action="click->template-selector#loadTemplate"
+                            data-template-selector-content-param="<%= template['template'].gsub('"', '&quot;') %>">
+                      <%= template["name"] %>
+                    </button>
+                  <% end %>
+                  <%= link_to edit_user_path(anchor: "content-templates"), class: "text-xs text-purple-600 dark:text-purple-400 hover:underline ml-2" do %>
+                    Manage templates
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="mb-3">
+                  <%= link_to edit_user_path(anchor: "content-templates"), class: "text-xs text-purple-600 dark:text-purple-400 hover:underline" do %>
+                    Create templates in User Settings to quickly populate this field
+                  <% end %>
+                </div>
+              <% end %>
+
+              <%= form.text_area :content_prompt,
+                  placeholder: Channel.default_content_prompt_template,
+                  rows: 12,
+                  class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono",
+                  data: { template_selector_target: "textarea" } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+          <%= link_to "Cancel", @channel, class: "text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
+          <%= form.submit "Save Settings", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="bg-red-50 dark:bg-red-900/20 shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg font-medium text-red-900 dark:text-red-200 mb-2">Danger Zone</h3>
+      <p class="text-sm text-red-700 dark:text-red-300 mb-4">
+        Deleting a channel will remove all relevance ratings for this channel. This action cannot be undone.
+      </p>
+      <%= button_to "Delete Channel", @channel,
+          method: :delete,
+          data: { turbo_confirm: "Are you sure you want to delete this channel? This action cannot be undone." },
+          class: "inline-flex items-center px-4 py-2 border border-red-600 dark:border-red-500 text-sm font-medium rounded-md text-red-700 dark:text-red-300 bg-white dark:bg-red-900/40 hover:bg-red-50 dark:hover:bg-red-900/60" %>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom slider styling */
+  input[type="range"].slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #9333ea;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  }
+
+  input[type="range"].slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #9333ea;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  }
+
+  input[type="range"].slider::-webkit-slider-thumb:hover {
+    background: #7e22ce;
+  }
+
+  input[type="range"].slider::-moz-range-thumb:hover {
+    background: #7e22ce;
+  }
+</style>

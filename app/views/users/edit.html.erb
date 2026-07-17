@@ -1,0 +1,252 @@
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <%= link_to dashboard_path, class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+    <% end %>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">User Settings</h1>
+  </div>
+
+  <%= form_with model: current_user, url: user_path, method: :patch, local: true, class: "space-y-6" do |f| %>
+    <% if current_user.errors.any? %>
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+        <ul class="list-disc list-inside text-sm text-red-800 dark:text-red-200">
+          <% current_user.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :system_prompt, "System Prompt (AI Context)", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+      <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
+        <p>This system prompt gives AI context about <strong>you</strong> for better relevance across channels. Default works out-of-box, but customize for optimal results.</p>
+        <p><strong>Make it yours:</strong> Describe who you are, domains/projects (e.g., "AI tools builder"), style (concise/tech/promotional), audience (developers/creators), tone (professional/inspirational). Helps AI grasp your unique situation.</p>
+        <details class="mt-2 p-3 bg-gray-50 dark:bg-gray-900 rounded">
+          <summary class="cursor-pointer font-medium text-sm">View Default Prompt</summary>
+          <pre class="mt-2 text-xs overflow-x-auto"><%= User::DEFAULT_SYSTEM_PROMPT %></pre>
+        </details>
+      </div>
+      <div data-controller="markdown-editor" data-markdown-editor-value="<%= f.object.system_prompt %>">
+        <textarea name="user[system_prompt]" data-markdown-editor-target="textarea" rows="12" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"><%= f.object.system_prompt %></textarea>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+      <%= f.label :event_link_template, "Event Link Template", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+      <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
+        <p>URL template for linking to Nostr events (notes) in generated content. Use <code>{eventid}</code> as placeholder for the nevent/note identifier.</p>
+        <p class="text-xs text-gray-500">Default: <code><%= User::DEFAULT_EVENT_LINK_TEMPLATE %></code></p>
+      </div>
+      <%= f.text_field :event_link_template,
+          value: f.object.event_link_template,
+          placeholder: User::DEFAULT_EVENT_LINK_TEMPLATE,
+          class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono" %>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        Examples: <code>https://yakihonne.com/note/{eventid}</code>, <code>https://primal.net/e/{eventid}</code>, <code>https://snort.social/e/{eventid}</code>
+      </p>
+    </div>
+
+    <div class="mt-4">
+      <%= f.label :naddr_link_template, "Article Link Template (naddr)", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+      <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
+        <p>URL template for linking to Nostr long-form articles (replaceable events). Use <code>{naddr}</code> as placeholder for the naddr identifier.</p>
+        <p class="text-xs text-gray-500">Default: <code><%= User::DEFAULT_NADDR_LINK_TEMPLATE %></code></p>
+      </div>
+      <%= f.text_field :naddr_link_template,
+          value: f.object.naddr_link_template,
+          placeholder: User::DEFAULT_NADDR_LINK_TEMPLATE,
+          class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono" %>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        Examples: <code>https://yakihonne.com/article/{naddr}</code>, <code>https://habla.news/a/{naddr}</code>
+      </p>
+    </div>
+
+    <div class="mt-4">
+      <%= f.label :profile_link_template, "Profile Link Template", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+      <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
+        <p>URL template for linking to Nostr profiles. Use <code>{npub}</code> as placeholder for the npub identifier.</p>
+        <p class="text-xs text-gray-500">Default: <code><%= User::DEFAULT_PROFILE_LINK_TEMPLATE %></code></p>
+      </div>
+      <%= f.text_field :profile_link_template,
+          value: f.object.profile_link_template,
+          placeholder: User::DEFAULT_PROFILE_LINK_TEMPLATE,
+          class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono" %>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        Examples: <code>https://yakihonne.com/profile/{npub}</code>, <code>https://primal.net/p/{npub}</code>, <code>https://njump.me/{npub}</code>
+      </p>
+    </div>
+
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+      <%= f.label :default_content_style, "Default Writing Style", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+      <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
+        <p>Default writing style used when creating new channels. You can customize it per channel in the channel settings.</p>
+      </div>
+      <%= f.text_area :default_content_style,
+          rows: 4,
+          placeholder: "E.g., Professional but approachable, use second person ('you'), avoid jargon, keep paragraphs short...",
+          class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+    </div>
+
+    <div class="flex gap-4 pt-4">
+      <%= f.submit "Save Settings", class: "inline-flex justify-center rounded-md border border-transparent bg-purple-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" %>
+      <%= link_to dashboard_path, class: "inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 px-6 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+        Cancel
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Content Templates Section -->
+  <div id="content-templates" class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Content Format Templates</h2>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Reusable templates for channel content formatting instructions. Select a template when creating or editing a channel.
+        </p>
+      </div>
+    </div>
+
+    <!-- Add from preset -->
+    <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Add Template from Preset</h3>
+      <div class="flex flex-wrap gap-2">
+        <% User.default_content_templates.each do |preset| %>
+          <%= form_with url: add_user_template_path, method: :post, class: "inline", data: { turbo: false } do %>
+            <%= hidden_field_tag :template_name, preset["name"] %>
+            <%= hidden_field_tag :template_content, preset["template"] %>
+            <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <%= preset["name"] %>
+            </button>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Existing templates -->
+    <% if @content_templates.any? %>
+      <div class="space-y-4">
+        <% @content_templates.each_with_index do |template, index| %>
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= template["name"] %></h4>
+              <%= button_to delete_user_template_path(template_index: index),
+                  method: :delete,
+                  data: { turbo_confirm: "Delete this template?" },
+                  class: "inline-flex items-center px-2 py-1 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" do %>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              <% end %>
+            </div>
+            <%= form_with url: update_user_template_path, method: :patch, data: { turbo: false } do %>
+              <%= hidden_field_tag :template_index, index %>
+              <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Name</label>
+                <%= text_field_tag :template_name, template["name"],
+                    class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+              </div>
+              <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Content</label>
+                <%= text_area_tag :template_content, template["template"],
+                    rows: 8,
+                    class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono text-xs" %>
+              </div>
+              <div class="flex justify-end">
+                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
+                  Save Template
+                </button>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No templates yet. Add one from the presets above.</p>
+      </div>
+    <% end %>
+
+    <!-- Add custom template -->
+    <div class="mt-6">
+      <details class="bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <summary class="px-4 py-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+          Add Custom Template
+        </summary>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+          <%= form_with url: add_user_template_path, method: :post, data: { turbo: false } do %>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Name</label>
+              <%= text_field_tag :template_name, "",
+                  placeholder: "e.g., Weekly Digest",
+                  class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+            </div>
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Content</label>
+              <%= text_area_tag :template_content, "",
+                  rows: 8,
+                  placeholder: "# Format\n\n## Output Format\n...\n\n## Writing Style\n...",
+                  class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm font-mono text-xs" %>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
+                Add Template
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <%= render "api_tokens" %>
+
+  <!-- Search Index Section -->
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white">Search Index</h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Manage the semantic search index for your events.
+      </p>
+    </div>
+    <div class="px-4 py-5 sm:px-6">
+      <% embedded_count = Event.joins(source: :user).where(sources: { user_id: current_user.id }).where.not(embedding: nil).count %>
+      <% total_count = Event.joins(source: :user).where(sources: { user_id: current_user.id }).count %>
+
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-700 dark:text-gray-300">
+            <span class="font-medium"><%= embedded_count %></span> of <span class="font-medium"><%= total_count %></span> events indexed
+          </p>
+          <% if current_user.last_reindexed_at %>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Last full reindex: <%= current_user.last_reindexed_at.strftime('%b %d, %Y at %H:%M') %>
+            </p>
+          <% end %>
+        </div>
+        <%= button_to "Rebuild Search Index",
+            reindex_user_path,
+            method: :post,
+            class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600",
+            data: { turbo_confirm: "This will regenerate embeddings for all your events. This may take a few minutes. Continue?" } %>
+      </div>
+
+      <div class="mt-4">
+        <%= link_to rag_chat_path, class: "inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300" do %>
+          <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+          </svg>
+          Try searching your content
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

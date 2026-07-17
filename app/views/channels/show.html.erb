@@ -1,0 +1,171 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <%= link_to channels_path, class: "text-gray-400 hover:text-gray-500" do %>
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        <% end %>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= @channel.name %></h1>
+      </div>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <%= @channel.language.upcase %> &middot; <%= @channel.description %>
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to channel_contents_path(@channel), class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
+        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Content Library
+      <% end %>
+      <%= link_to settings_channel_path(@channel), class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
+        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Settings
+      <% end %>
+      <%= link_to edit_channel_path(@channel), class: "inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
+        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        Edit Criteria
+      <% end %>
+    </div>
+  </div>
+
+  <div data-controller="bulk-select" data-bulk-select-total-value="<%= @channel_events.size %>" class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Relevant Content</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <%= @unused_count %> unused
+            <% if @used_count > 0 %>
+              · <%= @used_count %> used
+            <% end %>
+          </p>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Threshold: <%= @threshold %>%</span>
+          <div class="h-2 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="h-full bg-purple-600" style="width: <%= @threshold %>%"></div>
+          </div>
+          <!-- Show Used Toggle -->
+          <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+            <input type="checkbox"
+                   <%= "checked" if @show_used %>
+                   onchange="window.location.href='<%= channel_path(@channel) %>' + (this.checked ? '?show_used=true' : '')"
+                   class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+            Show used
+          </label>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <div class="flex items-center gap-4">
+          <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <input type="checkbox" data-action="change->bulk-select#toggleAll" data-bulk-select-target="selectAll" class="rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500">
+            <span>Select All on This Page</span>
+          </label>
+          <span data-bulk-select-target="count" class="text-sm text-gray-500 dark:text-gray-400">0 selected</span>
+        </div>
+        <%= form_with url: channel_path(@channel), method: :get, class: "flex gap-2" do |f| %>
+          <%= f.hidden_field :show_used, value: @show_used if @show_used %>
+          <%= f.text_field :search, value: params[:search], placeholder: "Search events...", class: "px-3 py-1.5 text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" %>
+          <%= f.submit "Search", class: "px-3 py-1.5 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer" %>
+          <% if params[:search].present? %>
+            <%= link_to "Clear", channel_path(@channel, show_used: @show_used), class: "px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
+          <% end %>
+        <% end %>
+      </div>
+      <div class="flex items-center gap-2 mt-3">
+        <div data-bulk-select-target="actions" class="hidden flex items-center gap-2">
+          <!-- Use Content button -->
+          <%= form_with url: new_channel_content_path(@channel), method: :get, data: { turbo: false }, class: "inline" do %>
+            <input type="hidden" name="event_ids" value="" data-bulk-select-target="contentCheckboxes">
+            <input type="submit" value="Use Events in new content" data-bulk-select-target="contentSubmitText" class="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 whitespace-nowrap cursor-pointer">
+          <% end %>
+          <!-- Mark as Used button -->
+          <%= form_with url: bulk_mark_used_channel_path(@channel, show_used: @show_used), method: :post, data: { turbo: false }, class: "inline" do %>
+            <input type="hidden" name="event_ids" value="" data-bulk-select-target="checkboxes">
+            <input type="submit" value="Mark as Used" data-bulk-select-target="submitText" class="px-4 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 whitespace-nowrap cursor-pointer">
+          <% end %>
+          <!-- Rate Events button -->
+          <%= form_with url: bulk_rate_channel_path(@channel, show_used: @show_used), method: :post, data: { turbo: false }, class: "inline" do %>
+            <input type="hidden" name="event_ids" value="" data-bulk-select-target="checkboxes">
+            <input type="submit" value="Rate Events" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 whitespace-nowrap cursor-pointer">
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <% events_to_display = @channel_events_with_selected || @channel_events %>
+    <% if events_to_display.empty? %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No content matches your criteria yet.</p>
+      </div>
+    <% else %>
+      <div class="space-y-6">
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% events_to_display.each do |channel_event| %>
+            <% is_selected = @selected_event_id && channel_event.event_id == @selected_event_id %>
+            <li id="<%= "event-#{channel_event.event_id}" %>" class="px-4 py-6 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-700 <%= 'opacity-50' if channel_event.used? && !is_selected %> <%= 'ring-2 ring-purple-500 ring-inset bg-purple-50 dark:bg-purple-900/20' if is_selected %>">
+              <label class="flex items-start space-x-3 cursor-pointer w-full">
+                <input type="checkbox" value="<%= channel_event.event.id %>" class="mt-1 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" data-bulk-select-target="checkbox" data-action="change->bulk-select#updateCount" <%= 'checked' if is_selected %> <%= 'disabled' if channel_event.used? && !is_selected %>>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex flex-col gap-1">
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-1 text-xs font-bold rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" title="AI Reasoning: <%= channel_event.relevance_reason %>">
+                          <%= channel_event.relevance_score %>%
+                        </span>
+                        <% if channel_event.used? %>
+                          <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                            Used
+                          </span>
+                        <% end %>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                          from <%= channel_event.event.source.name %>
+                        </span>
+                      </div>
+                      <% if channel_event.relevance_reason.present? %>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 italic"><%= channel_event.relevance_reason.truncate(150) %></p>
+                      <% end %>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="text-xs text-gray-400">
+                        <%= time_ago_in_words(channel_event.event.published_at) %> ago
+                      </span>
+                      <%= link_to event_path(channel_event.event), class: "text-xs text-purple-600 dark:text-purple-400 hover:underline", onclick: "event.stopPropagation();" do %>
+                        View details
+                      <% end %>
+                    </div>
+                  </div>
+                  <div data-controller="event-expander">
+                    <% if channel_event.event.content.length > 500 %>
+                      <p data-event-expander-target="short" class="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(truncate(channel_event.event.content, length: 500)) %></p>
+                      <p data-event-expander-target="full" class="hidden text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(channel_event.event.content) %></p>
+                      <button type="button" data-event-expander-target="button" data-action="click->event-expander#toggle" class="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
+                        Show more
+                      </button>
+                    <% else %>
+                      <p class="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(channel_event.event.content) %></p>
+                    <% end %>
+                  </div>
+                </div>
+              </label>
+            </li>
+          <% end %>
+        </ul>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-700">
+          <%= paginate @channel_events %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

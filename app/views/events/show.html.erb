@@ -1,0 +1,135 @@
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <%= link_to events_path, class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+    <% end %>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Event Details</h1>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @event.original? ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' %>">
+            <%= @event.event_type.capitalize %>
+          </span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            From <%= @event.source.name || @event.source.identifier.truncate(30) %>
+          </span>
+        </div>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          <%= @event.published_at.strftime("%B %d, %Y at %H:%M") %>
+        </span>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <% if @event.metadata["title"].present? %>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <%= @event.metadata["title"] %>
+        </h2>
+      <% end %>
+
+      <div class="prose dark:prose-invert max-w-none">
+        <p class="text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(@event.content) %></p>
+      </div>
+
+      <% if @event.metadata["link"].present? %>
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <a href="<%= @event.metadata["link"] %>" target="_blank" rel="noopener" class="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:underline">
+            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+            View Original
+          </a>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="flex justify-end mb-4 p-2">
+      <%= button_to bulk_rate_events_path(event_ids: [@event.id]), method: :post, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm", data: { turbo_confirm: "Rerate this event across all channels?" } do %>
+        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Rerate Event
+      <% end %>
+    </div>
+
+    <!-- Channel Ratings (sorted by relevance) -->
+    <% if @channel_events.any? %>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700" data-controller="bulk-select">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Channel Relevance (sorted by score)</h3>
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
+              <input type="checkbox" data-action="change->bulk-select#toggleAll" data-bulk-select-target="selectAll" class="rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500">
+              <span>Select All</span>
+            </label>
+            <span data-bulk-select-target="count" class="text-xs text-gray-500 dark:text-gray-400">0 selected</span>
+          </div>
+        </div>
+
+        <%= form_with url: bulk_mark_used_event_path(@event), method: :post, data: { turbo: false } do %>
+          <input type="hidden" name="channel_event_ids" value="" data-bulk-select-target="checkboxes">
+
+          <div class="space-y-2">
+            <% @channel_events.each do |ce| %>
+              <div class="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500 transition-all <%= 'opacity-60' if ce.used? %>">
+                <input type="checkbox"
+                       value="<%= ce.id %>"
+                       data-bulk-select-target="checkbox"
+                       data-action="change->bulk-select#updateCount"
+                       class="mt-1 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500"
+                       <%= 'disabled' if ce.used? %>>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <%= link_to channel_path(ce.channel, selected_event: @event.id), class: "text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400" do %>
+                      <%= ce.channel.name %>
+                    <% end %>
+                    <span class="text-xs font-bold px-2 py-1 rounded-full <%= relevance_score_class(ce.relevance_score) %>">
+                      <%= ce.relevance_score %>%
+                    </span>
+                  </div>
+                  <% if ce.used? %>
+                    <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Already used in this channel</span>
+                  <% end %>
+                  <% if ce.relevance_reason.present? %>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2"><%= ce.relevance_reason.truncate(150) %></p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <div data-bulk-select-target="actions" class="hidden mt-4 flex justify-end">
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Mark as Used in Selected Channels
+            </button>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-sm text-gray-500 dark:text-gray-400">This event hasn't been rated for any channels yet.</p>
+        <%= button_to bulk_rate_events_path(event_ids: [@event.id]), method: :post, class: "mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" do %>
+          Rate for all channels
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Raw Data (Collapsible) -->
+    <details class="border-t border-gray-200 dark:border-gray-700">
+      <summary class="px-6 py-4 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+        Raw Data
+      </summary>
+      <div class="px-6 pb-4">
+        <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><%= JSON.pretty_generate(@event.raw_data) %></pre>
+      </div>
+    </details>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+default: &default
+  dispatchers:
+    - polling_interval: 5
+      batch_size: 500
+  workers:
+    - queues: "auth"
+      threads: <%= ENV.fetch("AUTH_JOB_CONCURRENCY", 1) %>
+      processes: <%= ENV.fetch("AUTH_JOB_PROCESSES", 1) %>
+      polling_interval: 1
+    - queues: "default"
+      threads: 2
+      processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
+      polling_interval: 5
+  scheduler:
+    polling_interval: 30
+    recurring_tasks: config/recurring.yml
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  scheduler: null
+
+production:
+  <<: *default

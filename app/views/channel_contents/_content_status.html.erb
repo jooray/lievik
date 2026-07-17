@@ -1,0 +1,28 @@
+<% error = local_assigns[:error] %>
+
+<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-sm text-gray-500 dark:text-gray-400">Status:</span>
+      <span class="px-2 py-1 text-xs font-medium rounded <%= @channel_content.draft? ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' %>">
+        <%= @channel_content.status.capitalize %>
+      </span>
+    </div>
+
+    <% if @channel_content.version_history.present? %>
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        <span><%= @channel_content.version_history.size %> version(s) saved</span>
+      </div>
+    <% end %>
+  </div>
+
+  <% if error %>
+    <div class="text-sm text-red-600 dark:text-red-400">
+      <%= error %>
+    </div>
+  <% end %>
+
+  <div class="text-xs text-gray-400">
+    Last updated: <%= time_ago_in_words(@channel_content.updated_at) %> ago
+  </div>
+</div>

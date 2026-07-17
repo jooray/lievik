@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Lievik helps Nostr creators send the right thing to the right audience."
+    />
+    <title>Lievik - The right thing, for the right people</title>
+
+    <%# Installable PWA (manifest-only — no service worker) from the entry point too. %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    <link rel="manifest" href="/manifest" />
+    <meta name="theme-color" content="#6d4bc3" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <%# Apply the per-device theme before first paint to avoid a flash of the
+        wrong mode. Uses the same "theme" localStorage key as the app
+        (see app/javascript/controllers/theme_controller.js). %>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme") || "system";
+          var dark =
+            t === "dark" ||
+            (t === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+        } catch (e) {
+          /* private mode / no storage */
+        }
+      })();
+    </script>
+
+    <style>
+      :root {
+        --canvas: #f8f7f4;
+        --canvas-deep: #efede8;
+        --ink: #1c1b24;
+        --muted: #57545f;
+        --line: #dedbd4;
+        --card: #fffdfa;
+        --purple: #6d4bc3;
+        --purple-dark: #51389a;
+        --purple-soft: #eee9fc;
+        --amber: #b26200;
+        --amber-soft: #fff0d6;
+        --green: #216450;
+        --shadow: 0 24px 60px rgba(45, 35, 73, 0.11);
+      }
+
+      html.dark {
+        --canvas: #0a0a0a;
+        --canvas-deep: #141414;
+        --ink: #ece9e3;
+        --muted: #b4aea4;
+        --line: #2a2a2a;
+        --card: #161616;
+        --purple: #fbbf24;
+        --purple-dark: #fcd34d;
+        --purple-soft: rgba(217, 119, 6, 0.15);
+        --amber: #fbbf24;
+        --amber-soft: rgba(217, 119, 6, 0.15);
+        --green: #7cd6a9;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--canvas);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font: inherit;
+      }
+      :focus-visible {
+        outline: 3px solid var(--purple);
+        outline-offset: 3px;
+      }
+
+      .shell {
+        width: min(1160px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        color: var(--purple);
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .site-header {
+        padding: 22px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .wordmark {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -0.06em;
+      }
+      .mark {
+        width: 28px;
+        height: 28px;
+        position: relative;
+        display: inline-block;
+      }
+      .mark::before,
+      .mark::after {
+        content: "";
+        position: absolute;
+        border: 2px solid var(--purple);
+        transform: rotate(45deg);
+      }
+      .mark::before {
+        width: 17px;
+        height: 17px;
+        left: 2px;
+        top: 2px;
+        border-bottom: 0;
+        border-left: 0;
+      }
+      .mark::after {
+        width: 9px;
+        height: 9px;
+        left: 9px;
+        top: 9px;
+        border-top: 0;
+        border-right: 0;
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .theme-toggle {
+        width: 39px;
+        height: 39px;
+        display: inline-grid;
+        place-items: center;
+        padding: 0;
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .theme-toggle:hover {
+        color: var(--ink);
+        border-color: var(--muted);
+      }
+      .theme-icon {
+        width: 18px;
+        height: 18px;
+      }
+      .sun {
+        display: none;
+      }
+      .dark .sun {
+        display: block;
+      }
+      .dark .moon {
+        display: none;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 45px;
+        padding: 0 18px;
+        color: #fff;
+        background: var(--purple);
+        border: 1px solid var(--purple);
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: 750;
+        transition:
+          transform 0.16s ease,
+          background 0.16s ease,
+          border-color 0.16s ease;
+      }
+      .dark .button {
+        color: #1a1305;
+      }
+      .button:hover {
+        transform: translateY(-1px);
+        background: var(--purple-dark);
+        border-color: var(--purple-dark);
+      }
+      .button-outline {
+        color: var(--ink);
+        background: transparent;
+        border-color: var(--line);
+      }
+      .dark .button-outline {
+        color: var(--ink);
+      }
+      .button-outline:hover {
+        background: var(--card);
+        border-color: var(--muted);
+      }
+      .arrow {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 88px 0 76px;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        width: 500px;
+        height: 500px;
+        top: -310px;
+        right: -130px;
+        border-radius: 50%;
+        background: var(--purple-soft);
+        filter: blur(2px);
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+        align-items: center;
+        gap: 72px;
+      }
+      h1 {
+        max-width: 630px;
+        margin: 15px 0 22px;
+        font-size: clamp(46px, 6vw, 78px);
+        font-weight: 750;
+        letter-spacing: -0.07em;
+        line-height: 0.96;
+      }
+      h1 em {
+        color: var(--purple);
+        font-style: normal;
+      }
+      .lede {
+        max-width: 570px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.65;
+      }
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 31px;
+      }
+      .quiet-note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .quiet-note svg {
+        flex: 0 0 auto;
+        color: var(--green);
+      }
+
+      .desk {
+        position: relative;
+        min-height: 465px;
+      }
+      .desk::before {
+        content: "";
+        position: absolute;
+        inset: 35px 0 0 34px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        transform: rotate(3deg);
+      }
+      .workspace {
+        position: relative;
+        padding: 17px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+      }
+      .workspace-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .workspace-label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .identity {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .avatar {
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: #5b708a;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: 800;
+      }
+      .workspace-body {
+        display: grid;
+        grid-template-columns: 1.04fr 0.96fr;
+        gap: 13px;
+        padding-top: 15px;
+      }
+      .source-card,
+      .audience-card {
+        padding: 15px;
+        background: var(--canvas);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .card-kicker {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .note-head {
+        display: flex;
+        gap: 9px;
+        align-items: flex-start;
+      }
+      .note-avatar {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: linear-gradient(140deg, #c5795f, #5a3f56);
+      }
+      .note-byline {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 750;
+      }
+      .note-meta {
+        margin: 1px 0 0;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .note-copy {
+        margin: 13px 0 0;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .note-link {
+        display: block;
+        margin-top: 12px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: var(--purple);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .routing-line {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        height: 27px;
+      }
+      .routing-line::before {
+        content: "";
+        width: 1px;
+        height: 100%;
+        background: var(--purple);
+      }
+      .routing-line::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        width: 6px;
+        height: 6px;
+        border-right: 1px solid var(--purple);
+        border-bottom: 1px solid var(--purple);
+        transform: rotate(45deg);
+      }
+      .channel {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      .channel + .channel {
+        margin-top: 8px;
+      }
+      .channel-icon {
+        width: 27px;
+        height: 27px;
+        display: grid;
+        place-items: center;
+        color: var(--purple);
+        background: var(--purple-soft);
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .channel p {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 750;
+      }
+      .channel small {
+        display: block;
+        margin-top: 1px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 500;
+      }
+      .score {
+        margin-left: auto;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .score.low {
+        color: var(--muted);
+      }
+      .workspace-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 10px 12px;
+        color: var(--green);
+        background: color-mix(in srgb, var(--green) 9%, transparent);
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .workspace-footer::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        background: currentColor;
+        border-radius: 50%;
+      }
+
+      .statement {
+        padding: 88px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .statement-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: end;
+      }
+      .statement h2,
+      .how h2 {
+        margin: 12px 0 0;
+        max-width: 620px;
+        font-size: clamp(30px, 4vw, 49px);
+        letter-spacing: -0.055em;
+        line-height: 1.04;
+      }
+      .statement-copy {
+        max-width: 440px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.65;
+      }
+      .answer-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 47px;
+      }
+      .answer {
+        padding: 23px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 11px;
+      }
+      .answer-number {
+        display: block;
+        margin-bottom: 38px;
+        color: var(--purple);
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .answer h3 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: -0.03em;
+      }
+      .answer p {
+        margin: 9px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .how {
+        padding: 90px 0;
+      }
+      .how-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 30px;
+      }
+      .how-heading p:last-child {
+        max-width: 360px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        margin-top: 45px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .step {
+        min-height: 220px;
+        padding: 27px;
+        background: var(--card);
+      }
+      .step + .step {
+        border-left: 1px solid var(--line);
+      }
+      .step-index {
+        color: var(--purple);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+      }
+      .step h3 {
+        margin: 36px 0 8px;
+        font-size: 20px;
+        letter-spacing: -0.035em;
+      }
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .closing {
+        padding: 76px 0;
+        color: #fff;
+        background: #292339;
+      }
+      .dark .closing {
+        background: #1a1712;
+      }
+      .closing-grid {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 40px;
+      }
+      .closing .eyebrow {
+        color: #f6c558;
+      }
+      .closing h2 {
+        max-width: 620px;
+        margin: 14px 0 0;
+        font-size: clamp(32px, 4vw, 52px);
+        letter-spacing: -0.06em;
+        line-height: 1.02;
+      }
+      .closing .button {
+        flex: 0 0 auto;
+        color: #302642;
+        background: #f6c558;
+        border-color: #f6c558;
+      }
+      .dark .closing .button {
+        color: #211c12;
+      }
+      .closing .button:hover {
+        background: #ffe09a;
+        border-color: #ffe09a;
+      }
+      footer {
+        padding: 27px 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      @media (max-width: 850px) {
+        .hero {
+          padding: 63px 0 65px;
+        }
+        .hero-grid,
+        .statement-grid {
+          grid-template-columns: 1fr;
+          gap: 45px;
+        }
+        .desk {
+          max-width: 570px;
+          width: 100%;
+          margin: 0 auto;
+        }
+        .answer-grid,
+        .steps {
+          grid-template-columns: 1fr;
+        }
+        .answer-number {
+          margin-bottom: 22px;
+        }
+        .step + .step {
+          border-top: 1px solid var(--line);
+          border-left: 0;
+        }
+        .step {
+          min-height: auto;
+        }
+        .step h3 {
+          margin-top: 22px;
+        }
+        .how-heading,
+        .closing-grid {
+          display: block;
+        }
+        .how-heading p:last-child {
+          margin-top: 20px;
+        }
+        .closing .button {
+          margin-top: 30px;
+        }
+      }
+      @media (max-width: 520px) {
+        .shell {
+          width: min(100% - 28px, 1160px);
+        }
+        .site-header {
+          padding: 14px 0;
+        }
+        .nav .button {
+          min-height: 38px;
+          padding: 0 11px;
+          font-size: 12px;
+        }
+        .theme-toggle {
+          width: 37px;
+          height: 37px;
+        }
+        .hero {
+          padding-top: 48px;
+        }
+        h1 {
+          font-size: 47px;
+        }
+        .lede {
+          font-size: 16px;
+        }
+        .hero-actions .button {
+          width: 100%;
+        }
+        .desk {
+          min-height: 0;
+        }
+        .desk::before {
+          display: none;
+        }
+        .workspace {
+          padding: 11px;
+        }
+        .workspace-body {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .statement,
+        .how {
+          padding: 62px 0;
+        }
+        .answer-grid {
+          gap: 10px;
+          margin-top: 30px;
+        }
+        .answer {
+          padding: 19px;
+        }
+        .footer-inner {
+          display: block;
+        }
+        .footer-inner p + p {
+          margin-top: 8px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="shell nav">
+        <a class="wordmark" href="#top" aria-label="Lievik home"
+          ><span class="mark" aria-hidden="true"></span>Lievik</a
+        >
+        <div class="nav-actions">
+          <button
+            class="theme-toggle"
+            type="button"
+            aria-label="Switch color theme"
+            title="Switch color theme"
+          >
+            <svg
+              class="theme-icon moon"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M20.4 15.1A8.5 8.5 0 0 1 8.9 3.6 8.5 8.5 0 1 0 20.4 15.1Z"
+              />
+            </svg>
+            <svg
+              class="theme-icon sun"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="12" r="3.5" />
+              <path
+                d="M12 2.5v2M12 19.5v2M21.5 12h-2M4.5 12h-2M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4M18.7 18.7l-1.4-1.4M6.7 6.7 5.3 5.3"
+              />
+            </svg>
+          </button>
+          <a class="button" href="<%= nostr_login_path %>"
+            >Launch app <span class="arrow" aria-hidden="true">&#8599;</span></a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="shell hero-grid">
+          <div>
+            <p class="eyebrow">Nostr-first content curation</p>
+            <h1>The right thing,<br />for the <em>right people.</em></h1>
+            <p class="lede">
+              Lievik is a quiet workspace for figuring out who needs to hear
+              what. Pull in what you publish and the feeds you follow, describe
+              the people you write for, and it surfaces what is worth sending to
+              each of them.
+            </p>
+            <div class="hero-actions">
+              <a class="button" href="<%= nostr_login_path %>"
+                >Launch Lievik
+                <span class="arrow" aria-hidden="true">&#8599;</span></a
+              >
+              <a class="button button-outline" href="#how-it-works"
+                >See how it works</a
+              >
+            </div>
+            <p class="quiet-note">
+              <svg
+                aria-hidden="true"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M12 22s8-3.8 8-10V5l-8-3-8 3v7c0 6.2 8 10 8 10Z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              Sign in with your Nostr identity. No email or password.
+            </p>
+          </div>
+
+          <div
+            class="desk"
+            aria-label="An illustration of Lievik matching a Nostr note to audiences"
+          >
+            <div class="workspace">
+              <div class="workspace-top">
+                <span class="workspace-label">Your routing desk</span
+                ><span class="identity"
+                  ><span class="avatar">M</span> npub1mara...</span
+                >
+              </div>
+              <div class="workspace-body">
+                <div class="source-card">
+                  <p class="card-kicker">Something you made</p>
+                  <div class="note-head">
+                    <span class="note-avatar" aria-hidden="true"></span>
+                    <div>
+                      <p class="note-byline">Mara publishes a note</p>
+                      <p class="note-meta">Nostr · 2 hours ago</p>
+                    </div>
+                  </div>
+                  <p class="note-copy">
+                    A short guide to picking a private messenger for a family
+                    group. What to look for, and what is not worth overthinking.
+                  </p>
+                  <span class="note-link">long-form note · 6 min read</span>
+                </div>
+                <div class="audience-card">
+                  <p class="card-kicker">Who should hear it?</p>
+                  <div class="channel">
+                    <span class="channel-icon" aria-hidden="true">✦</span>
+                    <p>Privacy course<small>students and alumni</small></p>
+                    <span class="score">96</span>
+                  </div>
+                  <div class="channel">
+                    <span class="channel-icon" aria-hidden="true">#</span>
+                    <p>Local meetup<small>Bitcoin beginners</small></p>
+                    <span class="score">82</span>
+                  </div>
+                  <div class="channel">
+                    <span class="channel-icon" aria-hidden="true">@</span>
+                    <p>Project update<small>open-source contributors</small></p>
+                    <span class="score low">14</span>
+                  </div>
+                </div>
+              </div>
+              <div class="routing-line" aria-hidden="true"></div>
+              <div class="workspace-footer">
+                Ready for the Privacy course newsletter
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="statement">
+        <div class="shell">
+          <div class="statement-grid">
+            <div>
+              <p class="eyebrow">A better question</p>
+              <h2>Content gets lost when every audience lives in your head.</h2>
+            </div>
+            <p class="statement-copy">
+              A newsletter, a course, a chat group: each one has its own
+              context, and right now you are the only place that context lives.
+              Lievik turns that mental checklist into something that remembers
+              what each group cares about and what you have already sent them.
+            </p>
+          </div>
+          <div class="answer-grid">
+            <article class="answer">
+              <span class="answer-number">01 / MAKE</span>
+              <h3>You made something</h3>
+              <p>
+                Find its natural audience instead of broadcasting it everywhere
+                or forgetting it entirely.
+              </p>
+            </article>
+            <article class="answer">
+              <span class="answer-number">02 / SPEAK</span>
+              <h3>You have someone to reach</h3>
+              <p>
+                Open their channel and see the useful things they have not heard
+                from you yet.
+              </p>
+            </article>
+            <article class="answer">
+              <span class="answer-number">03 / REMEMBER</span>
+              <h3>You did this before</h3>
+              <p>
+                Track what went to each group, so your next update starts with
+                memory rather than guesswork.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="how" id="how-it-works">
+        <div class="shell">
+          <div class="how-heading">
+            <div>
+              <p class="eyebrow">How Lievik works</p>
+              <h2>One source of truth for your many conversations.</h2>
+            </div>
+            <p>Built around how Nostr creators already publish and follow each other.</p>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <span class="step-index">01</span>
+              <h3>Gather your signal</h3>
+              <p>
+                Add your Nostr identity, the people you follow, and any RSS
+                feeds you trust. Their notes, articles, and links all land in
+                one place.
+              </p>
+            </article>
+            <article class="step">
+              <span class="step-index">02</span>
+              <h3>Name your audiences</h3>
+              <p>
+                Create channels for the real groups you write to. Describe what
+                they care about in your own words.
+              </p>
+            </article>
+            <article class="step">
+              <span class="step-index">03</span>
+              <h3>Share with intention</h3>
+              <p>
+                Lievik ranks what is relevant, helps you draft the update, and
+                remembers what you have already used.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing">
+        <div class="shell closing-grid">
+          <div>
+            <p class="eyebrow">Nostr is home</p>
+            <h2>Make every message feel like it was meant for them.</h2>
+          </div>
+          <a class="button" href="<%= nostr_login_path %>"
+            >Launch app <span class="arrow" aria-hidden="true">&#8599;</span></a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell footer-inner">
+        <p>© Lievik. Send the right thing to the right people.</p>
+        <p>Sign in with NIP-07 or a NIP-46 remote signer.</p>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var root = document.documentElement;
+
+        function prefersDark() {
+          return window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+
+        function readTheme() {
+          try {
+            return localStorage.getItem("theme") || "system";
+          } catch (e) {
+            return "system";
+          }
+        }
+
+        function isDark() {
+          var t = readTheme();
+          return t === "dark" || (t === "system" && prefersDark());
+        }
+
+        function apply() {
+          root.classList.toggle("dark", isDark());
+        }
+
+        apply();
+
+        // Keep "system" mode in sync with the OS preference.
+        window
+          .matchMedia("(prefers-color-scheme: dark)")
+          .addEventListener("change", apply);
+
+        // The landing toggle flips between explicit light/dark and writes to the
+        // same "theme" key the app uses, so the choice carries into the app.
+        document
+          .querySelector(".theme-toggle")
+          .addEventListener("click", function () {
+            var next = isDark() ? "light" : "dark";
+            try {
+              localStorage.setItem("theme", next);
+            } catch (e) {}
+            apply();
+          });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,66 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <%= link_to channel_contents_path(@channel), class: "text-gray-400 hover:text-gray-500" do %>
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        <% end %>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          <%= @channel_content.title.presence || "Published Content" %>
+        </h1>
+      </div>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <%= @channel.name %> &middot;
+        Published <%= time_ago_in_words(@channel_content.published_at) %> ago
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to "Edit", edit_channel_content_path(@channel, @channel_content), class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
+      <%= button_to "Delete", channel_content_path(@channel, @channel_content), method: :delete, class: "inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-600 rounded-md shadow-sm text-sm font-medium text-red-700 dark:text-red-200 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900", data: { confirm: "Are you sure you want to delete this content?" } %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Content display -->
+    <div class="lg:col-span-2">
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Content</h2>
+          <button type="button"
+                  class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md"
+                  data-controller="clipboard"
+                  data-clipboard-text-value="<%= @channel_content.content %>"
+                  data-action="click->clipboard#copy">
+            Copy Markdown to Clipboard
+          </button>
+        </div>
+        <div class="markdown-content p-6 max-w-none text-gray-800 dark:text-gray-200">
+          <%= render_markdown(@channel_content.content) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source events panel -->
+    <div class="lg:col-span-1">
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Source Events</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><%= @events.size %> events used</p>
+        </div>
+        <div class="p-4 space-y-3 max-h-[600px] overflow-y-auto">
+          <% @events.each do |event| %>
+            <div class="text-sm bg-gray-50 dark:bg-gray-900 rounded p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-gray-900 dark:text-white"><%= event.source.name %></span>
+                <span class="text-xs text-gray-400"><%= event.published_at.strftime("%b %d") %></span>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400"><%= event.content.truncate(200) %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

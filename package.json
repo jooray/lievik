@@ -1,0 +1,16 @@
+{
+  "name": "app",
+  "private": true,
+  "scripts": {
+    "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
+    "build:css": "cp node_modules/easymde/dist/easymde.min.css app/assets/builds/easymde.css && ./node_modules/.bin/tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
+    "build:css:watch": "cp node_modules/easymde/dist/easymde.min.css app/assets/builds/easymde.css && ./node_modules/.bin/tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --watch"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo-rails": "^8.0.20",
+    "@tailwindcss/cli": "^4.1.18",
+    "easymde": "^2.20.0",
+    "esbuild": "^0.27.2"
+  }
+}

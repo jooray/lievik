@@ -1,0 +1,97 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <%= link_to channel_path(@channel), class: "text-gray-400 hover:text-gray-500" do %>
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        <% end %>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Generated Content</h1>
+      </div>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <%= @channel.name %> &middot; Content library
+      </p>
+    </div>
+  </div>
+
+  <% if @drafts.any? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Drafts</h2>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @drafts.each do |content| %>
+          <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <%= link_to edit_channel_content_path(@channel, content), class: "block" do %>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">
+                    <%= content.title.presence || "Untitled Draft" %>
+                  </p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <%= content.content.to_s.truncate(150) %>
+                  </p>
+                  <p class="text-xs text-gray-400 mt-2">
+                    <%= content.events.count %> source events &middot;
+                    Updated <%= time_ago_in_words(content.updated_at) %> ago
+                  </p>
+                </div>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  Draft
+                </span>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if @published.any? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+      <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Published Content</h2>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @published.each do |content| %>
+          <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <%= link_to channel_content_path(@channel, content), class: "block" do %>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">
+                    <%= content.title.presence || "Untitled" %>
+                  </p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <%= content.content.to_s.truncate(150) %>
+                  </p>
+                  <p class="text-xs text-gray-400 mt-2">
+                    <%= content.events.count %> source events &middot;
+                    Published <%= time_ago_in_words(content.published_at) %> ago
+                  </p>
+                </div>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  Published
+                </span>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if @channel_contents.empty? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No generated content yet.</p>
+        <p class="mt-1 text-xs text-gray-400">
+          Select events from the channel view and click "Use Content" to create content.
+        </p>
+      </div>
+    </div>
+  <% end %>
+</div>

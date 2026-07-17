@@ -1,0 +1,49 @@
+<%= form_with model: channel, class: "space-y-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6" do |form| %>
+  <% if channel.errors.any? %>
+    <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+      <div class="flex">
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+            <%= pluralize(channel.errors.count, "error") %> prevented this channel from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+            <ul class="list-disc pl-5 space-y-1">
+              <% channel.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+    <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm", placeholder: "e.g., Privacy Newsletter, Telegram Group" %>
+  </div>
+
+  <div>
+    <%= form.label :description, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+    <%= form.text_area :description, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm", placeholder: "Describe the purpose and audience of this channel..." %>
+  </div>
+
+  <div>
+    <%= form.label :language, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+    <%= form.select :language, [["English", "en"], ["Slovak", "sk"], ["Czech", "cs"], ["German", "de"], ["Spanish", "es"], ["French", "fr"]], {}, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Primary language for this channel's content</p>
+  </div>
+
+  <div data-controller="markdown-editor">
+    <%= form.label :prompt, "Relevance Criteria", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
+    <%= form.text_area :prompt, rows: 12, data: { markdown_editor_target: "textarea" }, class: "mt-1 block w-full" %>
+    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+      Define what makes content relevant for this channel. AI will use this to score events.
+    </p>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <%= link_to "Cancel", channels_path, class: "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500" %>
+    <%= form.submit channel.new_record? ? "Create Channel" : "Update Channel", class: "inline-flex justify-center rounded-md border border-transparent bg-purple-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer" %>
+  </div>
+<% end %>

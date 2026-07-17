@@ -1,0 +1,149 @@
+<div class="space-y-6" data-controller="content-builder" data-content-builder-stream-url-value="<%= generate_stream_channel_content_path(@channel, @channel_content) %>" data-content-builder-refine-url-value="<%= refine_stream_channel_content_path(@channel, @channel_content) %>" data-content-builder-auto-generate-value="<%= params[:auto_generate] == 'true' && @channel_content.content.blank? %>">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <%= link_to channel_contents_path(@channel), class: "text-gray-400 hover:text-gray-500" do %>
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        <% end %>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          <%= @channel_content.title.presence || "Edit Content" %>
+        </h1>
+      </div>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <%= @channel.name %> &middot;
+        <span class="<%= @channel_content.draft? ? 'text-yellow-600' : 'text-green-600' %>">
+          <%= @channel_content.status.capitalize %>
+        </span>
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <% if @channel_content.draft? %>
+        <%= button_to "Publish", publish_channel_content_path(@channel, @channel_content), method: :post, class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700", data: { confirm: "Publish this content? This will mark all source events as used." } %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="content-status">
+    <%= render partial: "content_status" %>
+  </div>
+
+  <!-- Editor section -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main editor -->
+    <div class="lg:col-span-2">
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Content Editor</h2>
+          <div class="flex gap-2">
+            <% if @channel_content.content.blank? %>
+              <button type="button" data-action="click->content-builder#startStreaming" class="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-md inline-flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Generate with AI
+              </button>
+            <% else %>
+              <button type="button" data-action="click->content-builder#startStreaming" class="px-3 py-1.5 text-sm bg-purple-600 hover:bg-purple-700 text-white rounded-md inline-flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Regenerate
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+        <div id="editor-container" class="p-4">
+          <%= render partial: "editor_container" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side panel -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- AI Edit Section -->
+      <% if @channel_content.content.present? %>
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+          <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">AI Edit</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tell the AI how to modify the content</p>
+          </div>
+          <div class="p-4">
+            <textarea
+                   id="refine-input"
+                   data-content-builder-target="refineInput"
+                   placeholder="E.g., 'Make it more concise', 'Add a call-to-action', 'Translate to Slovak'..."
+                   rows="3"
+                   class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm"></textarea>
+            <button type="button"
+                    id="refine-button"
+                    data-action="click->content-builder#startRefineStreaming"
+                    class="mt-3 w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
+              Apply AI Edit
+            </button>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Theme/Direction panel -->
+      <%= render "generation_prompt_panel" %>
+
+      <!-- Source events panel -->
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Source Events</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><%= @events.size %> events used</p>
+        </div>
+        <div class="p-4 space-y-3 max-h-[600px] overflow-y-auto">
+          <% @events.each do |event| %>
+            <div class="text-sm bg-gray-50 dark:bg-gray-900 rounded p-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-gray-900 dark:text-white"><%= event.source.name %></span>
+                <span class="text-xs text-gray-400"><%= event.published_at.strftime("%b %d") %></span>
+              </div>
+              <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap"><%= event.content.truncate(300) %></p>
+              <% if event.linked_contents.any? %>
+                <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <% event.linked_contents.each do |link| %>
+                    <a href="<%= link.url %>" target="_blank" class="text-xs text-blue-600 dark:text-blue-400 hover:underline block truncate">
+                      <%= link.url %>
+                    </a>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version History -->
+  <% if @channel_content.version_history.present? %>
+    <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+      <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white">Version History</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"><%= @channel_content.version_history.size %> previous version(s)</p>
+        </div>
+        <%= button_to "Restore Previous", revert_channel_content_path(@channel, @channel_content), method: :post, class: "px-3 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md", data: { turbo_submits_with: "Restoring...", confirm: "Restore the previous version? Current content will be saved to history." } %>
+      </div>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
+        <% @channel_content.version_history.reverse.each_with_index do |version, idx| %>
+          <details class="px-4 py-3">
+            <summary class="cursor-pointer text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              <span class="font-medium">Version <%= version["version"] %></span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                <%= Time.parse(version["saved_at"]).strftime("%b %d, %Y at %H:%M") %>
+              </span>
+            </summary>
+            <pre class="mt-2 p-3 bg-gray-50 dark:bg-gray-900 rounded text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap overflow-auto max-h-60"><%= version["content"] %></pre>
+          </details>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
