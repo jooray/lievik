@@ -35,7 +35,7 @@ gem "solid_cache"
 # an unrelated Ruby security bump.
 gem "solid_queue", "~> 1.2.4"
 # Pinned below 4.0: unreviewed major bump alongside the above, same reasoning.
-gem "solid_cable", "~> 3.0"
+gem "solid_cable", "~> 4.0"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
