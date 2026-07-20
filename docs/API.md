@@ -86,6 +86,20 @@ Notifications (requests without an `id`, e.g. `notifications/initialized`) get `
 | `-32603` | Internal error                                       |
 | `-32000` | Application error (e.g. record not found, job error) |
 
+Error messages are deliberately terse — a record that does not exist and a
+record belonging to someone else both return the same `"Record not found"`, so
+the endpoint cannot be used to probe for the existence of other users' data.
+Details go to the server log, not the client.
+
+## Limits
+
+| Limit                | Value        | Behaviour when exceeded                      |
+|----------------------|--------------|----------------------------------------------|
+| Requests per IP      | 120 / minute | `429` with `Retry-After: 60`                 |
+| JSON-RPC batch size  | 50 requests  | `-32600` "Batch too large"                   |
+
+Failed authentications are logged with the caller's IP.
+
 ## Protocol methods
 
 | Method                      | Purpose                                              |

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "net/http"
+require "openssl"
 require "uri"
 
 module Ai
@@ -65,7 +66,7 @@ module Ai
           stream: true
       ).to_json
 
-      buffer = ""
+      buffer = +""
       content_chars = 0
       finish_reason = nil
       last_event = nil
@@ -73,11 +74,19 @@ module Ai
       http.request(request) do |response|
         unless response.code == "200"
           error_body = response.body rescue "Unknown error"
-          raise ApiError, "API request failed (#{response.code}): #{error_body.to_s.truncate(2000)}"
+          raise ApiError, "API request failed (#{response.code}): #{redact_error_body(error_body)}"
         end
 
         response.read_body do |chunk|
-          buffer += chunk
+          buffer << chunk
+
+          # A server that never sends an event separator would otherwise grow the
+          # buffer without bound; drop what can no longer be a valid SSE event.
+          if buffer.bytesize > MAX_SSE_BUFFER_BYTES
+            Rails.logger.warn("AI streaming buffer exceeded #{MAX_SSE_BUFFER_BYTES} bytes (model=#{@model}); discarding partial event")
+            buffer = +""
+            next
+          end
 
           # SSE events are separated by blank lines (\n\n)
           # This correctly handles newlines within JSON content
@@ -118,12 +127,37 @@ module Ai
       if content_chars.zero?
         Rails.logger.error(
           "AI empty streaming response (model=#{@model}, finish_reason=#{finish_reason.inspect}): " \
-          "last_event=#{last_event.to_s.truncate(2000)}"
+          "last_event=#{redact_error_body(last_event)}"
         )
       end
+    rescue *NETWORK_ERRORS => e
+      # Callers only handle ApiError; a raw Errno/Timeout would bypass them.
+      raise ApiError, "Connection failed: #{e.class} - #{e.message}"
     end
 
     private
+
+    # SSE events are tiny; anything past this is a server that never terminated an
+    # event, so we drop the partial instead of growing the buffer forever.
+    MAX_SSE_BUFFER_BYTES = 1_000_000
+
+    NETWORK_ERRORS = [
+      Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EPIPE,
+      SocketError, IOError, EOFError,
+      Net::OpenTimeout, Net::ReadTimeout, Net::HTTPBadResponse, Net::ProtocolError,
+      OpenSSL::SSL::SSLError
+    ].freeze
+
+    # Error bodies can echo back the submitted prompt; keep logs short and drop
+    # anything that looks like the request payload we sent.
+    ERROR_BODY_LIMIT = 500
+
+    def redact_error_body(body)
+      text = body.to_s.gsub(/\s+/, " ").strip
+      return "(empty)" if text.empty?
+      text = text.gsub(/"(messages|prompt|input)"\s*:\s*(\[.*?\]|".*?")/m, '"\1":"[redacted]"')
+      text.truncate(ERROR_BODY_LIMIT)
+    end
 
     def ensure_configured!
       raise ConfigurationError, "AI endpoint is not configured" if @endpoint.blank?
@@ -198,12 +232,7 @@ module Ai
       end
 
       unless response.status == 200
-        error_body = begin
-          JSON.parse(response.body.to_s)
-        rescue
-          { "error" => response.body.to_s }
-        end
-        raise ApiError, "API request failed (#{response.status}): #{error_body}"
+        raise ApiError, "API request failed (#{response.status}): #{redact_error_body(response.body)}"
       end
 
       data = JSON.parse(response.body.to_s)
@@ -213,7 +242,7 @@ module Ai
         finish_reason = data.dig("choices", 0, "finish_reason")
         Rails.logger.error(
           "AI empty response (model=#{@model}, finish_reason=#{finish_reason.inspect}): " \
-          "#{response.body.to_s.truncate(2000)}"
+          "#{redact_error_body(response.body)}"
         )
         raise ApiError, "No content in response (finish_reason=#{finish_reason})"
       end

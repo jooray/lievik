@@ -19,14 +19,16 @@ class SessionsController < ApplicationController
     admission_token = SecureRandom.hex(16)
     admitted = Rails.cache.write("nostr-auth-session-admission", admission_token, expires_in: 10.seconds, unless_exist: true)
     unless admitted
-      render plain: "Authentication is temporarily at capacity. Please try again shortly.", status: :service_unavailable
+      render_unavailable(:service_unavailable, "Login is busy right now",
+                        "Too many people are signing in at once. Give it a few seconds and try again.")
       return
     end
 
     begin
       NostrAuthSession.cleanup_expired!
       if NostrAuthSession.active.where(authenticated_pubkey: nil).count >= MAX_ACTIVE_AUTH_SESSIONS
-        render plain: "Authentication is temporarily at capacity. Please try again shortly.", status: :service_unavailable
+        render_unavailable(:service_unavailable, "Login is busy right now",
+                          "Too many people are signing in at once. Give it a few seconds and try again.")
         return
       end
 
@@ -52,7 +54,7 @@ class SessionsController < ApplicationController
     session_id = session[:nostr_connect_session_id]
 
     if session_id.blank?
-      render json: { authenticated: false, error: "No pending session" }
+      render json: { authenticated: false, expired: true, error: "No pending session" }
       return
     end
 
@@ -64,25 +66,26 @@ class SessionsController < ApplicationController
       return
     end
 
+    # The approval window is short (SESSION_EXPIRY). Once it lapses the record
+    # leaves the `active` scope and no amount of further polling can ever
+    # succeed — tell the client so it can offer a fresh QR instead of spinning.
+    unless NostrAuthSession.active.exists?(session_id: session_id)
+      render json: { authenticated: false, expired: true }
+      return
+    end
+
     render json: { authenticated: false }
   end
 
   def refresh_profile
+    # Querying every relay in sequence takes seconds, so it happens in a job
+    # instead of holding the request (and the user) hostage.
     user = current_user
-    if user
-      profile = Nostr::ProfileFetcher.new.fetch(user.pubkey_hex)
-      if profile
-        user.update!(
-          display_name: profile[:display_name],
-          username: profile[:username],
-          about: profile[:about],
-          picture_url: profile[:picture]
-        )
-        notice = "Profile updated from relays!"
-      else
-        notice = "Could not fetch profile from relays."
-      end
+    notice = if user
+      RefreshUserProfileJob.perform_later(user.id)
+      "Refreshing your profile from the relays in the background — reload in a moment to see it."
     end
+
     redirect_back fallback_location: dashboard_path, notice: notice
   end
 
@@ -116,7 +119,14 @@ class SessionsController < ApplicationController
 
   def rate_limit_exceeded
     response.set_header("Retry-After", "60")
-    render plain: "Too many authentication attempts. Please try again shortly.", status: :too_many_requests
+    render_unavailable(:too_many_requests, "Slow down a moment",
+                      "You have requested a few login codes in quick succession. Wait about a minute, then try again.")
+  end
+
+  def render_unavailable(status, title, message)
+    @unavailable_title = title
+    @unavailable_message = message
+    render "sessions/unavailable", status: status
   end
 
   def pending_nip46_session

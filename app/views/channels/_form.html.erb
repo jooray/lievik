@@ -1,3 +1,7 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "easymde", "data-turbo-track": "reload" %>
+<% end %>
+
 <%= form_with model: channel, class: "space-y-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6" do |form| %>
   <% if channel.errors.any? %>
     <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-4">

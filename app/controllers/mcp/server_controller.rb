@@ -13,6 +13,10 @@ module Mcp
     JSONRPC_INTERNAL_ERROR = -32603
     APP_ERROR = -32000
 
+    # A JSON-RPC batch is processed in one request, so an unbounded array is a
+    # cheap way to pin a Puma thread for a very long time.
+    MAX_BATCH_SIZE = 50
+
     TOOL_REGISTRY = {
       "list_channels" => Mcp::Tools::ListChannels,
       "list_events" => Mcp::Tools::ListEvents,
@@ -31,6 +35,11 @@ module Mcp
       return if performed?
 
       if payload.is_a?(Array)
+        if payload.size > MAX_BATCH_SIZE
+          render json: jsonrpc_error(nil, JSONRPC_INVALID_REQUEST, "Batch too large (max #{MAX_BATCH_SIZE} requests)")
+          return
+        end
+
         responses = payload.map { |req| handle_request(req) }.compact
         render json: responses
       else
@@ -81,9 +90,12 @@ module Mcp
     rescue Mcp::Tools::Base::AppError => e
       jsonrpc_error(id, APP_ERROR, e.message)
     rescue ActiveRecord::RecordNotFound => e
-      jsonrpc_error(id, APP_ERROR, e.message)
+      # AR's default message leaks the model, primary key and SQL-ish detail —
+      # the client only needs to know the record isn't theirs / doesn't exist.
+      Rails.logger.info("[MCP] not found: #{e.message}")
+      jsonrpc_error(id, APP_ERROR, "Record not found")
     rescue => e
-      Rails.logger.error("[MCP] #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+      Rails.logger.error("[MCP] #{e.class}: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
       jsonrpc_error(id, JSONRPC_INTERNAL_ERROR, "Internal error")
     end
 

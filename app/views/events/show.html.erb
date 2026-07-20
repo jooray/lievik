@@ -16,11 +16,11 @@
             <%= @event.event_type.capitalize %>
           </span>
           <span class="text-sm text-gray-500 dark:text-gray-400">
-            From <%= @event.source.name || @event.source.identifier.truncate(30) %>
+            From <%= source_label(@event.source) %>
           </span>
         </div>
         <span class="text-sm text-gray-500 dark:text-gray-400">
-          <%= @event.published_at.strftime("%B %d, %Y at %H:%M") %>
+          <%= format_datetime(@event.published_at) %>
         </span>
       </div>
     </div>
@@ -36,9 +36,10 @@
         <p class="text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(@event.content) %></p>
       </div>
 
-      <% if @event.metadata["link"].present? %>
+      <% original_link = safe_external_url(@event.metadata["link"]) %>
+      <% if original_link.present? %>
         <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <a href="<%= @event.metadata["link"] %>" target="_blank" rel="noopener" class="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:underline">
+          <a href="<%= original_link %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:underline">
             <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
             </svg>
@@ -127,8 +128,18 @@
       <summary class="px-6 py-4 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
         Raw Data
       </summary>
+      <%# Long-form events carry tens of KB of raw JSON. Even inside <details>
+          it is all in the HTML the browser has to parse, so cap it. %>
+      <% raw_json = JSON.pretty_generate(@event.raw_data || {}) %>
+      <% raw_limit = 4_000 %>
       <div class="px-6 pb-4">
-        <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><%= JSON.pretty_generate(@event.raw_data) %></pre>
+        <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto max-h-96"><%= raw_json.truncate(raw_limit, omission: "\n… truncated …") %></pre>
+        <% if raw_json.length > raw_limit %>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Showing the first <%= number_with_delimiter(raw_limit) %> of
+            <%= number_with_delimiter(raw_json.length) %> characters.
+          </p>
+        <% end %>
       </div>
     </details>
   </div>

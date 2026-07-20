@@ -25,15 +25,19 @@ class ChannelContent < ApplicationRecord
   def add_version(old_content)
     return if old_content.blank?
 
-    new_history = version_history || []
-    new_history << {
-      content: old_content,
-      saved_at: Time.current.iso8601,
-      version: new_history.size + 1
-    }
-    # Keep only last 10 versions
-    new_history = new_history.last(10)
-    update_column(:version_history, new_history)
+    # Read-modify-write on a JSON column: without the row lock two concurrent
+    # saves/reverts both start from the same history and one version is lost.
+    with_lock do
+      new_history = version_history || []
+      new_history << {
+        content: old_content,
+        saved_at: Time.current.iso8601,
+        version: new_history.size + 1
+      }
+      # Keep only last 10 versions
+      new_history = new_history.last(10)
+      update_column(:version_history, new_history)
+    end
   end
 
   def previous_version
@@ -43,20 +47,25 @@ class ChannelContent < ApplicationRecord
   end
 
   def revert_to_previous!
-    return false if previous_version.nil?
+    # The whole pop-then-push must be atomic, otherwise a concurrent save can
+    # interleave and drop a version.
+    with_lock do
+      previous = previous_version
+      next false if previous.nil?
 
-    old_content = content
-    new_content = previous_version["content"]
+      old_content = content
+      new_content = previous["content"]
 
-    # Remove the last version from history
-    new_history = version_history[0..-2]
+      # Remove the last version from history
+      new_history = version_history[0..-2]
 
-    update!(content: new_content, version_history: new_history)
+      update!(content: new_content, version_history: new_history)
 
-    # Add current content as a new version so user can undo the revert
-    add_version(old_content)
+      # Add current content as a new version so user can undo the revert
+      add_version(old_content)
 
-    true
+      true
+    end
   end
 
   private

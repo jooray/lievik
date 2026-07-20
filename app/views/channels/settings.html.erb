@@ -24,7 +24,9 @@
             Only show events with a relevance score at or above this threshold.
           </p>
 
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4"
+               data-controller="range-output"
+               data-range-output-suffix-value="%">
             <input
               type="range"
               id="threshold"
@@ -34,9 +36,12 @@
               step="5"
               value="<%= @channel.settings['relevance_threshold'] || 50 %>"
               class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-              oninput="document.getElementById('threshold-value').textContent = this.value + '%'"
+              data-range-output-target="input"
+              data-action="input->range-output#update"
             >
-            <span id="threshold-value" class="text-lg font-medium text-gray-900 dark:text-white min-w-[4rem] text-right">
+            <span id="threshold-value"
+                  data-range-output-target="output"
+                  class="text-lg font-medium text-gray-900 dark:text-white min-w-[4rem] text-right">
               <%= @channel.settings['relevance_threshold'] || 50 %>%
             </span>
           </div>
@@ -47,24 +52,23 @@
           </div>
         </div>
 
-        <!-- Channel Type (Future Feature) -->
+        <%# Channel Type is not a real setting yet: it was never permitted in
+            strong params, so the radios could not save anything, and the
+            `checked="false"` attribute rendered as checked regardless. Shown as
+            read-only status until the feature actually exists. %>
         <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <h3 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Channel Type
-          </label>
+          </h3>
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
             How you interact with this channel's content.
           </p>
 
           <div class="space-y-2">
-            <label class="flex items-start p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-              <input
-                type="radio"
-                name="channel[settings][channel_type]"
-                value="pull"
-                checked="<%= (@channel.settings['channel_type'] || 'pull') == 'pull' %>"
-                class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-              >
+            <div class="flex items-start p-3 border border-gray-300 dark:border-gray-600 rounded-lg">
+              <span class="mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                Current
+              </span>
               <div class="ml-3">
                 <span class="block text-sm font-medium text-gray-900 dark:text-white">
                   Pull (Manual)
@@ -73,25 +77,21 @@
                   You manually check and select content when needed
                 </span>
               </div>
-            </label>
+            </div>
 
-            <label class="flex items-start p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-not-allowed opacity-50">
-              <input
-                type="radio"
-                name="channel[settings][channel_type]"
-                value="proactive"
-                disabled
-                class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-              >
+            <div class="flex items-start p-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg opacity-60">
+              <span class="mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                Soon
+              </span>
               <div class="ml-3">
                 <span class="block text-sm font-medium text-gray-900 dark:text-white">
-                  Proactive (Coming Soon)
+                  Proactive
                 </span>
                 <span class="block text-xs text-gray-500 dark:text-gray-400">
                   Receive reminders when relevant content is available
                 </span>
               </div>
-            </label>
+            </div>
           </div>
         </div>
 
@@ -206,7 +206,7 @@
   </div>
 </div>
 
-<style>
+<style nonce="<%= content_security_policy_nonce %>">
   /* Custom slider styling */
   input[type="range"].slider::-webkit-slider-thumb {
     -webkit-appearance: none;

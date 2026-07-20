@@ -76,7 +76,7 @@ module Rag
       cited_ids = parse_and_verify_citations(response, all_valid_ids)
 
       # 7. Load cited events for display
-      cited_events = Event.where(id: cited_ids).includes(source: :user)
+      cited_events = user_events.where(id: cited_ids).includes(source: :user)
 
       {
         success: true,
@@ -165,7 +165,9 @@ module Rag
       return question unless @query_rewrite_client
 
       # Build context from recent history (last 2 exchanges)
-      history_context = conversation_history.last(4).map do |msg|
+      history_context = Array(conversation_history).last(4).filter_map do |msg|
+        next unless msg.respond_to?(:key?)
+
         role = msg["role"] || msg[:role]
         content = msg["content"] || msg[:content]
         "#{role}: #{content.to_s.truncate(200)}"
@@ -184,8 +186,14 @@ module Rag
       question # Fall back to original
     end
 
+    # Every event this service is allowed to read or cite. The invariant is that
+    # a user only ever sees their own data, so nothing here may widen past it.
+    def user_events
+      @user.events
+    end
+
     def build_context(event_ids, max_chars:)
-      events = Event.where(id: event_ids).includes(:source)
+      events = user_events.where(id: event_ids).includes(:source)
       events.map do |event|
         content = event.content.to_s.truncate(max_chars)
         source_name = event.source&.name || "Unknown"
@@ -197,7 +205,9 @@ module Rag
       messages = [{ role: "system", content: SYSTEM_PROMPT }]
 
       # Add conversation history (previous Q&A pairs)
-      history.each do |msg|
+      Array(history).each do |msg|
+        next unless msg.respond_to?(:key?)
+
         role = msg["role"] || msg[:role]
         content = msg["content"] || msg[:content]
         messages << { role: role, content: content } if role && content
@@ -218,17 +228,23 @@ module Rag
 
     def extract_history_event_ids(conversation_history)
       history_ids = []
-      conversation_history.each do |msg|
+      Array(conversation_history).each do |msg|
+        next unless msg.respond_to?(:key?)
+
         role = msg["role"] || msg[:role]
         content = msg["content"] || msg[:content]
         next unless role == "assistant" && content
 
         # Extract [EVENT:id] references from previous assistant messages
-        content.scan(/\[EVENT:(\d+)\]/).flatten.map(&:to_i).each do |id|
+        content.to_s.scan(/\[EVENT:(\d+)\]/).flatten.map(&:to_i).each do |id|
           history_ids << id
         end
       end
-      history_ids.uniq
+      return [] if history_ids.empty?
+
+      # The history comes from the client, so a crafted request could claim any
+      # id. Only ids that really belong to this user are treatable as valid.
+      user_events.where(id: history_ids.uniq).pluck(:id)
     end
 
     def clean_response(response)

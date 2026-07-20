@@ -21,7 +21,7 @@
     <%# Apply the per-device theme before first paint to avoid a flash of the
         wrong mode. Uses the same "theme" localStorage key as the app
         (see app/javascript/controllers/theme_controller.js). %>
-    <script>
+    <script nonce="<%= content_security_policy_nonce %>">
       (function () {
         try {
           var t = localStorage.getItem("theme") || "system";
@@ -36,7 +36,7 @@
       })();
     </script>
 
-    <style>
+    <style nonce="<%= content_security_policy_nonce %>">
       :root {
         --canvas: #f8f7f4;
         --canvas-deep: #efede8;
@@ -801,6 +801,7 @@
             </svg>
           </a>
           <button
+            id="theme-switch"
             class="theme-toggle"
             type="button"
             aria-label="Switch color theme"
@@ -1039,7 +1040,7 @@
       </div>
     </footer>
 
-    <script>
+    <script nonce="<%= content_security_policy_nonce %>">
       (function () {
         var root = document.documentElement;
 
@@ -1073,15 +1074,18 @@
 
         // The landing toggle flips between explicit light/dark and writes to the
         // same "theme" key the app uses, so the choice carries into the app.
-        document
-          .querySelector(".theme-toggle")
-          .addEventListener("click", function () {
+        // NOTE: `.theme-toggle` is shared with the GitHub link next to it, so
+        // this must target the button by id.
+        var themeSwitch = document.getElementById("theme-switch");
+        if (themeSwitch) {
+          themeSwitch.addEventListener("click", function () {
             var next = isDark() ? "light" : "dark";
             try {
               localStorage.setItem("theme", next);
             } catch (e) {}
             apply();
           });
+        }
       })();
     </script>
   </body>

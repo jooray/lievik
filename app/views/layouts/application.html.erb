@@ -11,17 +11,23 @@
     <%= csp_meta_tag %>
 
     <%# Apply the per-device theme before first paint to avoid a flash of the
-        wrong mode. Mirrors app/javascript/controllers/theme_controller.js. %>
-    <script>
+        wrong mode. Mirrors app/javascript/controllers/theme_controller.js.
+        `data-theme-mode` also drives which toggle icon is painted (see the
+        .theme-icon rules), so the icon is right before Stimulus connects. %>
+    <%# nonce: true — the app's CSP is `script-src 'self'`, so a bare inline
+        <script> would be blocked and the theme would flash on every load. %>
+    <%= javascript_tag nonce: true do %>
       (function() {
         try {
-          var t = localStorage.getItem("theme") || "system";
+          var t = localStorage.getItem("theme");
+          if (t !== "light" && t !== "dark" && t !== "system") { t = "system"; }
           var dark = t === "dark" ||
             (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
           document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.setAttribute("data-theme-mode", t);
         } catch (e) { /* private mode / no storage */ }
       })();
-    </script>
+    <% end %>
 
     <%= yield :head %>
 
@@ -29,32 +35,33 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Installable PWA (manifest-only — no service worker). %>
+    <%# Installable PWA. The service worker caches only digest-stamped assets;
+        app freshness is handled by the version poller on <body>. %>
     <link rel="manifest" href="/manifest">
     <meta name="theme-color" content="#6d4bc3">
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "easymde", "data-turbo-track": "reload" %>
+<%# The EasyMDE stylesheet is render-blocking and only needed on the ~4 pages
+    with a markdown editor, so those pages pull it in via content_for :head. %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+        data-controller="app-version"
+        data-app-version-current-value="<%= Lievik::BUILD_VERSION %>"
+        data-app-version-url-value="<%= app_version_path %>">
     <% if user_signed_in? %>
       <%= render "layouts/navigation" %>
     <% end %>
 
     <main class="<%= user_signed_in? ? 'lg:pl-64' : '' %>">
       <div class="<%= user_signed_in? ? 'px-4 py-8 sm:px-6 lg:px-8' : '' %>">
-        <% if flash[:notice] %>
-          <div class="mb-4 rounded-md bg-green-50 dark:bg-green-900 p-4">
-            <p class="text-sm text-green-700 dark:text-green-200"><%= flash[:notice] %></p>
-          </div>
+        <% if flash[:notice].present? %>
+          <%= render "layouts/flash", kind: :notice, message: flash[:notice] %>
         <% end %>
 
-        <% if flash[:alert] %>
-          <div class="mb-4 rounded-md bg-red-50 dark:bg-red-900 p-4">
-            <p class="text-sm text-red-700 dark:text-red-200"><%= flash[:alert] %></p>
-          </div>
+        <% if flash[:alert].present? %>
+          <%= render "layouts/flash", kind: :alert, message: flash[:alert] %>
         <% end %>
 
         <%= yield %>

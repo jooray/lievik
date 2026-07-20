@@ -14,10 +14,18 @@ class ActivityLog < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
   scope :active, -> { where(status: [:pending, :running]) }
-  scope :stale, -> { active.where("updated_at < ?", 15.minutes.ago) }
+  # Must exceed the worst-case retry chain of a job that is slow but alive
+  # (3 attempts × a 300s AI operation timeout, plus backoff), or a healthy job
+  # gets declared failed out from under itself mid-flight.
+  STALE_AFTER = 30.minutes
+
+  scope :stale, -> { active.where(updated_at: ...STALE_AFTER.ago) }
 
   after_create_commit :broadcast_job_created
   after_update_commit :broadcast_job_updated
+  # Ingestion destroys the log when nothing new was imported. Without this the
+  # "in progress" card stays on screen until the next full page load.
+  after_destroy_commit :broadcast_job_removed
 
   def self.mark_stale_as_failed!
     stale.find_each do |activity|
@@ -108,5 +116,9 @@ class ActivityLog < ApplicationRecord
     else
       broadcast_remove_to "activity_logs_#{user_id}"
     end
+  end
+
+  def broadcast_job_removed
+    broadcast_remove_to "activity_logs_#{user_id}"
   end
 end

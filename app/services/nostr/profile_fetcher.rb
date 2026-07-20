@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require "json"
-require "socket"
-require "openssl"
-require "base64"
 require "securerandom"
 
 module Nostr
   class ProfileFetcher
     TIMEOUT = 5 # Reduced timeout for responsiveness
+    POLL_INTERVAL = 0.5
 
     def initialize
       @config = Rails.application.config_for(:lievik)
@@ -63,80 +61,70 @@ module Nostr
     private
 
     def fetch_from_relay(relay_url, pubkey_hex)
-      uri = URI.parse(relay_url)
-      socket = create_websocket(uri)
-      return nil unless socket
-
-      sub_id = SecureRandom.hex(4)
-      req = ["REQ", sub_id, { "kinds" => [0], "authors" => [pubkey_hex], "limit" => 1 }]
-      socket.write(frame_text(req.to_json))
-
-      deadline = Time.now + TIMEOUT
-      profile_event = nil
-
-      while Time.now < deadline
-        ready = WebsocketConnection.readable_now?(socket) || IO.select([socket], nil, nil, 0.5)
-        next unless ready
-
-        data = read_websocket_frame(socket)
-        break unless data
-
-        begin
-          parsed = JSON.parse(data)
-          if parsed[0] == "EVENT" && parsed[2] && parsed[2]["kind"] == 0
-            profile_event = parsed[2]
-            break
-          elsif parsed[0] == "EOSE"
-            break
-          end
-        rescue JSON::ParserError
-          next
-        end
+      query_relay(relay_url, { "kinds" => [ 0 ], "authors" => [ pubkey_hex ], "limit" => 1 }) do |event|
+        event["kind"] == 0
       end
-
-      # Cleanup
-      socket.write(frame_text(["CLOSE", sub_id].to_json)) rescue nil
-      socket.close rescue nil
-
-      profile_event
     end
 
     def fetch_event_from_relay(relay_url, event_id_hex)
+      query_relay(relay_url, { "ids" => [ event_id_hex ], "limit" => 1 })
+    end
+
+    # One relay query returning the first matching EVENT (or nil). Everything —
+    # connect, TLS handshake, upgrade, each frame read, each write — is bounded
+    # by a single deadline, and TLS certificates are verified by
+    # WebsocketConnection.
+    def query_relay(relay_url, filter)
+      deadline = Time.current + TIMEOUT
       uri = URI.parse(relay_url)
-      socket = create_websocket(uri)
+      socket = WebsocketConnection.open(uri, deadline: deadline)
       return nil unless socket
 
       sub_id = SecureRandom.hex(4)
-      req = ["REQ", sub_id, { "ids" => [event_id_hex], "limit" => 1 }]
-      socket.write(frame_text(req.to_json))
+      result = nil
 
-      deadline = Time.now + TIMEOUT
-      result_event = nil
+      begin
+        WebsocketConnection.send_text(socket, [ "REQ", sub_id, filter ].to_json, deadline: deadline)
 
-      while Time.now < deadline
-        ready = WebsocketConnection.readable_now?(socket) || IO.select([socket], nil, nil, 0.5)
-        next unless ready
+        while Time.current < deadline
+          ready = WebsocketConnection.readable_now?(socket) || IO.select([ socket ], nil, nil, POLL_INTERVAL)
+          next unless ready
 
-        data = read_websocket_frame(socket)
-        break unless data
+          data = read_frame(socket, deadline)
+          break unless data
 
-        begin
-          parsed = JSON.parse(data)
-          if parsed[0] == "EVENT" && parsed[2]
-            result_event = parsed[2]
+          begin
+            parsed = JSON.parse(data)
+          rescue JSON::ParserError
+            next
+          end
+          next unless parsed.is_a?(Array)
+
+          if parsed[0] == "EVENT" && parsed[2].is_a?(Hash)
+            event = parsed[2]
+            next if block_given? && !yield(event)
+            result = event
             break
-          elsif parsed[0] == "EOSE"
+          elsif parsed[0] == "EOSE" || parsed[0] == "CLOSED"
             break
           end
-        rescue JSON::ParserError
-          next
         end
+      ensure
+        close_socket(socket, sub_id)
       end
 
-      socket.write(frame_text(["CLOSE", sub_id].to_json)) rescue nil
-      socket.close rescue nil
+      result
+    end
 
-      result_event
+    def read_frame(socket, deadline)
+      WebsocketFrameReader.read(socket, deadline: deadline)
+    rescue WebsocketFrameReader::FrameError
+      nil
+    end
+
+    def close_socket(socket, sub_id)
+      WebsocketConnection.send_text(socket, [ "CLOSE", sub_id ].to_json, deadline: 1.second.from_now) rescue nil
+      socket.close rescue nil
     end
 
     def parse_profile(event)
@@ -151,79 +139,6 @@ module Nostr
         picture: profile_data["picture"]
       }
     rescue JSON::ParserError
-      nil
-    end
-
-    # Minimal WebSocket frame implementation (copied from Nip46Client logic)
-    def create_websocket(uri)
-      host = uri.host
-      port = uri.port || (uri.scheme == "wss" ? 443 : 80)
-
-      tcp_socket = TCPSocket.new(host, port)
-      tcp_socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
-
-      socket = if uri.scheme == "wss"
-        ctx = OpenSSL::SSL::SSLContext.new
-        ssl_socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ctx)
-        ssl_socket.hostname = host
-        ssl_socket.connect
-        ssl_socket
-      else
-        tcp_socket
-      end
-
-      key = Base64.strict_encode64(SecureRandom.random_bytes(16))
-      path = uri.path.empty? ? "/" : uri.path
-      request = ["GET #{path} HTTP/1.1", "Host: #{host}", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Key: #{key}", "Sec-WebSocket-Version: 13", "", ""].join("\r\n")
-      socket.write(request)
-
-      response = ""
-      while (line = socket.gets)
-        response += line
-        break if line == "\r\n"
-      end
-
-      return nil unless response.include?("101")
-      socket
-    end
-
-    def frame_text(data)
-      bytes = data.bytes
-      frame = [0x81]
-      if bytes.length < 126
-        frame << (0x80 | bytes.length)
-      elsif bytes.length < 65536
-        frame << (0x80 | 126) << (bytes.length >> 8) << (bytes.length & 0xFF)
-      else
-        frame << (0x80 | 127)
-        8.times { |i| frame << ((bytes.length >> (56 - i * 8)) & 0xFF) }
-      end
-      mask = 4.times.map { rand(256) }
-      frame.concat(mask)
-      bytes.each_with_index { |b, i| frame << (b ^ mask[i % 4]) }
-      frame.pack("C*")
-    end
-
-    def read_websocket_frame(socket)
-      first_byte = socket.read(1)&.unpack1("C")
-      return nil unless first_byte
-      second_byte = socket.read(1)&.unpack1("C")
-      return nil unless second_byte
-      masked = (second_byte & 0x80) != 0
-      length = second_byte & 0x7F
-      if length == 126
-        length = socket.read(2).unpack1("n")
-      elsif length == 127
-        length = socket.read(8).unpack1("Q>")
-      end
-      mask = masked ? socket.read(4).bytes : nil
-      payload = socket.read(length)
-      return nil unless payload
-      if masked
-        payload = payload.bytes.each_with_index.map { |b, i| b ^ mask[i % 4] }.pack("C*")
-      end
-      (+payload).force_encoding("UTF-8")
-    rescue StandardError
       nil
     end
   end

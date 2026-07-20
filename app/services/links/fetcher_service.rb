@@ -77,19 +77,21 @@ module Links
     private
 
     def fetch_url(url)
-      http = HTTPX.plugin(:follow_redirects)
-                  .with(timeout: { operation_timeout: TIMEOUT })
-                  .with(headers: { "user-agent" => USER_AGENT })
-
-      response = http.get(url)
-      return nil unless response.status == 200
-
-      # Check content length
-      if response.body.to_s.bytesize > MAX_CONTENT_LENGTH
-        return nil
-      end
+      # EgressGuard applies the SSRF filter to every redirect hop and enforces
+      # MAX_CONTENT_LENGTH while streaming, so a huge body can't be buffered.
+      response = Security::EgressGuard.get(
+        url,
+        headers: { "user-agent" => USER_AGENT },
+        timeout: TIMEOUT,
+        max_bytes: MAX_CONTENT_LENGTH
+      )
+      return nil unless response.success?
+      return nil if response.truncated
 
       response
+    rescue Security::EgressGuard::BlockedError => e
+      Rails.logger.info("Link fetch blocked: #{e.message}")
+      nil
     rescue StandardError
       nil
     end

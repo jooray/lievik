@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_20_155416) do
   create_table "activity_logs", force: :cascade do |t|
     t.string "activity_type", null: false
     t.datetime "completed_at"
@@ -75,6 +75,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.datetime "used_at"
     t.index ["channel_id", "event_id"], name: "index_channel_events_on_channel_id_and_event_id", unique: true
     t.index ["channel_id", "relevance_score"], name: "index_channel_events_on_channel_id_and_relevance_score"
+    t.index ["channel_id", "used", "relevance_score"], name: "index_channel_events_on_channel_used_relevance"
     t.index ["channel_id", "used"], name: "index_channel_events_on_channel_id_and_used"
     t.index ["channel_id"], name: "index_channel_events_on_channel_id"
     t.index ["event_id"], name: "index_channel_events_on_event_id"
@@ -123,6 +124,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
   create_table "events", force: :cascade do |t|
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.string "d_tag"
     t.datetime "embedded_at"
     t.binary "embedding"
     t.integer "event_type", default: 0, null: false
@@ -132,8 +134,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.json "raw_data", default: {}
     t.integer "source_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_events_on_external_id"
     t.index ["published_at"], name: "index_events_on_published_at"
+    t.index ["source_id", "d_tag"], name: "index_events_on_source_id_and_d_tag"
     t.index ["source_id", "external_id"], name: "index_events_on_source_id_and_external_id", unique: true
+    t.index ["source_id", "published_at"], name: "index_events_on_source_id_and_published_at"
     t.index ["source_id"], name: "index_events_on_source_id"
   end
 
@@ -180,6 +185,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_000000) do
     t.integer "source_type", default: 0, null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["identifier"], name: "index_sources_on_identifier"
     t.index ["user_id", "source_type", "identifier"], name: "index_sources_on_user_id_and_source_type_and_identifier", unique: true
     t.index ["user_id"], name: "index_sources_on_user_id"
   end

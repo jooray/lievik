@@ -29,8 +29,13 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
+# Pinned below 1.3: 1.3/1.4 broke config/recurring.yml parsing in production
+# (RecurringTask.wrap raised NoMethodError: undefined method 'second' for
+# an instance of String) - revisit as its own migration, not bundled with
+# an unrelated Ruby security bump.
+gem "solid_queue", "~> 1.2.4"
+# Pinned below 4.0: unreviewed major bump alongside the above, same reasoning.
+gem "solid_cable", "~> 3.0"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -49,9 +54,6 @@ gem "view_component"
 
 # Nostr protocol support
 gem "nostr", "~> 0.6"
-
-# WebSocket client for Nostr relay communication
-gem "faye-websocket"
 
 # Bech32 encoding for Nostr addresses (npub, nsec, etc.)
 gem "bech32"

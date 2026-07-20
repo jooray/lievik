@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
 
 export default class extends Controller {
   static targets = ["container"]
@@ -19,8 +20,10 @@ export default class extends Controller {
       this.element.classList.remove("hidden")
       this.hadJobs = true
     } else if (this.hadJobs) {
-      // All jobs finished — reload to refresh content feed
-      window.location.reload()
+      // All jobs finished — refresh the content feed. A Turbo visit re-renders
+      // in place and keeps scroll position, unlike window.location.reload().
+      this.hadJobs = false
+      Turbo.visit(window.location.href, { action: "replace" })
     }
   }
 }

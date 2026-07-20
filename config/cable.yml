@@ -18,5 +18,8 @@ production:
   connects_to:
     database:
       writing: cable
-  polling_interval: 0.1.seconds
+  # Every open tab polls the cable DB at this interval. 100ms means 10 queries
+  # per second per tab against MariaDB; the only cable traffic here is job
+  # progress cards, where a second of latency is imperceptible.
+  polling_interval: 1.second
   message_retention: 1.day

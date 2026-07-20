@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
 require "json"
-require "socket"
-require "openssl"
-require "base64"
 require "securerandom"
 
 module Nostr
   class EventFetcher
     TIMEOUT = 10
+    POLL_INTERVAL = 0.5
 
     def initialize
       @config = Rails.application.config_for(:lievik)
@@ -83,124 +81,73 @@ module Nostr
         events_by_id[event["id"]] = event
       end
 
-      events_by_id.values.sort_by { |e| -e["created_at"] }
+      # created_at is relay-supplied and may be missing or non-numeric; to_i keeps
+      # the sort from raising on a single malformed event.
+      events_by_id.values.sort_by { |e| -e["created_at"].to_i }
     end
 
     private
 
+    # One relay query, entirely bounded by a single deadline: connect, TLS
+    # handshake, upgrade, every frame read and every write. TLS certificates are
+    # verified by WebsocketConnection.
     def fetch_from_relay(relay_url, filter)
+      deadline = Time.current + TIMEOUT
       uri = URI.parse(relay_url)
-      socket = create_websocket(uri)
+      socket = WebsocketConnection.open(uri, deadline: deadline)
       return [] unless socket
 
       sub_id = SecureRandom.hex(4)
-      req = ["REQ", sub_id, filter]
-      socket.write(frame_text(req.to_json))
-
       events = []
-      deadline = Time.now + TIMEOUT
 
-      while Time.now < deadline
-        ready = WebsocketConnection.readable_now?(socket) || IO.select([socket], nil, nil, 0.5)
-        next unless ready
+      begin
+        WebsocketConnection.send_text(socket, [ "REQ", sub_id, filter ].to_json, deadline: deadline)
 
-        data = read_websocket_frame(socket)
-        break unless data
+        while Time.current < deadline
+          ready = WebsocketConnection.readable_now?(socket) || IO.select([ socket ], nil, nil, POLL_INTERVAL)
+          next unless ready
 
-        begin
-          parsed = JSON.parse(data)
+          data = read_frame(socket, deadline)
+          break unless data
+
+          begin
+            parsed = JSON.parse(data)
+          rescue JSON::ParserError
+            next
+          end
+          next unless parsed.is_a?(Array)
+
           case parsed[0]
           when "EVENT"
-            events << parsed[2] if parsed[2]
-          when "EOSE"
+            # A relay can send anything in the payload slot. Anything that is not
+            # a Hash with an id would blow up in the caller's tagging/dedupe
+            # loops and take every valid event from this relay down with it.
+            payload = parsed[2]
+            next unless payload.is_a?(Hash) && payload["id"].is_a?(String)
+
+            events << payload
+          when "EOSE", "CLOSED"
             break
           when "NOTICE"
             Rails.logger.debug("Relay notice: #{parsed[1]}")
           end
-        rescue JSON::ParserError
-          next
         end
+      ensure
+        close_socket(socket, sub_id)
       end
-
-      socket.write(frame_text(["CLOSE", sub_id].to_json)) rescue nil
-      socket.close rescue nil
 
       events
     end
 
-    def create_websocket(uri)
-      host = uri.host
-      port = uri.port || (uri.scheme == "wss" ? 443 : 80)
-
-      tcp_socket = TCPSocket.new(host, port)
-      tcp_socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
-
-      socket = if uri.scheme == "wss"
-        ctx = OpenSSL::SSL::SSLContext.new
-        ssl_socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ctx)
-        ssl_socket.hostname = host
-        ssl_socket.connect
-        ssl_socket
-      else
-        tcp_socket
-      end
-
-      key = Base64.strict_encode64(SecureRandom.random_bytes(16))
-      path = uri.path.empty? ? "/" : uri.path
-      request = ["GET #{path} HTTP/1.1", "Host: #{host}", "Upgrade: websocket", "Connection: Upgrade", "Sec-WebSocket-Key: #{key}", "Sec-WebSocket-Version: 13", "", ""].join("\r\n")
-      socket.write(request)
-
-      response = ""
-      while (line = socket.gets)
-        response += line
-        break if line == "\r\n"
-      end
-
-      return nil unless response.include?("101")
-      socket
-    rescue StandardError => e
-      Rails.logger.warn("WebSocket connection failed: #{e.message}")
+    def read_frame(socket, deadline)
+      WebsocketFrameReader.read(socket, deadline: deadline)
+    rescue WebsocketFrameReader::FrameError
       nil
     end
 
-    def frame_text(data)
-      bytes = data.bytes
-      frame = [0x81]
-      if bytes.length < 126
-        frame << (0x80 | bytes.length)
-      elsif bytes.length < 65536
-        frame << (0x80 | 126) << (bytes.length >> 8) << (bytes.length & 0xFF)
-      else
-        frame << (0x80 | 127)
-        8.times { |i| frame << ((bytes.length >> (56 - i * 8)) & 0xFF) }
-      end
-      mask = 4.times.map { rand(256) }
-      frame.concat(mask)
-      bytes.each_with_index { |b, i| frame << (b ^ mask[i % 4]) }
-      frame.pack("C*")
-    end
-
-    def read_websocket_frame(socket)
-      first_byte = socket.read(1)&.unpack1("C")
-      return nil unless first_byte
-      second_byte = socket.read(1)&.unpack1("C")
-      return nil unless second_byte
-      masked = (second_byte & 0x80) != 0
-      length = second_byte & 0x7F
-      if length == 126
-        length = socket.read(2).unpack1("n")
-      elsif length == 127
-        length = socket.read(8).unpack1("Q>")
-      end
-      mask = masked ? socket.read(4).bytes : nil
-      payload = socket.read(length)
-      return nil unless payload
-      if masked
-        payload = payload.bytes.each_with_index.map { |b, i| b ^ mask[i % 4] }.pack("C*")
-      end
-      (+payload).force_encoding("UTF-8")
-    rescue StandardError
-      nil
+    def close_socket(socket, sub_id)
+      WebsocketConnection.send_text(socket, [ "CLOSE", sub_id ].to_json, deadline: 1.second.from_now) rescue nil
+      socket.close rescue nil
     end
   end
 end

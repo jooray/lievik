@@ -330,3 +330,27 @@
   background-color: var(--color-dark-surface) !important;
   border-color: var(--color-dark-border) !important;
 }
+
+/* Theme toggle icons.
+   The icon shows the *mode* (system / light / dark), not the resolved colour
+   scheme, so the three-way cycle is legible. The pre-paint script in the layout
+   <head> stamps data-theme-mode on <html>, which means the correct icon is
+   painted server-side-first — no flash of the wrong icon before Stimulus boots. */
+.theme-icon {
+  display: none;
+}
+html[data-theme-mode="system"] .theme-icon-system,
+html[data-theme-mode="light"] .theme-icon-light,
+html[data-theme-mode="dark"] .theme-icon-dark {
+  display: block;
+}
+/* No data-theme-mode yet (storage blocked): fall back to the resolved scheme. */
+html:not([data-theme-mode]) .theme-icon-light {
+  display: block;
+}
+html:not([data-theme-mode]).dark .theme-icon-light {
+  display: none;
+}
+html:not([data-theme-mode]).dark .theme-icon-dark {
+  display: block;
+}

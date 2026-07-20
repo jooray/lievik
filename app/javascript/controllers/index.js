@@ -4,29 +4,23 @@
 
 import { application } from "./application"
 
-import HelloController from "./hello_controller"
-application.register("hello", HelloController)
+import ActivityDetailController from "./activity_detail_controller"
+application.register("activity-detail", ActivityDetailController)
 
-import NostrLoginController from "./nostr_login_controller"
-application.register("nostr-login", NostrLoginController)
+import AppVersionController from "./app_version_controller"
+application.register("app-version", AppVersionController)
 
-import SourceFormController from "./source_form_controller"
-application.register("source-form", SourceFormController)
+import AvatarController from "./avatar_controller"
+application.register("avatar", AvatarController)
 
 import BulkSelectController from "./bulk_select_controller"
 application.register("bulk-select", BulkSelectController)
 
-import ThemeController from "./theme_controller"
-application.register("theme", ThemeController)
+import ChannelAiChatController from "./channel_ai_chat_controller"
+application.register("channel-ai-chat", ChannelAiChatController)
 
-import MarkdownEditorController from "./markdown_editor_controller"
-application.register("markdown-editor", MarkdownEditorController)
-
-import ActivityDetailController from "./activity_detail_controller"
-application.register("activity-detail", ActivityDetailController)
-
-import EventExpanderController from "./event_expander_controller"
-application.register("event-expander", EventExpanderController)
+import ClipboardController from "./clipboard_controller"
+application.register("clipboard", ClipboardController)
 
 import ContentBuilderController from "./content_builder_controller"
 application.register("content-builder", ContentBuilderController)
@@ -34,23 +28,41 @@ application.register("content-builder", ContentBuilderController)
 import ContentEditorController from "./content_editor_controller"
 application.register("content-editor", ContentEditorController)
 
+import EventExpanderController from "./event_expander_controller"
+application.register("event-expander", EventExpanderController)
+
+import FlashController from "./flash_controller"
+application.register("flash", FlashController)
+
+import InlinePromptEditorController from "./inline_prompt_editor_controller"
+application.register("inline-prompt-editor", InlinePromptEditorController)
+
 import JobProgressController from "./job_progress_controller"
 application.register("job-progress", JobProgressController)
 
-import TemplateSelectorController from "./template_selector_controller"
-application.register("template-selector", TemplateSelectorController)
-
-import RagChatController from "./rag_chat_controller"
-application.register("rag-chat", RagChatController)
-
-import ChannelAiChatController from "./channel_ai_chat_controller"
-application.register("channel-ai-chat", ChannelAiChatController)
+import MarkdownEditorController from "./markdown_editor_controller"
+application.register("markdown-editor", MarkdownEditorController)
 
 import MobileNavController from "./mobile_nav_controller"
 application.register("mobile-nav", MobileNavController)
 
-import ClipboardController from "./clipboard_controller"
-application.register("clipboard", ClipboardController)
+import NostrLoginController from "./nostr_login_controller"
+application.register("nostr-login", NostrLoginController)
 
-import InlinePromptEditorController from "./inline_prompt_editor_controller"
-application.register("inline-prompt-editor", InlinePromptEditorController)
+import RagChatController from "./rag_chat_controller"
+application.register("rag-chat", RagChatController)
+
+import RangeOutputController from "./range_output_controller"
+application.register("range-output", RangeOutputController)
+
+import SourceFormController from "./source_form_controller"
+application.register("source-form", SourceFormController)
+
+import StopPropagationController from "./stop_propagation_controller"
+application.register("stop-propagation", StopPropagationController)
+
+import TemplateSelectorController from "./template_selector_controller"
+application.register("template-selector", TemplateSelectorController)
+
+import ThemeController from "./theme_controller"
+application.register("theme", ThemeController)

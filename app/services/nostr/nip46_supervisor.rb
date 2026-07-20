@@ -33,6 +33,9 @@ module Nostr
     IDLE_GRACE = 30        # seconds with zero pending sessions before we exit
     MAX_RUNTIME = 10 * 60  # seconds; hard cap so deploys/restarts recycle cleanly
     RECONNECT_MAX = 15     # seconds; relay reconnect backoff ceiling
+    CONNECT_DEADLINE = 12  # seconds; cap per connect attempt (TCP + TLS + upgrade)
+                           # so a TLS-stalled relay can't pin a thread for the
+                           # whole MAX_RUNTIME window.
 
     # Per-session state shared across relay threads. All mutation goes through the
     # mutex; pins one signer and one logical get_public_key request for the login.
@@ -180,7 +183,8 @@ module Nostr
       uri = URI.parse(relay_url)
 
       until Time.current >= @stop_deadline || @stopping
-        socket = client.create_websocket(uri, deadline: @stop_deadline)
+        connect_deadline = [Time.current + CONNECT_DEADLINE, @stop_deadline].min
+        socket = client.create_websocket(uri, deadline: connect_deadline)
         unless socket
           Rails.logger.warn("NIP-46 supervisor: connect failed #{relay_url}, retry in #{backoff}s")
           sleep [backoff, RECONNECT_MAX].min

@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["nip07Section", "divider", "extensionButton", "pollingIndicator", "errorMessage", "errorText", "config"]
+  static targets = ["nip07Section", "divider", "extensionButton", "pollingIndicator", "errorMessage", "errorText", "config", "qrSection", "expiredNotice"]
 
   connect() {
     this.pollInterval = null
@@ -78,19 +78,48 @@ export default class extends Controller {
   startPolling() {
     const pollUrl = this.configTarget.dataset.nostrLoginPollUrl
 
+    // The approval window is 5 minutes; polling past it can never succeed, so
+    // cap the attempts as a backstop even if the server never says "expired".
+    const maxAttempts = Math.ceil((10 * 60 * 1000) / 3000)
+    let attempts = 0
+    let consecutiveErrors = 0
+
     this.pollInterval = setInterval(async () => {
+      if (++attempts > maxAttempts) {
+        this.showExpired()
+        return
+      }
+
       try {
         const response = await fetch(pollUrl)
         const data = await response.json()
+        consecutiveErrors = 0
 
         if (data.authenticated) {
           this.stopPolling()
           window.location.href = data.redirect_url
+          return
+        }
+
+        if (data.expired) {
+          this.showExpired()
         }
       } catch (error) {
         console.error("Polling error:", error)
+        if (++consecutiveErrors >= 5) {
+          this.stopPolling()
+          this.showError("Lost connection to the server. Please reload the page to try again.")
+        }
       }
     }, 3000)
+  }
+
+  showExpired() {
+    this.stopPolling()
+
+    if (this.hasPollingIndicatorTarget) this.pollingIndicatorTarget.classList.add("hidden")
+    if (this.hasQrSectionTarget) this.qrSectionTarget.classList.add("hidden")
+    if (this.hasExpiredNoticeTarget) this.expiredNoticeTarget.classList.remove("hidden")
   }
 
   stopPolling() {

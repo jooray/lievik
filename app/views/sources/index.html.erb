@@ -53,7 +53,7 @@
                     Distance: <%= source.distance %>
                   </span>
                   <span class="text-xs text-gray-400">
-                    <%= source.events.count %> events
+                    <%= @event_counts.fetch(source.id, 0) %> events
                   </span>
                 </div>
                 <div class="mt-1 flex items-center gap-1">

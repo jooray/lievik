@@ -17,6 +17,9 @@ class EmbedEventsJob < ApplicationJob
         vector_store.store(event, embedding) if embedding
       rescue Rag::EmbeddingService::EmbeddingError => e
         Rails.logger.warn "Failed to embed event #{event.id}: #{e.message}"
+      rescue StandardError => e
+        # One bad response (or one unstorable event) must not abort the batch.
+        Rails.logger.warn "Unexpected error embedding event #{event.id}: #{e.class} - #{e.message}"
       end
     end
   end

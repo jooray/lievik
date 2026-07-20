@@ -17,8 +17,10 @@
       </div>
       <div>
         <%= f.label :source_id, "Source", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+        <%# `source_label` keeps the auto-created "manual" source (which has no
+            name) from rendering as a blank, unpickable option. %>
         <%= f.select :source_id,
-            options_from_collection_for_select(current_user.sources, :id, :name, params[:source_id]),
+            options_from_collection_for_select(@filter_sources, :id, ->(s) { source_label(s) }, params[:source_id]),
             { include_blank: "All Sources" },
             class: "mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
       </div>
@@ -39,8 +41,15 @@
   </div>
 
   <!-- Bulk Actions -->
-  <div data-controller="bulk-select" class="space-y-4" data-bulk-select-total-value="<%= @events.total_count %>">
-    <%= form_with url: bulk_rate_events_path, method: :post, data: { bulk_select_target: "form" } do %>
+  <%# "Rerate All" rates the *filtered* set the user is looking at, capped at
+      MAX_BULK_RATE_EVENTS most recent — keep the label and confirm honest. %>
+  <% rate_cap = EventsController::MAX_BULK_RATE_EVENTS %>
+  <% rate_filters = { source_id: params[:source_id], event_type: params[:event_type], search: params[:search] }.compact_blank %>
+  <% rate_count = [@events.total_count, rate_cap].min %>
+  <% rate_cap_note = @events.total_count > rate_cap ? " Only the #{rate_cap} most recent of #{@events.total_count} matching events will be rated." : "" %>
+
+  <div data-controller="bulk-select" class="space-y-4" data-bulk-select-total-value="<%= rate_count %>">
+    <%= form_with url: bulk_rate_events_path(rate_filters), method: :post, data: { bulk_select_target: "form" } do %>
       <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -51,11 +60,11 @@
             <span data-bulk-select-target="count" class="text-sm text-gray-500 dark:text-gray-400">0 selected</span>
           </div>
           <div data-bulk-select-target="actions" class="">
-            <button type="submit" data-bulk-select-target="submitButton" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+            <button type="submit" data-bulk-select-target="submitButton" data-turbo-confirm="Rerate <%= rate_count %> matching event(s) across all channels? This uses AI credits and cannot be undone.<%= rate_cap_note %>" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
               <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-bulk-select-target="submitIcon">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
               </svg>
-              <span data-bulk-select-target="submitText">Rerate All (<%= @events.total_count %>)</span>
+              <span data-bulk-select-target="submitText">Rerate All (<%= rate_count %>)</span>
             </button>
           </div>
         </div>
@@ -63,7 +72,7 @@
         <% if @events.any? %>
           <ul class="divide-y divide-gray-200 dark:divide-gray-700">
             <% @events.each do |event| %>
-              <li class="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-750">
+              <li class="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <div class="flex items-start gap-4">
                   <input type="checkbox" name="event_ids[]" value="<%= event.id %>" data-action="change->bulk-select#updateCount" data-bulk-select-target="checkbox" class="mt-1 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500">
                   <div class="flex-1 min-w-0">
@@ -71,7 +80,7 @@
                       <div class="block">
                         <% if event.content.length > 300 %>
                           <p data-event-expander-target="short" class="text-sm text-gray-900 dark:text-gray-100">
-                            <%= render_nostr_content(truncate(event.content, length: 300)) %>
+                            <%= nostr_content_preview(event, length: 300) %>
                           </p>
                           <p data-event-expander-target="full" class="hidden text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
                             <%= render_nostr_content(event.content) %>
@@ -89,7 +98,7 @@
                       <% end %>
                     </div>
                     <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span>From <%= event.source.name || event.source.identifier.truncate(20) %></span>
+                      <span>From <%= source_label(event.source) %></span>
                       <span>&middot;</span>
                       <span><%= time_ago_in_words(event.published_at) %> ago</span>
                       <span>&middot;</span>
@@ -98,11 +107,11 @@
                       </span>
                       <span>&middot;</span>
                       <%= link_to "View details", event_path(event), class: "text-purple-600 dark:text-purple-400 hover:underline" %>
-                      <%= button_to bulk_rate_events_path(event_ids: [event.id]), method: :post, class: "ml-2 inline-flex items-center px-2 py-0.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium rounded-full shadow-sm", data: { turbo_confirm: "Rerate this event across all channels?" } do %>
+                      <button type="submit" form="rerate-event-<%= event.id %>" data-turbo-confirm="Rerate this event across all channels?" class="ml-2 inline-flex items-center px-2 py-0.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium rounded-full shadow-sm">
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                      <% end %>
+                      </button>
                     </div>
                     <% chips = top_relevant_channels(event) %>
                     <% if chips.any? %>
@@ -131,6 +140,14 @@
           </div>
         <% end %>
       </div>
+    <% end %>
+
+    <!-- Per-event rerate forms, kept outside the bulk form above: nesting a <form>
+         inside another <form> is invalid HTML and browsers drop the inner one,
+         which would make the per-event button submit the outer bulk form instead. -->
+    <% @events.each do |event| %>
+      <%= form_with url: bulk_rate_events_path(rate_filters.merge(event_ids: [event.id])), method: :post, id: "rerate-event-#{event.id}", class: "hidden" do %>
+      <% end %>
     <% end %>
 
     <% if @events.any? %>

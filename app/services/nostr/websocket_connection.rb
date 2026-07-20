@@ -40,6 +40,44 @@ module Nostr
       nil
     end
 
+    # --- Client -> server frames ---------------------------------------------
+    #
+    # Client frames MUST be masked (RFC 6455 §5.3). Every write is bounded by the
+    # caller's deadline via write_all.
+
+    OPCODE_TEXT = 0x1
+    OPCODE_CLOSE = 0x8
+    OPCODE_PING = 0x9
+    OPCODE_PONG = 0xA
+
+    def self.frame(payload, opcode: OPCODE_TEXT)
+      bytes = payload.to_s.b.bytes
+      frame = [ 0x80 | opcode ]
+
+      if bytes.length < 126
+        frame << (0x80 | bytes.length)
+      elsif bytes.length < 65_536
+        frame << (0x80 | 126) << (bytes.length >> 8) << (bytes.length & 0xFF)
+      else
+        frame << (0x80 | 127)
+        8.times { |i| frame << ((bytes.length >> (56 - i * 8)) & 0xFF) }
+      end
+
+      mask = 4.times.map { rand(256) }
+      frame.concat(mask)
+      bytes.each_with_index { |b, i| frame << (b ^ mask[i % 4]) }
+      frame.pack("C*")
+    end
+
+    def self.send_text(socket, payload, deadline:)
+      write_all(socket, frame(payload, opcode: OPCODE_TEXT), deadline)
+    end
+
+    # Keepalive: relays that enforce ping/pong drop clients that never answer.
+    def self.send_pong(socket, payload, deadline:)
+      write_all(socket, frame(payload, opcode: OPCODE_PONG), deadline)
+    end
+
     def self.read_upgrade(socket, deadline:, max_size: MAX_UPGRADE_SIZE)
       read_until(socket, "\r\n\r\n".b, deadline, max_size).force_encoding("UTF-8")
     end
@@ -95,6 +133,10 @@ module Nostr
 
     # Read exactly `length` bytes, blocking (up to deadline) as needed.
     def self.read_exact(socket, length, deadline)
+      # Buffered bytes could otherwise satisfy a read after the deadline has
+      # already passed, quietly extending a run past its budget.
+      raise ConnectionError, "read deadline exceeded" if Time.current > deadline
+
       buf = read_buffer(socket)
       fill_buffer(socket, deadline) while buf.bytesize < length
       buf.slice!(0, length)

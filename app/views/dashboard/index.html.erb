@@ -88,7 +88,7 @@
           </div>
           <div class="ml-5 w-0 flex-1">
             <dl>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Ask Content</dt>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Ask Your Content</dt>
               <dd class="text-lg font-semibold text-gray-900 dark:text-white"><%= @embedded_count %>/<%= @events_count %> indexed</dd>
             </dl>
           </div>
@@ -116,30 +116,31 @@
     </div>
   </div>
 
-  <!-- Getting Started -->
-  <% if @sources_count <= 1 && @channels_count == 0 %>
+  <!-- Getting Started — one targeted hint per missing piece, so a user with
+       sources but no channels still gets pointed at the next step. -->
+  <% if @sources_count <= 1 %>
     <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6">
-      <h2 class="text-lg font-medium text-purple-800 dark:text-purple-200">Get Started</h2>
+      <h2 class="text-lg font-medium text-purple-800 dark:text-purple-200">Step 1: Add a source</h2>
       <p class="mt-2 text-sm text-purple-700 dark:text-purple-300">
-        Welcome to Lievik! Here's how to get started:
+        Sources are where content comes from — Nostr accounts (npubs) or RSS feeds. Add your own
+        account and the accounts you follow, then Lievik ingests their posts for you to curate.
       </p>
-      <ol class="mt-4 space-y-3 text-sm text-purple-700 dark:text-purple-300">
-        <li class="flex items-start gap-3">
-          <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 font-medium text-xs">1</span>
-          <span><strong>Add Sources:</strong> Add Nostr accounts (npubs) whose content you want to curate. This includes your own account and accounts you follow.</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 font-medium text-xs">2</span>
-          <span><strong>Create Channels:</strong> Set up channels for your marketing outputs (newsletters, chat groups, etc.) with custom relevance criteria.</span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 font-medium text-xs">3</span>
-          <span><strong>Curate Content:</strong> AI will rate content relevance for each channel. Mark content as used when you publish it.</span>
-        </li>
-      </ol>
-      <div class="mt-6 flex gap-3">
+      <div class="mt-6 flex flex-wrap gap-3">
         <%= link_to "Add Source", new_source_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700" %>
-        <%= link_to "Create Channel", new_channel_path, class: "inline-flex items-center px-4 py-2 border border-purple-300 dark:border-purple-600 text-sm font-medium rounded-md text-purple-700 dark:text-purple-300 bg-white dark:bg-transparent hover:bg-purple-50 dark:hover:bg-purple-900/20" %>
+        <%= link_to "View sources", sources_path, class: "inline-flex items-center px-4 py-2 border border-purple-300 dark:border-purple-600 text-sm font-medium rounded-md text-purple-700 dark:text-purple-300 bg-white dark:bg-transparent hover:bg-purple-50 dark:hover:bg-purple-900/20" %>
+      </div>
+    </div>
+  <% elsif @channels_count == 0 %>
+    <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6">
+      <h2 class="text-lg font-medium text-purple-800 dark:text-purple-200">Step 2: Create a channel</h2>
+      <p class="mt-2 text-sm text-purple-700 dark:text-purple-300">
+        Channels are the heart of Lievik — one per marketing output (newsletter, chat group, social
+        account). Each has its own relevance criteria, and AI scores every ingested event against
+        them so you only see what fits.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <%= link_to "Create Channel", new_channel_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700" %>
+        <%= link_to "Describe it to the AI instead", channel_ai_chat_path, class: "inline-flex items-center px-4 py-2 border border-purple-300 dark:border-purple-600 text-sm font-medium rounded-md text-purple-700 dark:text-purple-300 bg-white dark:bg-transparent hover:bg-purple-50 dark:hover:bg-purple-900/20" %>
       </div>
     </div>
   <% end %>
@@ -159,7 +160,7 @@
                 <div data-controller="event-expander">
                   <% if event.content.length > 300 %>
                     <p data-event-expander-target="short" class="text-sm text-gray-900 dark:text-gray-100">
-                      <%= render_nostr_content(truncate(event.content, length: 300)) %>
+                      <%= nostr_content_preview(event, length: 300) %>
                     </p>
                     <p data-event-expander-target="full" class="hidden text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
                       <%= render_nostr_content(event.content) %>
@@ -174,7 +175,7 @@
                   <% end %>
                 </div>
                 <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                  <span>From <%= event.source.name || event.source.identifier.truncate(20) %></span>
+                  <span>From <%= source_label(event.source) %></span>
                   <span>&middot;</span>
                   <span><%= time_ago_in_words(event.published_at) %> ago</span>
                   <span>&middot;</span>
@@ -210,8 +211,13 @@
       </svg>
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No events yet</h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Add sources and refresh them to start ingesting content.
+        Refresh your sources to start ingesting content, or add content by hand.
       </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <%= button_to "Refresh all sources", refresh_all_sources_path, method: :post, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700" %>
+        <%= link_to "Manage sources", sources_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
+        <%= link_to "Add an event manually", new_manual_event_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
+      </div>
     </div>
   <% end %>
 </div>

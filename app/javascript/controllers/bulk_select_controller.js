@@ -5,24 +5,15 @@ export default class extends Controller {
   static values = { total: Number }
 
   connect() {
-    console.log('BulkSelect CONNECTED', {
-      checkboxTargets: this.checkboxTargets.length,
-      hasCount: this.hasCountTarget,
-      hasSubmitText: this.hasSubmitTextTarget,
-      totalValue: this.totalValue,
-      hasSelectAllTarget: this.hasSelectAllTarget
-    });
     this.updateCount()
   }
 
   toggleAll(event) {
-    console.log('toggleAll FIRED', event.target.checked, 'checkboxTargets:', this.checkboxTargets.length);
     const checked = event.target.checked
-    this.checkboxTargets.forEach((checkbox, index) => {
+    this.checkboxTargets.forEach((checkbox) => {
       // Skip disabled checkboxes (e.g., already used items)
       if (!checkbox.disabled) {
         checkbox.checked = checked
-        console.log(`Set checkbox ${index} to ${checked}`);
       }
     })
     this.updateCount()
@@ -34,7 +25,6 @@ export default class extends Controller {
     const enabledCount = enabledCheckboxes.length
     const pageTotal = this.checkboxTargets.length
     const selectedIds = this.checkboxTargets.filter(cb => cb.checked).map(cb => cb.value)
-    console.log('updateCount', {checkedCount, enabledCount, pageTotal, selectedIds: selectedIds.slice(0,3)});
 
     if (this.hasCountTarget) {
       this.countTarget.textContent = `${checkedCount} selected`

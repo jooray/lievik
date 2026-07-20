@@ -5,23 +5,13 @@ module Rag
     def self.backend
       config = Rails.application.config_for(:lievik).dig(:rag, :vector_backend) || "auto"
 
+      # Only the Ruby backend exists: this app runs on SQLite (dev) and MariaDB
+      # (production), so there is no pgvector path to fall back to.
       case config.to_s
-      when "pgvector"
-        Rag::VectorStore::PgvectorBackend.new
-      when "ruby"
+      when "ruby", "auto"
         Rag::VectorStore::RubyBackend.new
-      else # 'auto'
-        if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
-          # Check if pgvector extension is available
-          begin
-            ActiveRecord::Base.connection.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
-            Rag::VectorStore::PgvectorBackend.new
-          rescue StandardError
-            Rag::VectorStore::RubyBackend.new
-          end
-        else
-          Rag::VectorStore::RubyBackend.new
-        end
+      else
+        raise ArgumentError, "Unknown rag.vector_backend #{config.inspect} (supported: 'ruby', 'auto')"
       end
     end
 

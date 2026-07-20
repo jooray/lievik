@@ -18,7 +18,7 @@
     </div>
     <div class="flex gap-3">
       <%= link_to "Edit", edit_channel_content_path(@channel, @channel_content), class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
-      <%= button_to "Delete", channel_content_path(@channel, @channel_content), method: :delete, class: "inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-600 rounded-md shadow-sm text-sm font-medium text-red-700 dark:text-red-200 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900", data: { confirm: "Are you sure you want to delete this content?" } %>
+      <%= button_to "Delete", channel_content_path(@channel, @channel_content), method: :delete, class: "inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-600 rounded-md shadow-sm text-sm font-medium text-red-700 dark:text-red-200 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900", data: { turbo_confirm: "Are you sure you want to delete this content? This cannot be undone." } %>
     </div>
   </div>
 
@@ -53,8 +53,8 @@
           <% @events.each do |event| %>
             <div class="text-sm bg-gray-50 dark:bg-gray-900 rounded p-3">
               <div class="flex items-center justify-between mb-2">
-                <span class="font-medium text-gray-900 dark:text-white"><%= event.source.name %></span>
-                <span class="text-xs text-gray-400"><%= event.published_at.strftime("%b %d") %></span>
+                <span class="font-medium text-gray-900 dark:text-white"><%= source_label(event.source) %></span>
+                <span class="text-xs text-gray-400"><%= format_datetime(event.published_at) %></span>
               </div>
               <p class="text-gray-600 dark:text-gray-400"><%= event.content.truncate(200) %></p>
             </div>

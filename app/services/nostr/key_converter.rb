@@ -148,8 +148,14 @@ module Nostr
         hrp, data, _spec = ::Bech32.decode(npub)
         return nil unless hrp == "npub"
 
+        # convert_bits returns nil on invalid padding, and a crafted-but-valid
+        # checksum can decode to the wrong length. Never let either reach .pack.
         bytes = convert_bits(data, 5, 8, false)
+        return nil unless bytes.is_a?(Array) && bytes.length == 32
+
         bytes.pack("C*").unpack1("H*")
+      rescue StandardError
+        nil
       end
 
       # Decode note1 to hex event ID
@@ -161,6 +167,8 @@ module Nostr
         return nil unless hrp == "note"
 
         bytes = convert_bits(data, 5, 8, false)
+        return nil unless bytes.is_a?(Array) && bytes.length == 32
+
         bytes.pack("C*").unpack1("H*")
       rescue StandardError
         nil
@@ -283,14 +291,22 @@ module Nostr
         return nil unless hrp == "nsec"
 
         bytes = convert_bits(data, 5, 8, false)
+        return nil unless bytes.is_a?(Array) && bytes.length == 32
+
         bytes.pack("C*").unpack1("H*")
+      rescue StandardError
+        nil
       end
 
       def valid_npub?(npub)
         return false if npub.blank?
 
         hrp, data, _spec = ::Bech32.decode(npub)
-        hrp == "npub" && data.length == 52
+        return false unless hrp == "npub" && data.length == 52
+
+        # A valid checksum is not enough: the 5→8 bit regrouping still has to
+        # produce a well-formed 32-byte key.
+        !npub_to_hex(npub).nil?
       rescue StandardError
         false
       end

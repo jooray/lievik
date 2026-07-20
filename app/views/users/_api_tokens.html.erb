@@ -14,10 +14,14 @@
       </p>
       <div class="flex items-center gap-2">
         <input type="text" readonly value="<%= flash[:plain_token] %>"
+               aria-label="Your new API token"
                class="flex-1 font-mono text-xs px-2 py-1.5 rounded border border-yellow-300 dark:border-yellow-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-               onclick="this.select()" />
+               data-controller="clipboard"
+               data-action="click->clipboard#selectAll" />
         <button type="button"
-                onclick="navigator.clipboard.writeText('<%= j flash[:plain_token] %>'); this.textContent='Copied'; setTimeout(() => this.textContent='Copy', 1500)"
+                data-controller="clipboard"
+                data-clipboard-text-value="<%= flash[:plain_token] %>"
+                data-action="click->clipboard#copy"
                 class="px-3 py-1.5 text-xs font-medium rounded border border-yellow-300 dark:border-yellow-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-yellow-100 dark:hover:bg-yellow-900/40">
           Copy
         </button>
@@ -54,7 +58,7 @@
           <% tokens.each do |token| %>
             <tr>
               <td class="px-4 py-2 text-gray-900 dark:text-gray-100"><%= token.name %></td>
-              <td class="px-4 py-2 text-gray-500 dark:text-gray-400"><%= token.created_at.strftime("%b %d, %Y") %></td>
+              <td class="px-4 py-2 text-gray-500 dark:text-gray-400"><%= format_datetime(token.created_at) %></td>
               <td class="px-4 py-2 text-gray-500 dark:text-gray-400">
                 <%= token.last_used_at ? "#{time_ago_in_words(token.last_used_at)} ago" : "Never" %>
               </td>

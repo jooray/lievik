@@ -42,11 +42,17 @@ class Nip46SupervisorJob < ApplicationJob
     Thread.new do
       loop do
         sleep(LOCK_TTL / 3)
-        break unless Rails.cache.read(LOCK_KEY) == token
-        Rails.cache.write(LOCK_KEY, token, expires_in: LOCK_TTL)
+        # Rescue INSIDE the loop: a transient cache error must only skip one beat.
+        # If it killed the thread the lock would expire and the minutely recurring
+        # task would start a SECOND supervisor (duplicate relay connections and
+        # duplicate NIP-46 requests hitting the user's signer).
+        begin
+          break unless Rails.cache.read(LOCK_KEY) == token
+          Rails.cache.write(LOCK_KEY, token, expires_in: LOCK_TTL)
+        rescue => e
+          Rails.logger.warn("Nip46SupervisorJob heartbeat error: #{e.class} - #{e.message}")
+        end
       end
-    rescue => e
-      Rails.logger.warn("Nip46SupervisorJob heartbeat error: #{e.class} - #{e.message}")
     end
   end
 

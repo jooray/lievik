@@ -15,6 +15,10 @@ class Event < ApplicationRecord
   enum :event_type, { original: 0, reply: 1, repost: 2, long_form: 3 }
 
   validates :external_id, uniqueness: { scope: :source_id }
+  # An empty event is worthless and still costs paid AI rating calls on every
+  # channel, so never let one in. Both ingestion services already skip blank
+  # content upstream, so this only guards the manual-entry path.
+  validates :content, presence: true
 
   scope :recent, -> { order(published_at: :desc) }
   scope :originals_only, -> { where(event_type: :original) }

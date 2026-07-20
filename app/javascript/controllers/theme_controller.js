@@ -5,6 +5,7 @@ import { Controller } from "@hotwired/stimulus"
 // the layout <head> applies the same value before first paint to avoid a flash.
 const STORAGE_KEY = "theme"
 const THEMES = ["system", "light", "dark"]
+const THEME_LABELS = { system: "System", light: "Light", dark: "Dark" }
 
 export default class extends Controller {
   connect() {
@@ -55,19 +56,30 @@ export default class extends Controller {
   }
 
   applyTheme() {
-    const isDark = this.theme === "dark" ||
-      (this.theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    const mode = this.theme
+    const isDark = mode === "dark" ||
+      (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
 
     document.documentElement.classList.toggle("dark", isDark)
 
-    // Update icon visibility
-    this.updateIcons(isDark)
+    // Which icon is visible is pure CSS, keyed off this attribute — the same
+    // attribute the pre-paint script in the layout <head> sets, so the icon is
+    // already correct before this controller connects.
+    document.documentElement.setAttribute("data-theme-mode", mode)
+
+    this.updateLabels(mode)
   }
 
-  updateIcons(isDark) {
-    // Update every theme toggle on the page (desktop + mobile nav) so they stay
-    // in sync when one is toggled.
-    document.querySelectorAll("[data-theme-icon='sun']").forEach((el) => el.classList.toggle("hidden", isDark))
-    document.querySelectorAll("[data-theme-icon='moon']").forEach((el) => el.classList.toggle("hidden", !isDark))
+  updateLabels(mode) {
+    // Every toggle on the page (desktop + mobile nav) shares the state, so keep
+    // their tooltips in sync when one of them is clicked.
+    const label = THEME_LABELS[mode] || THEME_LABELS.system
+    const next = THEMES[(THEMES.indexOf(mode) + 1) % THEMES.length]
+    const title = `Theme: ${label} (click for ${THEME_LABELS[next]})`
+
+    document.querySelectorAll("[data-theme-target='button']").forEach((el) => {
+      el.setAttribute("title", title)
+      el.setAttribute("aria-label", title)
+    })
   }
 }

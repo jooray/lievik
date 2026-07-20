@@ -3,10 +3,38 @@
 class SourceIngestionJob < ApplicationJob
   queue_as :default
 
+  # The 30-minute recurring refresh, the manual refresh buttons, the MCP
+  # refresh_source tool and a slow previous run can all target the same source at
+  # once, and the check-then-create in the ingestion services then races into
+  # RecordNotUnique. A cache lock (same pattern as Nip46SupervisorJob) keeps one
+  # run per source; the TTL means a crashed worker can't wedge the source.
+  LOCK_TTL = 30.minutes
+
+  def self.lock_key(source_id)
+    "source-ingestion-lock:#{source_id}"
+  end
+
   def perform(source_id)
     source = Source.find_by(id: source_id)
     return unless source
 
+    key = self.class.lock_key(source_id)
+    token = SecureRandom.hex(16)
+    unless Rails.cache.write(key, token, unless_exist: true, expires_in: LOCK_TTL)
+      Rails.logger.info("SourceIngestionJob skipped: source #{source_id} is already being ingested")
+      return
+    end
+
+    begin
+      ingest(source)
+    ensure
+      Rails.cache.delete(key) if Rails.cache.read(key) == token
+    end
+  end
+
+  private
+
+  def ingest(source)
     activity_log = ActivityLog.start_activity(
       user: source.user,
       activity_type: "ingestion",

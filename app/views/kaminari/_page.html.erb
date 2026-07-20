@@ -1,0 +1,15 @@
+<%# Link showing page number
+  - available local variables
+    page:          a page object for "this" page
+    url:           url to this page
+    current_page:  a page object for the currently displayed page
+    total_pages:   total number of pages
+    per_page:      number of items to fetch per page
+    remote:        data-remote
+-%>
+<% if page.current? %>
+  <span aria-current="page" class="inline-flex items-center justify-center min-w-9 h-9 px-3 text-sm font-medium rounded-md text-white bg-purple-600 border border-purple-600"><%= page %></span>
+<% else %>
+  <%= link_to page, url, remote: remote, rel: page.rel,
+        class: "inline-flex items-center justify-center min-w-9 h-9 px-3 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-purple-50 dark:hover:bg-gray-700 hover:text-purple-700 dark:hover:text-purple-300 transition-colors" %>
+<% end %>

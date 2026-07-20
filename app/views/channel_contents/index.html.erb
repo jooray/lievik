@@ -33,7 +33,7 @@
                     <%= content.content.to_s.truncate(150) %>
                   </p>
                   <p class="text-xs text-gray-400 mt-2">
-                    <%= content.events.count %> source events &middot;
+                    <%= @event_counts.fetch(content.id, 0) %> source events &middot;
                     Updated <%= time_ago_in_words(content.updated_at) %> ago
                   </p>
                 </div>
@@ -66,7 +66,7 @@
                     <%= content.content.to_s.truncate(150) %>
                   </p>
                   <p class="text-xs text-gray-400 mt-2">
-                    <%= content.events.count %> source events &middot;
+                    <%= @event_counts.fetch(content.id, 0) %> source events &middot;
                     Published <%= time_ago_in_words(content.published_at) %> ago
                   </p>
                 </div>

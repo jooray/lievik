@@ -191,12 +191,25 @@ module Ai
     end
 
     def parse_response(response)
-      # Try to extract JSON from the response
-      json_match = response.match(/\{[^}]+\}/)
-      return { score: nil, reason: "Invalid response format", error: true } unless json_match
+      # Brace-counting rather than /\{[^}]+\}/ — the reason text routinely
+      # contains "}" and the naive regex then truncates the object, producing a
+      # spurious parse failure and a paid retry.
+      json_str = Ai::JsonExtraction.extract_json_object(response.to_s)
+      return { score: nil, reason: "Invalid response format", error: true } unless json_str
 
-      data = JSON.parse(json_match[0])
-      score = data["score"].to_i.clamp(0, 100)
+      data = JSON.parse(json_str)
+      return { score: nil, reason: "Invalid response format", error: true } unless data.is_a?(Hash)
+
+      # A non-numeric score ("high", nil, "") would silently become 0 via
+      # #to_i and be stored as a legitimate-looking rating. Treat it as a
+      # parse failure so the caller retries instead.
+      raw_score = data["score"]
+      raw_score = Integer(raw_score, exception: false) || Float(raw_score, exception: false) if raw_score.is_a?(String)
+      unless raw_score.is_a?(Numeric)
+        return { score: nil, reason: "AI returned a non-numeric score", error: true }
+      end
+
+      score = raw_score.round.clamp(0, 100)
       reason = data["reason"].to_s.truncate(500)
 
       { score: score, reason: reason }

@@ -43,6 +43,9 @@
     </div>
 
     <% if @activity_logs.any? %>
+      <%# One query, so the ingestion Retry button is only offered for sources
+          that still exist (refreshing a deleted one would 404). %>
+      <% user_source_ids = current_user.sources.pluck(:id) %>
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         <% @activity_logs.each do |log| %>
           <li class="px-4 py-4 sm:px-6">
@@ -83,15 +86,25 @@
                     <span class="text-sm text-gray-900 dark:text-gray-100"><%= log.message %></span>
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    <%= log.created_at.strftime("%b %d, %Y at %H:%M") %>
+                    <%= format_datetime(log.created_at) %>
                     <% if log.duration %>
                       &middot; Took <%= distance_of_time_in_words(log.duration) %>
                     <% end %>
                   </p>
                 </div>
               </div>
+              <% retry_button_class = "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 dark:text-amber-300 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 rounded-md border border-amber-200 dark:border-amber-800 transition-colors" %>
               <% if log.failed? && log.activity_type == "rating" && log.metadata["channel_id"].present? %>
-                <%= button_to retry_job_activity_log_path(log), method: :post, class: "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 dark:text-amber-300 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 rounded-md border border-amber-200 dark:border-amber-800 transition-colors", title: "Retry this rating job" do %>
+                <%= button_to retry_job_activity_log_path(log), method: :post, class: retry_button_class, title: "Retry this rating job" do %>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  Retry
+                <% end %>
+              <%# Failed ingestions had no retry at all — re-running one is just
+                  refreshing the source it came from. %>
+              <% elsif log.failed? && log.activity_type == "ingestion" && user_source_ids.include?(log.metadata["source_id"].to_i) %>
+                <%= button_to refresh_source_path(log.metadata["source_id"]), method: :post, class: retry_button_class, title: "Retry by refreshing this source" do %>
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                   </svg>
@@ -99,7 +112,7 @@
                 <% end %>
               <% end %>
             </div>
-            <% dev_log_count = log.dev_logs.count %>
+            <% dev_log_count = @dev_log_counts.fetch(log.id, 0) %>
             <% if dev_log_count > 0 %>
               <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
                 <%= link_to dev_logs_activity_log_path(log), class: "inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 hover:shadow-sm dark:text-blue-300 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 rounded-md border border-blue-100/50 dark:border-blue-800/30 transition-all duration-150" do %>

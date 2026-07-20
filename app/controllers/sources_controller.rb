@@ -5,6 +5,7 @@ class SourcesController < ApplicationController
 
   def index
     @sources = current_user.sources.where.not(source_type: :manual).order(:name)
+    @event_counts = Event.where(source_id: @sources.map(&:id)).group(:source_id).count
   end
 
   def show
@@ -19,7 +20,16 @@ class SourcesController < ApplicationController
     @source = current_user.sources.build(source_params)
 
     if @source.save
-      redirect_to sources_path, notice: "Source added successfully"
+      # Without this the dashboard stays empty until the user discovers the
+      # small refresh icon — the first-run flow reads as broken.
+      if @source.nostr? || @source.rss?
+        SourceIngestionJob.perform_later(@source.id)
+        notice = "Source added — importing recent posts in the background. Check the Activity Log for progress."
+      else
+        notice = "Source added successfully"
+      end
+
+      redirect_to sources_path, notice: notice
     else
       render :new, status: :unprocessable_entity
     end

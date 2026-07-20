@@ -98,11 +98,15 @@ export default class extends Controller {
           if (eventType === "chunk" && eventData) {
             const chunk = JSON.parse(eventData)
             fullContent += chunk
+            // Re-rendering the whole answer on every chunk is ~15 regex passes
+            // plus a full innerHTML replacement — O(n^2) over a long answer, and
+            // visibly janky. Coalesce to one render per animation frame.
             if (fullContent.trim()) {
-              contentDiv.innerHTML = this.renderMarkdown(fullContent)
+              this.scheduleRender(contentDiv, () => fullContent)
             }
             this.scrollToBottom()
           } else if (eventType === "complete" && eventData) {
+            this.cancelScheduledRender()
             const data = JSON.parse(eventData)
             this.isStreaming = false
             this.setLoading(false)
@@ -145,6 +149,7 @@ export default class extends Controller {
 
     const messageDiv = document.createElement("div")
     messageDiv.className = "grid grid-cols-1 lg:grid-cols-3 gap-4"
+    messageDiv.setAttribute("data-chat-message", "")
 
     const contentCol = document.createElement("div")
     contentCol.className = "lg:col-span-2 flex flex-col items-end"
@@ -181,6 +186,7 @@ export default class extends Controller {
     const wrapper = document.createElement("div")
     wrapper.className = "grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch"
     wrapper.setAttribute("data-message-wrapper", "")
+    wrapper.setAttribute("data-chat-message", "")
 
     // Left: Answer (2/3)
     const contentCol = document.createElement("div")
@@ -336,9 +342,33 @@ export default class extends Controller {
     }
   }
 
+  // Coalesce streaming re-renders into one per frame.
+  scheduleRender(target, contentFn) {
+    this.pendingRenderTarget = target
+    this.pendingRenderContent = contentFn
+
+    if (this.renderFrame) return
+
+    this.renderFrame = requestAnimationFrame(() => {
+      this.renderFrame = null
+      if (!this.pendingRenderTarget) return
+      this.pendingRenderTarget.innerHTML = this.renderMarkdown(this.pendingRenderContent())
+    })
+  }
+
+  cancelScheduledRender() {
+    if (this.renderFrame) {
+      cancelAnimationFrame(this.renderFrame)
+      this.renderFrame = null
+    }
+    this.pendingRenderTarget = null
+    this.pendingRenderContent = null
+  }
+
   renderMarkdown(content) {
     if (!content) return ""
 
+    content = this.escapeHtml(content)
     let html = this.cleanContent(content)
 
     // Format [EVENT:ID] as badges BEFORE other markdown processing
@@ -429,16 +459,15 @@ export default class extends Controller {
   clearChat() {
     this.messages = []
     this.currentMessageWrapper = null
-    // Keep only the welcome message if present
-    const welcomeMessage = this.messageListTarget.querySelector('[data-message-wrapper]')
-    if (!welcomeMessage) {
-      // Reset to show welcome message - reload the page
-      window.location.reload()
-    } else {
-      // Clear all messages except static content
-      this.messageListTarget.innerHTML = ""
-      window.location.reload()
-    }
+
+    // Every message this controller appends is tagged; removing just those
+    // leaves the server-rendered welcome / empty state in place. No page
+    // reload, so scroll position and the rest of the page survive.
+    this.messageListTarget
+      .querySelectorAll("[data-chat-message]")
+      .forEach((el) => el.remove())
+
+    this.messageListTarget.scrollTop = 0
   }
 
   autoResize(event) {

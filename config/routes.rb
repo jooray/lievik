@@ -7,9 +7,14 @@ Rails.application.routes.draw do
   post "/auth/nostr/refresh_profile", to: "sessions#refresh_profile", as: :refresh_profile
   delete "/logout", to: "sessions#destroy", as: :logout
 
-  # PWA: web app manifest so the app is installable (manifest-only PWA — no
-  # service worker; nothing here intercepts navigations).
-  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  # PWA: manifest, a scope-"/" service worker (assets only — it never
+  # intercepts navigations), and the version endpoint the client polls so an
+  # open tab or installed app can never keep running a stale build.
+  # `defaults: { format: :json }` so the manifest resolves regardless of the
+  # client's Accept header — without it an HTML-ish Accept raises MissingTemplate.
+  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest, defaults: { format: :json }
+  get "service_worker.js" => "pwa#service_worker", as: :pwa_service_worker
+  get "version.json" => "pwa#version", as: :app_version
 
   # Public landing page
   root "pages#landing"
@@ -42,18 +47,12 @@ Rails.application.routes.draw do
       patch :update_settings
       post :rate
     end
-    resources :events, only: [:index, :show], controller: "channel_events" do
-      member do
-        post :mark_used
-        post :mark_unused
-      end
-    end
     resources :contents, controller: "channel_contents" do
       member do
-        post :generate
-        get :generate_stream
-        post :refine
-        get :refine_stream
+        # POST, not GET: both mutate the draft (they save a version and
+        # overwrite content), and Rails' CSRF protection does not cover GET.
+        post :generate_stream
+        post :refine_stream
         post :publish
         post :revert
       end

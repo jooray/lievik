@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
+  before_action :set_search_index_stats, only: [:edit, :update]
+
   def edit
     @content_templates = current_user.content_templates_list
   end
@@ -49,6 +51,14 @@ class UsersController < ApplicationController
   end
 
   private
+
+  def set_search_index_stats
+    @content_templates = current_user.content_templates_list
+
+    user_events = Event.joins(:source).where(sources: { user_id: current_user.id })
+    @total_event_count = user_events.count
+    @embedded_event_count = user_events.where.not(embedding: nil).count
+  end
 
   def user_params
     params.require(:user).permit(:system_prompt, :event_link_template, :naddr_link_template, :profile_link_template, :default_content_style)

@@ -20,6 +20,12 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
+# NOTE: Kamal is not actually used to deploy this app in practice (deploy is via
+# `git push production main`, see CLAUDE.md). TLS is terminated by nginx on
+# jl.bednar.io in front of Puma (port 3000), not by Kamal's proxy, so this block
+# stays disabled here. config.assume_ssl / config.force_ssl are enabled directly
+# in config/environments/production.rb regardless.
+#
 # proxy:
 #   ssl: true
 #   host: app.example.com

@@ -53,14 +53,25 @@
           <div class="h-2 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div class="h-full bg-purple-600" style="width: <%= @threshold %>%"></div>
           </div>
-          <!-- Show Used Toggle -->
-          <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-            <input type="checkbox"
-                   <%= "checked" if @show_used %>
-                   onchange="window.location.href='<%= channel_path(@channel) %>' + (this.checked ? '?show_used=true' : '')"
-                   class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+          <!-- Show Used Toggle — must carry the active search along, otherwise
+               ticking it silently throws away the user's filter. -->
+          <% show_used_on_url = channel_path(@channel, show_used: true, search: params[:search].presence) %>
+          <% show_used_off_url = channel_path(@channel, search: params[:search].presence) %>
+          <%# A link rather than a checkbox with an inline onchange handler:
+              the app's CSP forbids inline scripts, so the old handler never ran. %>
+          <%= link_to(@show_used ? show_used_off_url : show_used_on_url,
+                      role: "switch",
+                      "aria-checked": @show_used.to_s,
+                      class: "flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200") do %>
+            <span class="h-4 w-4 rounded border flex items-center justify-center <%= @show_used ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600' %>">
+              <% if @show_used %>
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+              <% end %>
+            </span>
             Show used
-          </label>
+          <% end %>
         </div>
       </div>
       <div class="flex items-center justify-between mt-3">
@@ -76,7 +87,7 @@
           <%= f.text_field :search, value: params[:search], placeholder: "Search events...", class: "px-3 py-1.5 text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" %>
           <%= f.submit "Search", class: "px-3 py-1.5 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer" %>
           <% if params[:search].present? %>
-            <%= link_to "Clear", channel_path(@channel, show_used: @show_used), class: "px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
+            <%= link_to "Clear", channel_path(@channel, show_used: (@show_used || nil)), class: "px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
           <% end %>
         <% end %>
       </div>
@@ -130,7 +141,7 @@
                           </span>
                         <% end %>
                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                          from <%= channel_event.event.source.name %>
+                          from <%= source_label(channel_event.event.source) %>
                         </span>
                       </div>
                       <% if channel_event.relevance_reason.present? %>
@@ -141,14 +152,19 @@
                       <span class="text-xs text-gray-400">
                         <%= time_ago_in_words(channel_event.event.published_at) %> ago
                       </span>
-                      <%= link_to event_path(channel_event.event), class: "text-xs text-purple-600 dark:text-purple-400 hover:underline", onclick: "event.stopPropagation();" do %>
+                      <%# The whole card is a <label>, so this click must not bubble
+                          up and toggle the checkbox. Stimulus, not an inline
+                          onclick, because CSP blocks inline handlers. %>
+                      <%= link_to event_path(channel_event.event),
+                            class: "text-xs text-purple-600 dark:text-purple-400 hover:underline",
+                            data: { controller: "stop-propagation", action: "click->stop-propagation#stop" } do %>
                         View details
                       <% end %>
                     </div>
                   </div>
                   <div data-controller="event-expander">
                     <% if channel_event.event.content.length > 500 %>
-                      <p data-event-expander-target="short" class="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(truncate(channel_event.event.content, length: 500)) %></p>
+                      <p data-event-expander-target="short" class="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= nostr_content_preview(channel_event.event, length: 500) %></p>
                       <p data-event-expander-target="full" class="hidden text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(channel_event.event.content) %></p>
                       <button type="button" data-event-expander-target="button" data-action="click->event-expander#toggle" class="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
                         Show more

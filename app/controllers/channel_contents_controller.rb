@@ -4,13 +4,16 @@ class ChannelContentsController < ApplicationController
   include ActionController::Live
 
   before_action :set_channel
-  before_action :set_channel_content, only: [:show, :edit, :update, :destroy, :generate, :generate_stream, :refine, :refine_stream, :publish, :revert]
+  before_action :set_channel_content, only: [:show, :edit, :update, :destroy, :generate_stream, :refine_stream, :publish, :revert]
   before_action :set_events_from_params, only: [:new, :create]
 
   def index
-    @channel_contents = @channel.channel_contents.includes(:events).recent
+    @channel_contents = @channel.channel_contents.recent
     @drafts = @channel_contents.drafts
     @published = @channel_contents.published_content
+    @event_counts = ChannelContentEvent.where(channel_content_id: @channel.channel_contents.select(:id))
+      .group(:channel_content_id)
+      .count
   end
 
   def show
@@ -68,68 +71,6 @@ class ChannelContentsController < ApplicationController
   def destroy
     @channel_content.destroy
     redirect_to channel_contents_path(@channel), notice: "Content deleted."
-  end
-
-  # POST /channels/:channel_id/contents/:id/generate
-  # Generate content from source events using AI
-  def generate
-    events = @channel_content.events.includes(:source, :linked_contents)
-
-    if events.empty?
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "editor-container",
-            partial: "editor_container",
-            locals: { error: "No source events found. Please add events first." }
-          )
-        end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), alert: "No source events found." }
-      end
-      return
-    end
-
-    # Save current version before generating new content
-    @channel_content.add_version(@channel_content.content) if @channel_content.content.present?
-
-    service = Ai::ContentBuilderService.new(
-      channel: @channel,
-      events: events,
-      title: @channel_content.title,
-      generation_prompt: @channel_content.generation_prompt
-    )
-    result = service.generate
-
-    # Humanize if enabled and generation succeeded
-    if result[:content].present? && service.humanize_enabled?
-      humanize_result = service.humanize(result[:content])
-      result[:content] = humanize_result[:content] if humanize_result[:content].present?
-    end
-
-    if result[:error]
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "editor-container",
-            partial: "editor_container",
-            locals: { error: "AI generation failed: #{result[:error]}" }
-          )
-        end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), alert: "AI generation failed: #{result[:error]}" }
-      end
-    else
-      @channel_content.update!(content: result[:content])
-
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.replace("editor-container", partial: "editor_container"),
-            turbo_stream.replace("content-status", partial: "content_status")
-          ]
-        end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), notice: "Content generated successfully." }
-      end
-    end
   end
 
   # GET /channels/:channel_id/contents/:id/generate_stream
@@ -201,66 +142,6 @@ class ChannelContentsController < ApplicationController
       response.stream.write "event: error\ndata: #{{ message: "Unexpected error occurred" }.to_json}\n\n"
     ensure
       response.stream.close
-    end
-  end
-
-  # POST /channels/:channel_id/contents/:id/refine
-  # Refine content with AI based on user prompt
-  def refine
-    user_prompt = params[:user_prompt]
-    existing_content = @channel_content.content
-
-    if user_prompt.blank?
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "ai-prompt-modal",
-            partial: "ai_prompt_modal",
-            locals: { error: "Please provide instructions for the AI." }
-          )
-        end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), alert: "Please provide instructions." }
-      end
-      return
-    end
-
-    # Save current version before refining
-    @channel_content.add_version(existing_content) if existing_content.present?
-
-    events = @channel_content.events.includes(:source, :linked_contents)
-    service = Ai::ContentBuilderService.new(channel: @channel, events: events)
-    result = service.refine(existing_content: existing_content, user_prompt: user_prompt)
-
-    # Humanize if enabled and refinement succeeded
-    if result[:content].present? && service.humanize_enabled?
-      humanize_result = service.humanize(result[:content])
-      result[:content] = humanize_result[:content] if humanize_result[:content].present?
-    end
-
-    if result[:error]
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "editor-container",
-            partial: "editor_container",
-            locals: { error: "AI refinement failed: #{result[:error]}" }
-          )
-        end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), alert: "AI refinement failed: #{result[:error]}" }
-      end
-    else
-      @channel_content.update!(content: result[:content])
-
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.replace("editor-container", partial: "editor_container"),
-            turbo_stream.replace("content-status", partial: "content_status"),
-            turbo_stream.replace("ai-prompt-modal", partial: "ai_prompt_modal", locals: { show: false })
-          ]
-        end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), notice: "Content refined successfully." }
-      end
     end
   end
 
@@ -383,7 +264,7 @@ class ChannelContentsController < ApplicationController
 
   def set_events_from_params
     event_ids = parse_event_ids(params[:event_ids])
-    @selected_events = Event.where(id: event_ids).includes(:source) if event_ids.present?
+    @selected_events = current_user.events.where(id: event_ids).includes(:source) if event_ids.present?
     @selected_events ||= []
   end
 
@@ -407,8 +288,15 @@ class ChannelContentsController < ApplicationController
     event_ids = parse_event_ids(event_ids_param)
     return if event_ids.empty?
 
-    event_ids.each do |event_id|
-      channel_content.channel_content_events.create(event_id: event_id)
+    event_ids = current_user.events.where(id: event_ids).pluck(:id)
+    return if event_ids.empty?
+
+    # All-or-nothing: a silently dropped association would give the generator a
+    # different event set than the user selected.
+    ChannelContentEvent.transaction do
+      event_ids.each do |event_id|
+        channel_content.channel_content_events.create!(event_id: event_id)
+      end
     end
   end
 

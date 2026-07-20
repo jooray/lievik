@@ -16,9 +16,33 @@ module NostrContentHelper
     resolved.html_safe
   end
 
+  # Short/collapsed previews must resolve `nostr:` references BEFORE truncating.
+  # Truncating first cuts bech32 identifiers mid-string, and the leftover stub
+  # no longer matches NOSTR_URI_PATTERN — so a raw "nostr:nevent1qq…" leaks into
+  # the card. Event#content_for_embedding does the resolution to plain text.
+  def nostr_content_preview(event, length:)
+    text = event.respond_to?(:content_for_embedding) ? event.content_for_embedding : event.to_s
+    h(truncate(text.to_s, length: length))
+  end
+
   private
 
+  # Per-request memoization: the same npub/note is typically referenced by many
+  # cards on one page. The view context object lives for the whole request (and
+  # is shared across partials), so an ivar here is request-local.
+  def nostr_reference_cache
+    @_nostr_reference_cache ||= {}
+  end
+
   def resolve_nostr_reference(identifier, user)
+    cache_key = [identifier, user&.id]
+    cache = nostr_reference_cache
+    return cache[cache_key] if cache.key?(cache_key)
+
+    cache[cache_key] = resolve_nostr_reference_uncached(identifier, user)
+  end
+
+  def resolve_nostr_reference_uncached(identifier, user)
     parsed = Nostr::KeyConverter.parse_nostr_identifier(identifier)
     return "nostr:#{identifier}" unless parsed
 
@@ -149,7 +173,7 @@ module NostrContentHelper
     scheduled = Rails.cache.write(schedule_key, true, expires_in: 10.minutes, unless_exist: true)
     return unless scheduled
 
-    WarmNostrReferenceCacheJob.perform_later(reference_type, identifier, Array(relay_hints).select(&:present?))
+    WarmNostrReferenceCacheJob.perform_later(reference_type, identifier, Security::EgressGuard.filter_relay_urls(relay_hints))
   rescue => e
     Rails.logger.warn "Failed to schedule #{reference_type} fetch for #{identifier}: #{e.message}"
   end

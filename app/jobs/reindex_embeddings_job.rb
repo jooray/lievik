@@ -20,7 +20,9 @@ class ReindexEmbeddingsJob < ApplicationJob
 
     events.find_each do |event|
       begin
-        embedding = embedding_service.embed(event.content)
+        # Must match EmbedEventsJob exactly, or the same event ends up with two
+        # different vectors depending on which job last touched it.
+        embedding = embedding_service.embed(event.content_for_embedding)
         vector_store.store(event, embedding) if embedding
         embedded += 1
       rescue => e

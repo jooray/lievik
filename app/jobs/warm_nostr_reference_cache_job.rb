@@ -4,7 +4,9 @@ class WarmNostrReferenceCacheJob < ApplicationJob
   queue_as :default
 
   def perform(reference_type, identifier, relay_hints = [])
-    relay_hints = Array(relay_hints).select(&:present?)
+    # Hints originate in untrusted note content — never connect out to whatever
+    # host they name (SSRF / internal port-knock primitive).
+    relay_hints = Security::EgressGuard.filter_relay_urls(relay_hints)
 
     case reference_type
     when "profile"

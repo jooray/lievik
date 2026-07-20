@@ -4,7 +4,7 @@ require "rails_helper"
 
 RSpec.describe "Nostr sessions", type: :request do
   before do
-    allow(Nip46AuthJob).to receive(:perform_later)
+    allow(Nip46SupervisorJob).to receive(:perform_later)
     Rails.cache.clear
   end
 
@@ -37,13 +37,14 @@ RSpec.describe "Nostr sessions", type: :request do
     expect(response).to have_http_status(:ok)
   end
 
-  it "refuses to create sessions and jobs when active authentication is at capacity" do
+  it "refuses to create sessions and start the supervisor when active authentication is at capacity" do
     stub_const("SessionsController::MAX_ACTIVE_AUTH_SESSIONS", 0)
 
     expect { get nostr_login_path }.not_to change(NostrAuthSession, :count)
 
     expect(response).to have_http_status(:service_unavailable)
-    expect(Nip46AuthJob).not_to have_received(:perform_later)
+    expect(response.body).to include("Login is busy right now")
+    expect(Nip46SupervisorJob).not_to have_received(:perform_later)
   end
 
   it "keeps the browser's existing session when replacement admission is rejected" do
@@ -62,11 +63,11 @@ RSpec.describe "Nostr sessions", type: :request do
     expect(NostrAuthSession.exists?(existing.id)).to be(true)
   end
 
-  it "defaults admission capacity to dedicated auth worker concurrency" do
-    expected = ENV.fetch("AUTH_JOB_CONCURRENCY", 1).to_i * ENV.fetch("AUTH_JOB_PROCESSES", 1).to_i
-
-    expect(SessionsController::AUTH_LISTENER_CONCURRENCY).to eq(expected)
-    expect(SessionsController::MAX_ACTIVE_AUTH_SESSIONS).to eq(expected) unless ENV.key?("MAX_ACTIVE_NOSTR_AUTH_SESSIONS")
+  it "caps concurrent pending logins independently of worker concurrency" do
+    # The multiplexed supervisor serves every pending login from one connection,
+    # so the cap is a plain memory / relay fan-out guard, not a worker count.
+    expect(SessionsController::MAX_ACTIVE_AUTH_SESSIONS).to be > 0
+    expect(SessionsController::MAX_ACTIVE_AUTH_SESSIONS).to eq(50) unless ENV.key?("MAX_ACTIVE_NOSTR_AUTH_SESSIONS")
   end
 
   it "allows the same browser to replace its pending session at capacity" do
@@ -81,17 +82,63 @@ RSpec.describe "Nostr sessions", type: :request do
     expect(replacement.id).not_to eq(existing.id)
     expect(existing.reload.consumed_at).to be_present
     expect(NostrAuthSession.active.where(authenticated_pubkey: nil).count).to eq(1)
-    expect(Nip46AuthJob).to have_received(:perform_later).twice
+    expect(Nip46SupervisorJob).to have_received(:perform_later).twice
   end
 
-  it "keeps the existing browser session when replacement job enqueue fails" do
+  it "keeps the existing browser session when replacement supervisor enqueue fails" do
     get nostr_login_path
     existing = NostrAuthSession.order(:created_at).last
-    allow(Nip46AuthJob).to receive(:perform_later).and_raise(ActiveJob::EnqueueError)
+    allow(Nip46SupervisorJob).to receive(:perform_later).and_raise(ActiveJob::EnqueueError)
 
     expect { get nostr_login_path }.to raise_error(ActiveJob::EnqueueError)
 
     expect(NostrAuthSession.exists?(existing.id)).to be(true)
     expect(NostrAuthSession.count).to eq(1)
+  end
+
+  describe "GET /auth/nostr/poll" do
+    it "reports expired when there is no pending session in the Rails session" do
+      get auth_nostr_poll_path
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["authenticated"]).to be(false)
+      expect(body["expired"]).to be(true)
+    end
+
+    it "keeps polling while the auth session is still active" do
+      get nostr_login_path
+
+      get auth_nostr_poll_path
+
+      body = JSON.parse(response.body)
+      expect(body["authenticated"]).to be(false)
+      expect(body["expired"]).to be_nil
+    end
+
+    it "reports expired once the auth session leaves the active scope" do
+      get nostr_login_path
+      NostrAuthSession.order(:created_at).last.consume!
+
+      get auth_nostr_poll_path
+
+      body = JSON.parse(response.body)
+      expect(body["authenticated"]).to be(false)
+      expect(body["expired"]).to be(true)
+    end
+
+    it "returns the callback redirect once the session is authenticated" do
+      get nostr_login_path
+      NostrAuthSession.order(:created_at).last.update!(
+        authenticated_pubkey: "c" * 64,
+        authenticated_user_pubkey: "d" * 64
+      )
+
+      get auth_nostr_poll_path
+
+      body = JSON.parse(response.body)
+      expect(body["authenticated"]).to be(true)
+      expect(body["redirect_url"]).to eq(auth_nostr_callback_path)
+    end
   end
 end

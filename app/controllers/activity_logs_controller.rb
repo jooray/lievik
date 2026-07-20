@@ -5,6 +5,9 @@ class ActivityLogsController < ApplicationController
     @activity_logs = current_user.activity_logs.recent.page(params[:page]).per(50)
     @active_jobs = current_user.activity_logs.active
     @stale_jobs = current_user.activity_logs.stale
+    @dev_log_counts = DevLog.where(parent_type: "ActivityLog", parent_id: @activity_logs.map(&:id))
+      .group(:parent_id)
+      .count
   end
 
   def active

@@ -2,13 +2,17 @@
   <div class="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
     <%= link_to dashboard_path, class: "text-xl font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300" do %>Lievik<% end %>
     <div data-controller="theme">
-      <button type="button" data-action="click->theme#toggle" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="Toggle theme">
-        <!-- Sun icon (shown in dark mode) -->
-        <svg data-theme-icon="moon" class="h-5 w-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button type="button" data-action="click->theme#toggle" data-theme-target="button" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" title="Theme" aria-label="Change colour theme">
+        <%# One icon per *mode* (system / light / dark). Which one shows is decided by
+            CSS from the data-theme-mode attribute the pre-paint script sets, so the
+            server never has to guess. %>
+        <svg class="theme-icon theme-icon-system h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        <svg class="theme-icon theme-icon-light h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
         </svg>
-        <!-- Moon icon (shown in light mode) -->
-        <svg data-theme-icon="sun" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="theme-icon theme-icon-dark h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
         </svg>
       </button>
@@ -71,7 +75,7 @@
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
-            Ask Content
+            Ask Your Content
           <% end %>
         </li>
       </ul>
@@ -81,7 +85,16 @@
       <div class="flex items-center gap-3 mb-4 cursor-pointer group" data-turbo-frame="_top">
         <% if current_user.picture_url.present? %>
           <%= link_to edit_user_path do %>
-            <img src="<%= current_user.picture_url %>" alt="Profile" class="h-10 w-10 rounded-full object-cover hover:ring-2 hover:ring-purple-500 hover:ring-opacity-50 transition-all group-hover:scale-105">
+            <span data-controller="avatar">
+              <img src="<%= current_user.picture_url %>" alt="Profile"
+                   loading="lazy" referrerpolicy="no-referrer"
+                   data-avatar-target="image"
+                   data-action="error->avatar#fallback"
+                   class="h-10 w-10 rounded-full object-cover hover:ring-2 hover:ring-purple-500 hover:ring-opacity-50 transition-all group-hover:scale-105">
+              <span data-avatar-target="fallback" class="hidden h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                <span class="text-purple-600 dark:text-purple-400 font-medium"><%= current_user.display_name_or_npub[0].upcase %></span>
+              </span>
+            </span>
           <% end %>
         <% else %>
           <%= link_to edit_user_path do %>
@@ -131,11 +144,17 @@
       </button>
       <%= link_to dashboard_path, class: "text-lg font-bold text-purple-600 dark:text-purple-400" do %>Lievik<% end %>
       <div data-controller="theme">
-        <button type="button" data-action="click->theme#toggle" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Toggle theme">
-          <svg data-theme-icon="moon" class="h-5 w-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button type="button" data-action="click->theme#toggle" data-theme-target="button" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Theme" aria-label="Change colour theme">
+          <%# One icon per *mode* (system / light / dark). Which one shows is decided by
+              CSS from the data-theme-mode attribute the pre-paint script sets, so the
+              server never has to guess. %>
+          <svg class="theme-icon theme-icon-system h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          <svg class="theme-icon theme-icon-light h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
-          <svg data-theme-icon="sun" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="theme-icon theme-icon-dark h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
           </svg>
         </button>
@@ -212,7 +231,7 @@
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
-            Ask Content
+            Ask Your Content
           <% end %>
         </li>
       </ul>
@@ -222,7 +241,16 @@
       <div class="flex items-center gap-3 mb-4">
         <% if current_user.picture_url.present? %>
           <%= link_to edit_user_path, data: { action: "click->mobile-nav#close" } do %>
-            <img src="<%= current_user.picture_url %>" alt="Profile" class="h-10 w-10 rounded-full object-cover">
+            <span data-controller="avatar">
+              <img src="<%= current_user.picture_url %>" alt="Profile"
+                   loading="lazy" referrerpolicy="no-referrer"
+                   data-avatar-target="image"
+                   data-action="error->avatar#fallback"
+                   class="h-10 w-10 rounded-full object-cover">
+              <span data-avatar-target="fallback" class="hidden h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                <span class="text-purple-600 dark:text-purple-400 font-medium"><%= current_user.display_name_or_npub[0].upcase %></span>
+              </span>
+            </span>
           <% end %>
         <% else %>
           <%= link_to edit_user_path, data: { action: "click->mobile-nav#close" } do %>

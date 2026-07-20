@@ -2,49 +2,9 @@
 
 class ChannelEventsController < ApplicationController
   before_action :set_channel
-  before_action :set_channel_event, only: [:show, :mark_used, :mark_unused]
-
-  def index
-    @threshold = params[:threshold]&.to_i || @channel.relevance_threshold
-    @show_used = params[:show_used] == "true"
-
-    @channel_events = @channel.channel_events
-      .includes(event: [:source, :linked_contents])
-      .above_threshold(@threshold)
-
-    @channel_events = @channel_events.unused unless @show_used
-    @channel_events = @channel_events.by_relevance.page(params[:page])
-  end
-
-  def show
-    @event = @channel_event.event
-  end
-
-  def mark_used
-    @channel_event.mark_used!
-
-    respond_to do |format|
-      format.turbo_stream
-      format.html { redirect_to channel_events_path(@channel) }
-    end
-  end
-
-  def mark_unused
-    @channel_event.mark_unused!
-
-    respond_to do |format|
-      format.turbo_stream
-      format.html { redirect_to channel_events_path(@channel) }
-    end
-  end
 
   def bulk_mark_used
-    event_ids_json = params[:event_ids]
-    event_ids = if event_ids_json.is_a?(String)
-      JSON.parse(event_ids_json)
-    else
-      Array.wrap(event_ids_json).reject(&:blank?)
-    end
+    event_ids = parse_event_ids(params[:event_ids])
 
     if event_ids.empty?
       redirect_to channel_path(@channel, show_used: params[:show_used]), alert: "No events selected"
@@ -59,19 +19,14 @@ class ChannelEventsController < ApplicationController
   end
 
   def bulk_rate
-    event_ids_json = params[:event_ids]
+    event_ids = parse_event_ids(params[:event_ids])
 
-    event_ids = if event_ids_json.blank?
-      []
-    elsif event_ids_json.is_a?(String)
-      begin
-        JSON.parse(event_ids_json)
-      rescue JSON::ParserError
-        []
-      end
-    else
-      Array.wrap(event_ids_json).reject(&:blank?)
+    if event_ids.empty?
+      redirect_to channel_path(@channel, show_used: params[:show_used]), alert: "No events selected"
+      return
     end
+
+    event_ids = current_user.events.where(id: event_ids).pluck(:id)
 
     if event_ids.empty?
       redirect_to channel_path(@channel, show_used: params[:show_used]), alert: "No events selected"
@@ -86,12 +41,27 @@ class ChannelEventsController < ApplicationController
 
   private
 
+  # `event_ids` is either an array of checkbox values or a JSON-encoded array
+  # from the bulk-select Stimulus controller. A hand-crafted request can send
+  # anything at all, so never let JSON.parse (or its result) blow up the action.
+  def parse_event_ids(raw)
+    return [] if raw.blank?
+
+    values = if raw.is_a?(String)
+      begin
+        JSON.parse(raw)
+      rescue JSON::ParserError, TypeError
+        []
+      end
+    else
+      raw
+    end
+
+    Array.wrap(values).reject { |v| v.blank? || !v.to_s.match?(/\A\d+\z/) }
+  end
+
   def set_channel
     channel_id = params[:channel_id] || params[:id]
     @channel = current_user.channels.find(channel_id)
-  end
-
-  def set_channel_event
-    @channel_event = @channel.channel_events.find(params[:id])
   end
 end

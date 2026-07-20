@@ -37,7 +37,11 @@ module Lievik
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Persist login sessions for 30 days (Nostr login is cumbersome to repeat)
-    config.session_store :cookie_store, expire_after: 30.days
+    config.session_store :cookie_store,
+      expire_after: 30.days,
+      httponly: true,
+      same_site: :lax,
+      secure: Rails.env.production?
 
     # Don't generate system test files.
     config.generators.system_tests = nil

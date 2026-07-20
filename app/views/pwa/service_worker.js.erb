@@ -1,0 +1,69 @@
+// Lievik service worker.
+//
+// Deliberately conservative: it never intercepts navigations or API calls, so
+// it cannot serve a stale page or a stale JSON response. It only cache-firsts
+// digest-stamped asset URLs (which are immutable by construction) and drops
+// every cache from a previous build on activate.
+//
+// Freshness of the app itself is handled by the version poller in the layout,
+// not by this worker.
+
+const BUILD_VERSION = "<%= Lievik::BUILD_VERSION %>";
+const CACHE_NAME = `lievik-assets-${BUILD_VERSION}`;
+
+self.addEventListener("install", (event) => {
+  // Don't sit in "waiting" — a new build should take over immediately.
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      const names = await caches.keys();
+      await Promise.all(
+        names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
+      );
+      await self.clients.claim();
+    })()
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Only digest-stamped build output. Everything else falls through to the
+  // network untouched.
+  const isImmutableAsset =
+    url.pathname.startsWith("/assets/") ||
+    url.pathname === "/icon.png" ||
+    url.pathname === "/icon.svg" ||
+    url.pathname === "/icon-192.png" ||
+    url.pathname === "/icon-maskable.png";
+
+  if (!isImmutableAsset) return;
+
+  event.respondWith(
+    (async () => {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+
+      const response = await fetch(request);
+      if (response.ok && response.type === "basic") {
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, response.clone());
+      }
+      return response;
+    })()
+  );
+});
+
+// The page tells the worker to step aside when it is about to reload for an
+// update, so the reload is served entirely from the network.
+self.addEventListener("message", (event) => {
+  if (event.data === "skip-waiting") self.skipWaiting();
+});

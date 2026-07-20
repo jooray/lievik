@@ -54,7 +54,7 @@ default: &default
       # Using 6000 chars for safety with international text
       max_chars: 6000
 
-    # Vector store backend: auto | ruby | pgvector
+    # Vector store backend: auto | ruby (only the Ruby backend is implemented)
     vector_backend: auto
 
     # Retrieval settings
@@ -62,6 +62,9 @@ default: &default
       max_events: 20
       min_similarity: 0.3
       context_max_chars: 4000
+      # Ruby backend only scans the most recent N embedded events per query,
+      # keeping memory bounded on large accounts (see RubyBackend::MAX_CANDIDATES).
+      max_candidates: 20000
 
     # Query rewriting - preprocess queries with LLM for better retrieval
     query_rewriting:

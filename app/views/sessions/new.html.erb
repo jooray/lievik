@@ -36,7 +36,7 @@
       </div>
 
       <!-- NIP-46 QR Code -->
-      <div id="qr-section">
+      <div id="qr-section" data-nostr-login-target="qrSection">
         <p class="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
           Scan with Amber or compatible NIP-46 signer
         </p>
@@ -69,6 +69,16 @@
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
         </svg>
         Waiting for connection...
+      </div>
+
+      <!-- Shown once the approval window lapses; polling can never succeed after that -->
+      <div class="hidden text-center space-y-3" data-nostr-login-target="expiredNotice">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          This QR code has expired for your security.
+        </p>
+        <%= link_to "Get a new QR code", nostr_login_path,
+              data: { turbo: false },
+              class: "inline-flex items-center justify-center px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium" %>
       </div>
 
       <!-- Error message -->

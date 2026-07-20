@@ -64,25 +64,21 @@ module Nostr
     def find_or_create_user(pubkey_hex)
       npub = KeyConverter.hex_to_npub(pubkey_hex)
 
-      user = ::User.find_or_initialize_by(pubkey_hex: pubkey_hex)
+      # Two browser tabs (or a retried callback) can hit this at the same moment
+      # for one pubkey; find_or_initialize_by then races into RecordNotUnique and
+      # 500s the callback. create_or_find_by! lets the unique index arbitrate.
+      user = ::User.find_by(pubkey_hex: pubkey_hex)
+      user ||= begin
+        ::User.create!(pubkey_hex: pubkey_hex, npub: npub)
+      rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
+        # The other login won; adopt its record rather than blowing up the callback.
+        ::User.find_by(pubkey_hex: pubkey_hex) || raise(e)
+      end
 
-      # If new user or profile is missing data, try to fetch it
-      if user.new_record? || user.display_name.blank?
-        user.npub = npub
-
-        # Fetch profile from relays
-        profile = ProfileFetcher.new.fetch(pubkey_hex)
-        if profile
-          user.display_name = profile[:display_name]
-          user.username = profile[:username]
-          user.about = profile[:about]
-          user.picture_url = profile[:picture]
-        end
-
-        user.save!
-
-        # Create manual source for the user only if it's a new record
-        if user.previously_new_record?
+      if user.previously_new_record?
+        # Create the manual source for genuinely new users only, and tolerate a
+        # concurrent login having created it already.
+        begin
           user.sources.create!(
             source_type: :manual,
             identifier: "manual",
@@ -90,8 +86,14 @@ module Nostr
             description: "Manually entered content",
             distance: 1
           )
+        rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+          Rails.logger.info("Manual source already exists for user #{user.id}")
         end
       end
+
+      # Profile fetching is sequential relay IO (seconds per relay) — it happens
+      # in the background so login itself stays fast.
+      RefreshUserProfileJob.perform_later(user.id) if user.display_name.blank?
 
       user
     end

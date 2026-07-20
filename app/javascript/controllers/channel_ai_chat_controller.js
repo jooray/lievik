@@ -98,10 +98,11 @@ export default class extends Controller {
           if (eventType === "chunk" && eventData) {
             const chunk = JSON.parse(eventData)
             fullContent += chunk
-            // Display text with JSON blocks stripped
-            const displayContent = this.stripJsonBlocks(fullContent)
-            if (displayContent.trim()) {
-              contentDiv.innerHTML = this.renderMarkdown(displayContent)
+            // Display text with JSON blocks stripped. Re-rendering the whole
+            // answer per chunk is O(n^2) and visibly janky, so coalesce to one
+            // render per animation frame.
+            if (this.stripJsonBlocks(fullContent).trim()) {
+              this.scheduleRender(contentDiv, () => this.stripJsonBlocks(fullContent))
             }
             this.scrollToBottom()
           } else if (eventType === "proposal" && eventData) {
@@ -109,6 +110,7 @@ export default class extends Controller {
             this.currentProposal = proposal
             this.renderProposal(proposal)
           } else if (eventType === "complete" && eventData) {
+            this.cancelScheduledRender()
             this.isStreaming = false
             this.setLoading(false)
 
@@ -245,8 +247,13 @@ export default class extends Controller {
   }
 
   renderChannelCard(channel, index) {
-    const langUpper = (channel.language || "en").toUpperCase()
-    const threshold = channel.settings?.relevance_threshold || 50
+    const langUpper = this.escapeHtml((channel.language || "en").toUpperCase())
+    // AI-supplied, and interpolated straight into a value="" attribute below —
+    // coerce to a plain bounded integer so it can never carry markup.
+    const parsedThreshold = parseInt(channel.settings?.relevance_threshold, 10)
+    const threshold = Number.isFinite(parsedThreshold)
+      ? Math.min(100, Math.max(0, parsedThreshold))
+      : 50
 
     return `
       <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 border border-gray-200 dark:border-gray-700"
@@ -570,9 +577,33 @@ export default class extends Controller {
     return null
   }
 
+  // Coalesce streaming re-renders into one per frame.
+  scheduleRender(target, contentFn) {
+    this.pendingRenderTarget = target
+    this.pendingRenderContent = contentFn
+
+    if (this.renderFrame) return
+
+    this.renderFrame = requestAnimationFrame(() => {
+      this.renderFrame = null
+      if (!this.pendingRenderTarget) return
+      this.pendingRenderTarget.innerHTML = this.renderMarkdown(this.pendingRenderContent())
+    })
+  }
+
+  cancelScheduledRender() {
+    if (this.renderFrame) {
+      cancelAnimationFrame(this.renderFrame)
+      this.renderFrame = null
+    }
+    this.pendingRenderTarget = null
+    this.pendingRenderContent = null
+  }
+
   renderMarkdown(content) {
     if (!content) return ""
 
+    content = this.escapeHtml(content)
     let html = content
 
     // Code blocks (triple backticks)

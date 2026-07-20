@@ -3,6 +3,8 @@
 class ChannelAiChatController < ApplicationController
   include ActionController::Live
 
+  MAX_BULK_RATE_EVENTS = RateEventsJob::MAX_BULK_RATE_EVENTS
+
   def index
     @existing_channels_count = current_user.channels.count
   end
@@ -14,7 +16,23 @@ class ChannelAiChatController < ApplicationController
 
     message = params[:message].to_s.strip
     history_param = params[:history]
-    conversation_history = history_param.is_a?(Array) ? history_param : JSON.parse(history_param || "[]")
+
+    conversation_history =
+      if history_param.is_a?(Array)
+        history_param
+      else
+        begin
+          JSON.parse(history_param.presence || "[]")
+        rescue JSON::ParserError, TypeError
+          :invalid
+        end
+      end
+
+    if conversation_history == :invalid || !conversation_history.is_a?(Array)
+      response.stream.write "event: error\ndata: #{({ message: "Invalid conversation history" }).to_json}\n\n"
+      response.stream.close
+      return
+    end
 
     if message.blank?
       response.stream.write "event: error\ndata: #{({ message: "Please enter a message" }).to_json}\n\n"
@@ -104,14 +122,15 @@ class ChannelAiChatController < ApplicationController
 
   private
 
+  # Bounded + chunked: each rated event costs up to 3 paid AI calls, and a
+  # bulk_create can produce several channels at once.
   def queue_initial_rating(channel)
-    recent_event_ids = current_user.sources
-      .joins(:events)
+    recent_event_ids = current_user.events
       .where("events.published_at >= ?", 3.months.ago)
-      .pluck("events.id")
+      .order(published_at: :desc)
+      .limit(MAX_BULK_RATE_EVENTS)
+      .pluck(:id)
 
-    return if recent_event_ids.empty?
-
-    RateEventsJob.perform_later(channel.id, recent_event_ids)
+    RateEventsJob.enqueue_batches(channel.id, recent_event_ids)
   end
 end

@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 require "rss"
-require "open-uri"
 
 module Ingestion
   class RssIngestionService
     USER_AGENT = "Lievik/1.0 (RSS Reader)"
     TIMEOUT = 30
+    MAX_FEED_BYTES = 5_000_000 # 5MB — feeds larger than this are rejected, not buffered
+    # events.content is MEDIUMTEXT on MariaDB (16 MB). A single `content:encoded`
+    # body is capped well below that so an insert can never fail on length.
+    MAX_CONTENT_BYTES = 1_000_000
 
     def initialize(source, activity_log_id: nil)
       @source = source
@@ -36,14 +39,24 @@ module Ingestion
         items = extract_items(feed)
 
         items.each do |item|
-          result = import_item(item)
-          if result
-            imported_count += 1
-            imported_event_ids << result.id
-            # Extract links from the new event
-            linked_contents = Links::ExtractionService.new(result).extract_and_save
-            new_linked_content_ids.concat(linked_contents.select { |lc| lc.fetched_at.nil? }.map(&:id))
-          else
+          begin
+            result = import_item(item)
+
+            if result
+              imported_count += 1
+              imported_event_ids << result.id
+              # Extract links from the new event
+              linked_contents = Links::ExtractionService.new(result).extract_and_save
+              new_linked_content_ids.concat(linked_contents.select { |lc| lc.fetched_at.nil? }.map(&:id))
+            else
+              skipped_count += 1
+            end
+          rescue ActiveRecord::RecordNotUnique
+            # Concurrent ingestion of the same source imported this item first.
+            skipped_count += 1
+          rescue StandardError => e
+            # One malformed item must never abort the rest of the feed.
+            Rails.logger.warn("Skipping bad RSS item: #{e.class} - #{e.message}")
             skipped_count += 1
           end
         end
@@ -72,18 +85,22 @@ module Ingestion
     private
 
     def valid_url?(url)
-      uri = URI.parse(url)
-      uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-    rescue URI::InvalidURIError
-      false
+      Security::EgressGuard.allowed_http_url?(url)
     end
 
     def fetch_feed(url)
-      URI.open(url,
-        "User-Agent" => USER_AGENT,
-        read_timeout: TIMEOUT,
-        open_timeout: TIMEOUT
-      ).read
+      # EgressGuard re-applies the SSRF filter on every redirect hop and caps the
+      # body while streaming — URI.open did neither.
+      response = Security::EgressGuard.get(
+        url,
+        headers: { "user-agent" => USER_AGENT },
+        timeout: TIMEOUT,
+        max_bytes: MAX_FEED_BYTES
+      )
+      raise "Feed returned HTTP #{response.status}" unless response.success?
+      raise "Feed larger than #{MAX_FEED_BYTES} bytes" if response.truncated
+
+      response.body
     end
 
     def parse_feed(content)
@@ -115,7 +132,7 @@ module Ingestion
 
       event = @source.events.create(
         external_id: external_id,
-        content: content,
+        content: truncate_content(content),
         event_type: :original,
         published_at: published_at,
         raw_data: item_to_hash(item),
@@ -126,6 +143,14 @@ module Ingestion
       )
 
       event.persisted? ? event : nil
+    end
+
+    def truncate_content(content)
+      return content unless content.is_a?(String)
+      return content if content.bytesize <= MAX_CONTENT_BYTES
+
+      Rails.logger.warn("Truncating oversized RSS item content (#{content.bytesize} bytes)")
+      content.byteslice(0, MAX_CONTENT_BYTES).scrub("")
     end
 
     def extract_id(item)
@@ -166,16 +191,32 @@ module Ingestion
     end
 
     def extract_link(item)
-      if item.respond_to?(:link)
-        link = item.link
-        if link.respond_to?(:href)
-          link.href
-        elsif link.is_a?(String)
-          link
-        else
-          link.to_s
-        end
+      return nil unless item.respond_to?(:link)
+
+      link = item.link
+      raw = if link.respond_to?(:href)
+        link.href
+      elsif link.is_a?(String)
+        link
+      else
+        link.to_s
       end
+
+      safe_link(raw)
+    end
+
+    # Feed-supplied links are rendered into href attributes ("View Original"),
+    # so anything but http(s) — notably javascript: — is dropped at ingestion.
+    def safe_link(url)
+      return nil if url.blank?
+
+      uri = URI.parse(url.to_s.strip)
+      return nil unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+      return nil if uri.host.blank?
+
+      uri.to_s
+    rescue URI::InvalidURIError
+      nil
     end
 
     def extract_date(item)

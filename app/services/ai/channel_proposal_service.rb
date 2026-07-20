@@ -43,7 +43,7 @@ module Ai
       yield({ type: "error", data: { message: e.message } })
       { success: false, error: e.message }
     rescue => e
-      Rails.logger.error("Channel proposal error: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+      Rails.logger.error("Channel proposal error: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
       yield({ type: "error", data: { message: "An unexpected error occurred" } })
       { success: false, error: e.message }
     end
@@ -140,34 +140,7 @@ module Ai
     end
 
     def extract_balanced_json(text, start_idx)
-      depth = 0
-      i = start_idx
-
-      while i < text.length
-        char = text[i]
-        if char == "{"
-          depth += 1
-        elsif char == "}"
-          depth -= 1
-          if depth == 0
-            return text[start_idx..i]
-          end
-        elsif char == '"'
-          # Skip string contents (handle escaped quotes)
-          i += 1
-          while i < text.length
-            if text[i] == '\\'
-              i += 1 # skip escaped character
-            elsif text[i] == '"'
-              break
-            end
-            i += 1
-          end
-        end
-        i += 1
-      end
-
-      nil
+      Ai::JsonExtraction.extract_balanced_json(text, start_idx)
     end
   end
 end

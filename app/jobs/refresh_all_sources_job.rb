@@ -5,7 +5,12 @@ class RefreshAllSourcesJob < ApplicationJob
 
   def perform(user_id = nil)
     sources = if user_id
-      User.find(user_id).sources.where.not(source_type: :manual)
+      # A raw id isn't covered by `discard_on DeserializationError`, so a user
+      # deleted between enqueue and run would raise forever on retry.
+      user = User.find_by(id: user_id)
+      return unless user
+
+      user.sources.where.not(source_type: :manual)
     else
       Source.where.not(source_type: :manual)
     end
