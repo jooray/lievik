@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_20_155416) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_20_201539) do
   create_table "activity_logs", force: :cascade do |t|
     t.string "activity_type", null: false
     t.datetime "completed_at"
@@ -22,6 +22,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_20_155416) do
     t.integer "user_id", null: false
     t.index ["activity_type"], name: "index_activity_logs_on_activity_type"
     t.index ["user_id", "created_at"], name: "index_activity_logs_on_user_id_and_created_at"
+    t.index ["user_id", "status", "updated_at"], name: "index_activity_logs_on_user_status_updated"
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
   end
 

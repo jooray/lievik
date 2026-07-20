@@ -177,6 +177,17 @@ class RateEventsJob < ApplicationJob
     rescue StandardError => e
       activity_log.fail!(message: e.message)
       raise
+    ensure
+      # See SourceIngestionJob: a worker interrupted mid-run (deploy, restart,
+      # crash loop) unwinds without raising a StandardError, which would strand
+      # this log as a permanent "running" card. Must never raise itself.
+      begin
+        if activity_log.persisted? && activity_log.reload.active?
+          activity_log.fail!(message: "Interrupted — worker stopped mid-run")
+        end
+      rescue ActiveRecord::RecordNotFound, ActiveRecord::ActiveRecordError
+        nil
+      end
     end
   end
 end

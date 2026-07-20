@@ -27,6 +27,9 @@ class ActivityLog < ApplicationRecord
   # "in progress" card stays on screen until the next full page load.
   after_destroy_commit :broadcast_job_removed
 
+  # Callable on a relation too (`user.activity_logs.mark_stale_as_failed!`) —
+  # `stale` resolves against the current scope. The controllers use that so the
+  # UI heals itself even when the recurring sweep isn't running.
   def self.mark_stale_as_failed!
     stale.find_each do |activity|
       activity.fail!(message: "Job stale — no progress for #{activity.minutes_since_last_update} minutes")

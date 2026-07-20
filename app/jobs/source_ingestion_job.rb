@@ -73,6 +73,21 @@ class SourceIngestionJob < ApplicationJob
     rescue StandardError => e
       activity_log.fail!(message: e.message)
       raise
+    ensure
+      # A worker shutting down mid-ingestion (systemd restart, deploy, crash
+      # loop) unwinds this method without going through any branch above — the
+      # thread is interrupted, not handed a StandardError. Without this the log
+      # is left "running" forever and shows up as a phantom progress card on the
+      # dashboard; a restart loop mints a fresh one every cycle, which is how
+      # 142 of them once accumulated in a single afternoon.
+      # Never let this ensure raise — it would mask the real error.
+      begin
+        if activity_log.persisted? && activity_log.reload.active?
+          activity_log.fail!(message: "Interrupted — worker stopped mid-ingestion")
+        end
+      rescue ActiveRecord::RecordNotFound, ActiveRecord::ActiveRecordError
+        nil
+      end
     end
   end
 end

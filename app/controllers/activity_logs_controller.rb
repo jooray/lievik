@@ -11,6 +11,9 @@ class ActivityLogsController < ApplicationController
   end
 
   def active
+    # Polled endpoint — sweeping here is what actually clears stranded cards
+    # from an open dashboard without a reload. See DashboardController#index.
+    current_user.activity_logs.mark_stale_as_failed!
     @active_jobs = current_user.activity_logs.active
 
     respond_to do |format|

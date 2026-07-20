@@ -8,7 +8,11 @@ class DashboardController < ApplicationController
     @events_count = current_user.events.count
     @embedded_count = current_user.events.where.not(embedding: nil).count
 
-    # Active background jobs
+    # Active background jobs. Sweep this user's stale logs first: the recurring
+    # sweep is the primary path, but it rides on a scheduler that can itself be
+    # down (and once was, for days), and the visible symptom is a dashboard full
+    # of phantom "running" cards. Doing it on read makes the UI self-healing.
+    current_user.activity_logs.mark_stale_as_failed!
     @active_jobs = current_user.activity_logs.active
 
     # Recent events with top channel relevance pre-loaded

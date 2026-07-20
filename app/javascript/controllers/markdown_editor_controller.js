@@ -17,6 +17,14 @@ export default class extends Controller {
 
     this.editor = new EasyMDE({
       element: this.textareaTarget,
+      // Left at its default, EasyMDE appends a <link> to
+      // maxcdn.bootstrapcdn.com for Font Awesome, which is what draws every
+      // toolbar icon. `style-src :self` blocks it, so the toolbar rendered as a
+      // row of blank buttons with only the separators visible. Icons are
+      // self-hosted instead (see the .editor-toolbar rules in
+      // application.tailwind.css) — one less third-party request, and the
+      // toolbar no longer depends on a CDN being up.
+      autoDownloadFontAwesome: false,
       spellChecker: false,
       autosave: {
         enabled: false
