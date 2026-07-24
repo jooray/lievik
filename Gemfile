@@ -33,7 +33,7 @@ gem "solid_cache"
 # (RecurringTask.wrap raised NoMethodError: undefined method 'second' for
 # an instance of String) - revisit as its own migration, not bundled with
 # an unrelated Ruby security bump.
-gem "solid_queue", "~> 1.2.4"
+gem "solid_queue", "~> 1.5.0"
 # Pinned below 4.0: unreviewed major bump alongside the above, same reasoning.
 gem "solid_cable", "~> 3.0"
 
