@@ -34,10 +34,10 @@ default: &default
     provider: venice
     endpoint: https://api.venice.ai/api/v1
     models:
-      classification: deepseek-v4-flash
-      link_summarization: deepseek-v4-flash
+      classification: deepseek-v4-flash-0731
+      link_summarization: deepseek-v4-flash-0731
       rag_chat: claude-sonnet-4-6
-      query_rewriting: deepseek-v4-flash
+      query_rewriting: deepseek-v4-flash-0731
       channel_proposal: claude-sonnet-4-6
       content_generation: claude-sonnet-4-6
       content_refinement: claude-sonnet-4-6

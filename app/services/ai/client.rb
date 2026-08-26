@@ -168,17 +168,22 @@ module Ai
       normalized_payload(payload).merge(provider_specific_payload)
     end
 
-    # Venice reasoning models (claude-sonnet-4-6, deepseek-v4-flash, …) always
-    # emit reasoning tokens, and those tokens count against the completion
-    # budget. With a tight max_tokens the reasoning can consume the entire
-    # allowance, leaving an EMPTY response with finish_reason: "length" — this
-    # was silently dropping ratings (a small classification budget is far less
-    # than the reasoning overhead). Add headroom so the caller's
+    # Venice reasoning models (claude-sonnet-4-6, deepseek-v4-flash-0731, …)
+    # always emit reasoning tokens, and those tokens count against the
+    # completion budget. With a tight max_tokens the reasoning can consume the
+    # entire allowance, leaving an EMPTY response with finish_reason: "length"
+    # — this was silently dropping ratings (a small classification budget is
+    # far less than the reasoning overhead). Add headroom so the caller's
     # intended output size survives the reasoning overhead, strip the thinking
     # from the returned content, and keep the effort low to limit the overhead.
+    #
+    # This list is matched against the configured model string EXACTLY, so it
+    # must be kept in sync with config/lievik.yml `ai.models` — a model that
+    # drops off this list keeps working but silently loses the headroom and the
+    # thinking-strip, which is how the empty-rating bug comes back.
     REASONING_HEADROOM_TOKENS = 8_000
     MODEL_MAX_COMPLETION_TOKENS = 64_000
-    VENICE_REASONING_MODELS = %w[claude-sonnet-4-6 deepseek-v4-flash].freeze
+    VENICE_REASONING_MODELS = %w[claude-sonnet-4-6 deepseek-v4-flash-0731].freeze
 
     def venice_reasoning_model?
       @config[:provider].to_s == "venice" && VENICE_REASONING_MODELS.include?(@model)
