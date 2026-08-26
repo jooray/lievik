@@ -168,7 +168,7 @@ module Ai
       normalized_payload(payload).merge(provider_specific_payload)
     end
 
-    # Venice reasoning models (claude-sonnet-4-6, deepseek-v4-flash-0731, …)
+    # Venice reasoning models (claude-sonnet-5, deepseek-v4-flash-0731, …)
     # always emit reasoning tokens, and those tokens count against the
     # completion budget. With a tight max_tokens the reasoning can consume the
     # entire allowance, leaving an EMPTY response with finish_reason: "length"
@@ -183,7 +183,7 @@ module Ai
     # thinking-strip, which is how the empty-rating bug comes back.
     REASONING_HEADROOM_TOKENS = 8_000
     MODEL_MAX_COMPLETION_TOKENS = 64_000
-    VENICE_REASONING_MODELS = %w[claude-sonnet-4-6 deepseek-v4-flash-0731].freeze
+    VENICE_REASONING_MODELS = %w[claude-sonnet-5 deepseek-v4-flash-0731].freeze
 
     def venice_reasoning_model?
       @config[:provider].to_s == "venice" && VENICE_REASONING_MODELS.include?(@model)

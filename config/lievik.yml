@@ -36,12 +36,12 @@ default: &default
     models:
       classification: deepseek-v4-flash-0731
       link_summarization: deepseek-v4-flash-0731
-      rag_chat: claude-sonnet-4-6
+      rag_chat: claude-sonnet-5
       query_rewriting: deepseek-v4-flash-0731
-      channel_proposal: claude-sonnet-4-6
-      content_generation: claude-sonnet-4-6
-      content_refinement: claude-sonnet-4-6
-      content_humanization: claude-sonnet-4-6
+      channel_proposal: claude-sonnet-5
+      content_generation: claude-sonnet-5
+      content_refinement: claude-sonnet-5
+      content_humanization: claude-sonnet-5
 
   rag:
     # Ollama embedding settings
