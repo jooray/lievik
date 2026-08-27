@@ -1,3 +1,15 @@
+<%# Every filter link and bulk form on this page has to carry the *other*
+    filters along, otherwise clicking one silently resets the user's search,
+    sort or "show used" choice. This builds a channel URL with all three
+    preserved, overriding only what the caller names. %>
+<% sort_param = (@sort == ChannelsController::DEFAULT_SORT ? nil : @sort) %>
+<% channel_view_path = ->(**overrides) {
+     channel_path(@channel, {
+       show_used: (@show_used || nil),
+       search: params[:search].presence,
+       sort: sort_param
+     }.merge(overrides))
+   } %>
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
@@ -38,7 +50,7 @@
 
   <div data-controller="bulk-select" data-bulk-select-total-value="<%= @channel_events.size %>" class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
     <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h2 class="text-lg font-medium text-gray-900 dark:text-white">Relevant Content</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -48,15 +60,30 @@
             <% end %>
           </p>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-wrap">
+          <%# Sort order. Links rather than a <select> with an onchange handler:
+              the app's CSP forbids inline scripts. Every order still runs
+              through the threshold and "show used" filters. %>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Sort:</span>
+            <div class="inline-flex rounded-md border border-gray-300 dark:border-gray-600 p-0.5" role="group" aria-label="Sort order">
+              <% [["relevance", "Rating"], ["newest", "Newest"], ["oldest", "Oldest"]].each do |value, label| %>
+                <% active = @sort == value %>
+                <%= link_to label,
+                      channel_view_path.(sort: (value == ChannelsController::DEFAULT_SORT ? nil : value)),
+                      "aria-current": (active ? "true" : nil),
+                      class: "px-2 py-1 text-xs font-medium rounded #{active ? 'bg-purple-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}" %>
+              <% end %>
+            </div>
+          </div>
           <span class="text-sm text-gray-500 dark:text-gray-400">Threshold: <%= @threshold %>%</span>
           <div class="h-2 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div class="h-full bg-purple-600" style="width: <%= @threshold %>%"></div>
           </div>
-          <!-- Show Used Toggle — must carry the active search along, otherwise
-               ticking it silently throws away the user's filter. -->
-          <% show_used_on_url = channel_path(@channel, show_used: true, search: params[:search].presence) %>
-          <% show_used_off_url = channel_path(@channel, search: params[:search].presence) %>
+          <!-- Show Used Toggle — must carry the active search and sort along,
+               otherwise ticking it silently throws away the user's filters. -->
+          <% show_used_on_url = channel_view_path.(show_used: true) %>
+          <% show_used_off_url = channel_view_path.(show_used: nil) %>
           <%# A link rather than a checkbox with an inline onchange handler:
               the app's CSP forbids inline scripts, so the old handler never ran. %>
           <%= link_to(@show_used ? show_used_off_url : show_used_on_url,
@@ -84,10 +111,11 @@
         </div>
         <%= form_with url: channel_path(@channel), method: :get, class: "flex gap-2" do |f| %>
           <%= f.hidden_field :show_used, value: @show_used if @show_used %>
+          <%= f.hidden_field :sort, value: @sort if sort_param %>
           <%= f.text_field :search, value: params[:search], placeholder: "Search events...", class: "px-3 py-1.5 text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" %>
           <%= f.submit "Search", class: "px-3 py-1.5 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer" %>
           <% if params[:search].present? %>
-            <%= link_to "Clear", channel_path(@channel, show_used: (@show_used || nil)), class: "px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
+            <%= link_to "Clear", channel_view_path.(search: nil), class: "px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
           <% end %>
         <% end %>
       </div>
@@ -99,12 +127,12 @@
             <input type="submit" value="Use Events in new content" data-bulk-select-target="contentSubmitText" class="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 whitespace-nowrap cursor-pointer">
           <% end %>
           <!-- Mark as Used button -->
-          <%= form_with url: bulk_mark_used_channel_path(@channel, show_used: @show_used), method: :post, data: { turbo: false }, class: "inline" do %>
+          <%= form_with url: bulk_mark_used_channel_path(@channel, show_used: @show_used, sort: sort_param), method: :post, data: { turbo: false }, class: "inline" do %>
             <input type="hidden" name="event_ids" value="" data-bulk-select-target="checkboxes">
             <input type="submit" value="Mark as Used" data-bulk-select-target="submitText" class="px-4 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 whitespace-nowrap cursor-pointer">
           <% end %>
           <!-- Rate Events button -->
-          <%= form_with url: bulk_rate_channel_path(@channel, show_used: @show_used), method: :post, data: { turbo: false }, class: "inline" do %>
+          <%= form_with url: bulk_rate_channel_path(@channel, show_used: @show_used, sort: sort_param), method: :post, data: { turbo: false }, class: "inline" do %>
             <input type="hidden" name="event_ids" value="" data-bulk-select-target="checkboxes">
             <input type="submit" value="Rate Events" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 whitespace-nowrap cursor-pointer">
           <% end %>

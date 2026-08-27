@@ -7,7 +7,7 @@ class ChannelEventsController < ApplicationController
     event_ids = parse_event_ids(params[:event_ids])
 
     if event_ids.empty?
-      redirect_to channel_path(@channel, show_used: params[:show_used]), alert: "No events selected"
+      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: "No events selected"
       return
     end
 
@@ -15,31 +15,39 @@ class ChannelEventsController < ApplicationController
     channel_events.update_all(used: true, used_at: Time.current)
 
     notice = "Marked #{channel_events.size} events as used"
-    redirect_to channel_path(@channel, show_used: params[:show_used]), notice: notice
+    redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), notice: notice
   end
 
   def bulk_rate
     event_ids = parse_event_ids(params[:event_ids])
 
     if event_ids.empty?
-      redirect_to channel_path(@channel, show_used: params[:show_used]), alert: "No events selected"
+      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: "No events selected"
       return
     end
 
     event_ids = current_user.events.where(id: event_ids).pluck(:id)
 
     if event_ids.empty?
-      redirect_to channel_path(@channel, show_used: params[:show_used]), alert: "No events selected"
+      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: "No events selected"
       return
     end
 
     RateEventsJob.perform_later(@channel.id, event_ids)
 
     notice = "Rerating queued for #{event_ids.size} event#{event_ids.size != 1 ? 's' : ''}"
-    redirect_to channel_path(@channel, show_used: params[:show_used]), notice: notice
+    redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), notice: notice
   end
 
   private
+
+  # Bulk actions redirect back to the list the user was looking at, so the sort
+  # has to survive the round trip. Whitelisted for the same reason it is in
+  # ChannelsController: it ends up choosing an ORDER BY.
+  def sort_param
+    params[:sort] if ChannelsController::SORT_OPTIONS.include?(params[:sort]) &&
+      params[:sort] != ChannelsController::DEFAULT_SORT
+  end
 
   # `event_ids` is either an array of checkbox values or a JSON-encoded array
   # from the bulk-select Stimulus controller. A hand-crafted request can send

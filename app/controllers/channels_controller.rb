@@ -7,6 +7,11 @@ class ChannelsController < ApplicationController
 
   MAX_BULK_RATE_EVENTS = RateEventsJob::MAX_BULK_RATE_EVENTS
 
+  # Whitelist: the value picks an ORDER BY, so it must never come straight from
+  # params. "relevance" is the default and is left out of generated URLs.
+  SORT_OPTIONS = %w[relevance newest oldest].freeze
+  DEFAULT_SORT = "relevance"
+
   before_action :set_channel, only: [:show, :edit, :update, :destroy, :settings, :update_settings, :rate]
 
   def index
@@ -19,6 +24,7 @@ class ChannelsController < ApplicationController
     @show_used = params[:show_used] == "true"
     @search_query = params[:search]
     @selected_event_id = params[:selected_event]&.to_i
+    @sort = SORT_OPTIONS.include?(params[:sort]) ? params[:sort] : DEFAULT_SORT
 
     @channel_events = @channel.channel_events
       .includes(event: :source)
@@ -32,14 +38,17 @@ class ChannelsController < ApplicationController
       @channel_events = @channel_events.joins(:event).where("events.content LIKE ? ESCAPE '!'", "%#{pattern}%")
     end
 
-    # Separate used and unused events
-    if @show_used
+    # Separate used and unused events. The chosen sort applies within each
+    # group — used events stay pinned to the bottom regardless of it.
+    @channel_events = if @show_used
       # Show all events, with unused first, then used at bottom
-      @channel_events = @channel_events.order(used: :asc).by_relevance.page(params[:page]).per(PER_PAGE)
+      @channel_events.order(used: :asc)
     else
       # Only show unused events
-      @channel_events = @channel_events.unused.by_relevance.page(params[:page]).per(PER_PAGE)
+      @channel_events.unused
     end
+
+    @channel_events = apply_sort(@channel_events, @sort).page(params[:page]).per(PER_PAGE)
 
     # One grouped query instead of two COUNTs. `used` is a boolean, so the keys
     # come back as true/false (SQLite returns 0/1, hence the coercion).
@@ -137,6 +146,14 @@ class ChannelsController < ApplicationController
     end.join(" OR ")
 
     ChannelEvent.unused.where(predicate).group(:channel_id).count
+  end
+
+  def apply_sort(scope, sort)
+    case sort
+    when "newest" then scope.by_newest
+    when "oldest" then scope.by_oldest
+    else scope.by_relevance
+    end
   end
 
   def set_channel
