@@ -36,15 +36,53 @@
         <p class="text-gray-900 dark:text-gray-100 whitespace-pre-wrap"><%= render_nostr_content(@event.content) %></p>
       </div>
 
+      <%# Nostr events get a link into the user's configured client plus a copy
+          button for the bech32 id; RSS/manual events only ever have a link. %>
+      <% nostr_id = @event.source.nostr? ? @event.source_identifier : nil %>
+      <% client_url = nostr_id.present? ? safe_external_url(@event.source_link(current_user)) : nil %>
       <% original_link = safe_external_url(@event.metadata["link"]) %>
-      <% if original_link.present? %>
-        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <a href="<%= original_link %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:underline">
-            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-            </svg>
-            View Original
-          </a>
+      <% if client_url.present? || original_link.present? %>
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <% if client_url.present? %>
+              <a href="<%= client_url %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:underline">
+                <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                Open in <%= external_host(client_url) || "Nostr client" %>
+              </a>
+            <% end %>
+
+            <% if nostr_id.present? %>
+              <% id_kind = nostr_id.start_with?("naddr") ? "naddr" : "nevent" %>
+              <button type="button"
+                      class="inline-flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
+                      data-controller="clipboard"
+                      data-clipboard-text-value="<%= nostr_id %>"
+                      data-action="click->clipboard#copy"
+                      title="Copy <%= id_kind %> to clipboard">
+                <svg class="h-4 w-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span data-clipboard-target="label">Copy <%= id_kind %></span>
+              </button>
+            <% end %>
+
+            <% if original_link.present? %>
+              <a href="<%= original_link %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:underline">
+                <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                View Original
+              </a>
+            <% end %>
+          </div>
+
+          <% if nostr_id.present? %>
+            <p class="text-xs font-mono text-gray-400 dark:text-gray-500 break-all" title="<%= nostr_id %>">
+              <%= nostr_id %>
+            </p>
+          <% end %>
         </div>
       <% end %>
     </div>

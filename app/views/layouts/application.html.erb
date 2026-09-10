@@ -41,8 +41,9 @@
     <meta name="theme-color" content="#6d4bc3">
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-<%# The EasyMDE stylesheet is render-blocking and only needed on the ~4 pages
-    with a markdown editor, so those pages pull it in via content_for :head. %>
+<%# The markdown editor is a bundle of its own, not part of application.js, and
+    only the ~4 pages that have an editor pull it in via content_for :head —
+    see markdown_editor_tags. %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 

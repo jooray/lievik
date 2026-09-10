@@ -1,66 +1,60 @@
 import { Controller } from "@hotwired/stimulus"
-import EasyMDE from "easymde"
 
-// NOTE: EasyMDE + CodeMirror is the bulk of the JS bundle and is only needed on
-// ~4 pages, but it is imported statically on purpose. esbuild here runs without
-// --splitting, and Propshaft serves digested paths only, so a dynamic import()
-// chunk would 404 in production. The render-blocking *stylesheet* is deferred
-// instead (see content_for :head in the views that use this controller).
+// The editor library itself is NOT imported here. It lives in a separate
+// esbuild entry point (editor_overtype.js, or editor_easymde.js for a user with
+// the escape hatch set) that only the pages with an editor pull in, via
+// `markdown_editor_tags`. Importing it here would put it back in
+// application.js, which is how CodeMirror ended up on every page in the app.
+//
+// What stays here is everything that is identical whichever implementation
+// loads: keeping the Rails textarea in sync so the form posts the right value,
+// and firing `input` so content_editor_controller's dirty state flips while
+// typing rather than only on submit.
 export default class extends Controller {
   static targets = ["textarea"]
-  static values = { placeholder: String }
+  static values = { placeholder: String, minHeight: String }
 
   connect() {
-    const placeholder = this.hasPlaceholderValue
-      ? this.placeholderValue
-      : "Type your content here..."
+    this.editor = null
 
-    this.editor = new EasyMDE({
-      element: this.textareaTarget,
-      // Left at its default, EasyMDE appends a <link> to
-      // maxcdn.bootstrapcdn.com for Font Awesome, which is what draws every
-      // toolbar icon. `style-src :self` blocks it, so the toolbar rendered as a
-      // row of blank buttons with only the separators visible. Icons are
-      // self-hosted instead (see the .editor-toolbar rules in
-      // application.tailwind.css) — one less third-party request, and the
-      // toolbar no longer depends on a CDN being up.
-      autoDownloadFontAwesome: false,
-      spellChecker: false,
-      autosave: {
-        enabled: false
-      },
-      toolbar: [
-        "bold", "italic", "heading", "|",
-        "quote", "unordered-list", "ordered-list", "|",
-        "link", "|",
-        "preview", "side-by-side", "fullscreen", "|",
-        "guide"
-      ],
-      status: false,
-      minHeight: "300px",
-      placeholder: placeholder,
-      renderingConfig: {
-        singleLineBreaks: false,
-        codeSyntaxHighlighting: false
-      }
+    // Turbo appends the editor bundle to <head> on navigation, which can happen
+    // after this controller connects, so wait for the announcement rather than
+    // assuming script order.
+    if (window.LievikEditor) {
+      this.mount()
+    } else {
+      this.onReady = () => this.mount()
+      document.addEventListener("lievik:editor-ready", this.onReady, { once: true })
+    }
+  }
+
+  mount() {
+    if (this.editor || !this.hasTextareaTarget) return
+
+    this.editor = window.LievikEditor.mount(this.textareaTarget, {
+      placeholder: this.hasPlaceholderValue ? this.placeholderValue : "Type your content here...",
+      minHeight: this.hasMinHeightValue ? this.minHeightValue : "300px",
+      onChange: (value) => this.sync(value)
     })
 
-    // Keep the textarea in sync so the "Save Changes" dirty-state fires while
-    // typing in the editor, not only on submit.
-    this.editor.codemirror.on("change", () => {
-      this.textareaTarget.value = this.editor.value()
-      this.textareaTarget.dispatchEvent(new Event("input", { bubbles: true }))
-    })
-
-    // Handle form submission - sync editor content back to textarea
     this.form = this.element.closest("form")
     if (this.form) {
-      this.onSubmit = () => { this.textareaTarget.value = this.editor.value() }
+      this.onSubmit = () => this.sync(this.editor.getValue())
       this.form.addEventListener("submit", this.onSubmit)
     }
   }
 
+  sync(value) {
+    this.textareaTarget.value = value
+    this.textareaTarget.dispatchEvent(new Event("input", { bubbles: true }))
+  }
+
   disconnect() {
+    if (this.onReady) {
+      document.removeEventListener("lievik:editor-ready", this.onReady)
+      this.onReady = null
+    }
+
     if (this.form && this.onSubmit) {
       this.form.removeEventListener("submit", this.onSubmit)
       this.form = null
@@ -68,7 +62,7 @@ export default class extends Controller {
     }
 
     if (this.editor) {
-      this.editor.toTextArea()
+      this.editor.destroy()
       this.editor = null
     }
   }

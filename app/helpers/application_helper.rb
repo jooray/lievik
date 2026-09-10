@@ -74,6 +74,18 @@ module ApplicationHelper
     nil
   end
 
+  # Host of an external URL, for labelling a link with the client it opens in
+  # ("yakihonne.com", "primal.net", ...). The link template is user-supplied, so
+  # it may not parse — fall back to a generic label at the call site.
+  def external_host(url)
+    safe = safe_external_url(url)
+    return nil if safe.blank?
+
+    URI.parse(safe).host&.sub(/\Awww\./, "")
+  rescue URI::InvalidURIError
+    nil
+  end
+
   def render_markdown(content)
     return "" if content.blank?
 
@@ -82,5 +94,20 @@ module ApplicationHelper
       tags: %w[p br h1 h2 h3 h4 h5 h6 ul ol li strong em a blockquote code pre hr],
       attributes: %w[href rel target]
     )
+  end
+
+  # The markdown editor is its own JS bundle, pulled in only by the ~4 pages
+  # that have one (via content_for :head) instead of riding along in
+  # application.js. Exactly one implementation is ever sent to the browser —
+  # see User#markdown_editor and app/javascript/editor_*.js.
+  def markdown_editor_tags
+    editor = current_user&.markdown_editor || "overtype"
+
+    tags = []
+    # OverType generates its own CSS at runtime; only EasyMDE needs a stylesheet.
+    tags << stylesheet_link_tag("easymde", "data-turbo-track": "reload") if editor == "easymde"
+    tags << javascript_include_tag("editor_#{editor}", "data-turbo-track": "reload", type: "module")
+
+    safe_join(tags, "\n")
   end
 end

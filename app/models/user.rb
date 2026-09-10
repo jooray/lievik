@@ -18,6 +18,22 @@ class User < ApplicationRecord
     display_name.presence || username.presence || npub.truncate(20)
   end
 
+  # Which markdown editor bundle the browser downloads. OverType is the editor;
+  # EasyMDE is a deliberately UI-less escape hatch while OverType settles in —
+  # set it from the console for one user if the monospace, no-heading-sizes look
+  # turns out to be wrong for them:
+  #
+  #   user.update!(settings: user.settings.merge("editor" => "easymde"))
+  #
+  # Delete this, editor_easymde.js and the easymde dependency once that has gone
+  # a release or two without being used.
+  MARKDOWN_EDITORS = %w[overtype easymde].freeze
+
+  def markdown_editor
+    editor = settings&.dig("editor")
+    MARKDOWN_EDITORS.include?(editor) ? editor : "overtype"
+  end
+
   DEFAULT_EVENT_LINK_TEMPLATE = "https://yakihonne.com/note/{eventid}"
   DEFAULT_NADDR_LINK_TEMPLATE = "https://yakihonne.com/article/{naddr}"
   DEFAULT_PROFILE_LINK_TEMPLATE = "https://yakihonne.com/profile/{npub}"

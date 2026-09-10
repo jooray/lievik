@@ -1,5 +1,5 @@
 <% content_for :head do %>
-  <%= stylesheet_link_tag "easymde", "data-turbo-track": "reload" %>
+  <%= markdown_editor_tags %>
 <% end %>
 
 <div class="space-y-6" data-controller="content-builder" data-content-builder-stream-url-value="<%= generate_stream_channel_content_path(@channel, @channel_content) %>" data-content-builder-refine-url-value="<%= refine_stream_channel_content_path(@channel, @channel_content) %>" data-content-builder-auto-generate-value="<%= params[:auto_generate] == 'true' && @channel_content.content.blank? %>">

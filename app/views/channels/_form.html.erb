@@ -1,5 +1,5 @@
 <% content_for :head do %>
-  <%= stylesheet_link_tag "easymde", "data-turbo-track": "reload" %>
+  <%= markdown_editor_tags %>
 <% end %>
 
 <%= form_with model: channel, class: "space-y-6 bg-white dark:bg-gray-800 shadow rounded-lg p-6" do |form| %>

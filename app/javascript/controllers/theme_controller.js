@@ -67,6 +67,11 @@ export default class extends Controller {
     // already correct before this controller connects.
     document.documentElement.setAttribute("data-theme-mode", mode)
 
+    // The markdown editor paints itself from a JS palette, not from Tailwind's
+    // `dark:` variants, so toggling the class is not enough — it has to be told.
+    // Nothing listens on the pages without an editor.
+    document.dispatchEvent(new CustomEvent("lievik:theme", { detail: { dark: isDark } }))
+
     this.updateLabels(mode)
   }
 
