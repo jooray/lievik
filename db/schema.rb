@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_20_201539) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_19_161119) do
   create_table "activity_logs", force: :cascade do |t|
     t.string "activity_type", null: false
     t.datetime "completed_at"
@@ -69,6 +69,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_20_201539) do
     t.integer "channel_id", null: false
     t.datetime "created_at", null: false
     t.integer "event_id", null: false
+    t.json "rating_details"
     t.text "relevance_reason"
     t.integer "relevance_score"
     t.datetime "updated_at", null: false
@@ -163,16 +164,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_20_201539) do
     t.datetime "consumed_at"
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
+    t.string "flow", default: "nostrconnect", null: false
     t.datetime "listener_started_at"
     t.string "listener_token"
     t.string "pending_rpc_id"
     t.string "relay_url", null: false
     t.string "secret", null: false
     t.string "session_id", null: false
+    t.string "signer_pubkey"
     t.string "temp_privkey", null: false
     t.string "temp_pubkey", null: false
     t.datetime "updated_at", null: false
     t.index ["expires_at"], name: "index_nostr_auth_sessions_on_expires_at"
+    t.index ["flow", "expires_at"], name: "index_nostr_auth_sessions_on_flow_and_expires_at"
     t.index ["session_id"], name: "index_nostr_auth_sessions_on_session_id", unique: true
   end
 

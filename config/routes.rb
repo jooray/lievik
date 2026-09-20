@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   get "/auth/nostr/poll", to: "sessions#poll", as: :auth_nostr_poll
   get "/auth/nostr/callback", to: "sessions#callback", as: :auth_nostr_callback
   post "/auth/nostr/callback", to: "sessions#callback"
+  # bunker:// — the signer-initiated flow, where the user pastes a URI
+  # naming their signer instead of the signer scanning ours.
+  post "/auth/nostr/bunker", to: "sessions#bunker", as: :auth_nostr_bunker
   post "/auth/nostr/refresh_profile", to: "sessions#refresh_profile", as: :refresh_profile
   delete "/logout", to: "sessions#destroy", as: :logout
 

@@ -49,12 +49,20 @@ module Nostr
         @relay_urls = record.relay_urls
         @client = Nip46Client.new(record)
         @mutex = Mutex.new
-        @signer_pubkey = nil
+        @bunker = record.bunker?
+        # In the bunker flow the signer is named by the pasted URI, so it is
+        # pinned before a single byte crosses the wire. In nostrconnect it stays
+        # nil until a reply proves knowledge of our one-time secret.
+        @signer_pubkey = @bunker ? record.signer_pubkey : nil
+        @bunker_secret = record.secret.to_s if @bunker
+        @connect_request = nil
         @request = nil
         @done = false
       end
 
       attr_reader :client, :session_id
+
+      def bunker? = @bunker
 
       def signer_pubkey
         @mutex.synchronize { @signer_pubkey }
@@ -62,6 +70,17 @@ module Nostr
 
       def set_signer(pubkey)
         @mutex.synchronize { @signer_pubkey ||= pubkey }
+      end
+
+      # The `connect` we send first in the bunker flow. Built once and shared
+      # across relay threads so every relay carries the same request id — the
+      # signer answers on whichever relay it likes, and any of them resolves it.
+      def connect_request
+        @mutex.synchronize do
+          @connect_request ||= @client.build_request_event(
+            @signer_pubkey, "connect", [@signer_pubkey, @bunker_secret.to_s]
+          )
+        end
       end
 
       def request
@@ -72,6 +91,16 @@ module Nostr
         return false unless id
         @mutex.synchronize { @request && @request[:request_id] == id }
       end
+
+      def known_connect_request?(id)
+        return false unless id
+        @mutex.synchronize { @connect_request && @connect_request[:request_id] == id }
+      end
+
+      # Set once the signer has acknowledged our connect, which is what gates
+      # sending get_public_key in the bunker flow.
+      def connect_acked? = @mutex.synchronize { @connect_acked }
+      def mark_connect_acked! = @mutex.synchronize { @connect_acked = true }
 
       def done?
         @mutex.synchronize { @done }
@@ -208,6 +237,7 @@ module Nostr
     def serve_relay(relay_url, socket, client)
       subs = {}
       gpk_sent = Set.new
+      connect_sent = Set.new
 
       until Time.current >= @stop_deadline || @stopping
         live = @registry.for_relay(relay_url)
@@ -224,13 +254,27 @@ module Nostr
         (subs.keys - live_ids).each do |gone_id|
           sub_id = subs.delete(gone_id)
           gpk_sent.delete(gone_id)
+          connect_sent.delete(gone_id)
           socket.write(client.frame_text(["CLOSE", sub_id].to_json)) rescue nil
         end
 
-        # Once a signer is pinned (by any relay), ask for the user pubkey here too.
+        # Bunker flow only: we speak first. The subscription above is already
+        # open, so the signer's reply cannot arrive before we are listening.
+        live.each do |session|
+          next unless session.bunker?
+          next if connect_sent.include?(session.id)
+          send_connect(socket, relay_url, session)
+          connect_sent << session.id
+        end
+
+        # Ask for the user pubkey once a signer is pinned. In nostrconnect that
+        # means a reply proved the secret; in bunker it means our connect was
+        # acked. Asking a bunker signer before the ack just races its approval
+        # prompt and burns a request id.
         live.each do |session|
           next if gpk_sent.include?(session.id)
           next unless session.signer_pubkey
+          next if session.bunker? && !session.connect_acked?
           send_get_public_key(socket, relay_url, session)
           gpk_sent << session.id
         end
@@ -283,11 +327,46 @@ module Nostr
         return
       end
 
+      # Bunker flow: the reply to OUR connect. The signer was pinned from the
+      # pasted URI, so the only thing to establish here is that it accepted.
+      #
+      # This is deliberately a separate branch from the nostrconnect check
+      # below, and "ack" must never be accepted there: in nostrconnect the
+      # signer speaks first and the exact-secret match is the only thing tying
+      # the reply to this browser. Merging the two would let any signer that
+      # says "ack" complete somebody else's pending login.
+      if session.bunker? && session.known_connect_request?(message["id"])
+        return unless decoded[:signer_pubkey] == session.signer_pubkey
+
+        if auth_challenge?(message)
+          persist_auth_url(session, message["error"])
+          return
+        end
+        if message["error"].present?
+          Rails.logger.info("NIP-46 supervisor: bunker connect refused session=#{session.id}: #{message['error'].to_s[0, 80]}")
+          return
+        end
+        return unless message["result"].present?
+
+        session.mark_connect_acked!
+        Rails.logger.info("NIP-46 supervisor: bunker connect acked on #{relay_url} session=#{session.id}")
+        # get_public_key goes out on the next serve_relay tick, on every relay.
+        return
+      end
+
       if session.signer_pubkey.nil? && session.client.valid_connect_response?(message)
         signer = session.set_signer(decoded[:signer_pubkey])
         Rails.logger.info("NIP-46 supervisor: connect ok on #{relay_url} signer=#{signer[0..7]}… session=#{session.id}")
         # get_public_key is sent on the next serve_relay tick by every relay.
       end
+    end
+
+    def send_connect(socket, relay_url, session)
+      request = session.connect_request
+      socket.write(session.client.frame_text(["EVENT", request[:event]].to_json))
+      Rails.logger.info("NIP-46 supervisor: sent bunker connect session=#{session.id} via #{relay_url}")
+    rescue => e
+      Rails.logger.warn("NIP-46 supervisor: connect send failed #{relay_url}: #{e.class} - #{e.message}")
     end
 
     def send_get_public_key(socket, relay_url, session)

@@ -9,6 +9,9 @@ class SessionsController < ApplicationController
   skip_before_action :authenticate_user!
   rate_limit to: 5, within: 1.minute, only: :new, name: "nostr-login-ip", with: :rate_limit_exceeded
   rate_limit to: 60, within: 1.minute, only: :new, name: "nostr-login-global", by: -> { "global" }, with: :rate_limit_exceeded
+  # Pasting a bunker URI creates a session and makes us publish to relays, so it
+  # needs its own ceiling; a few fat-fingered pastes are normal, a flood is not.
+  rate_limit to: 10, within: 1.minute, only: :bunker, name: "nostr-bunker-ip", with: :rate_limit_exceeded
 
   def new
     # Cancel this browser's previous pending login so its listener bails promptly
@@ -50,6 +53,32 @@ class SessionsController < ApplicationController
     @qr_code = RQRCode::QRCode.new(@connect_data[:uri])
   end
 
+  # bunker:// login. The user pastes a URI naming their signer, so we replace
+  # whatever nostrconnect session this page started with and speak first.
+  # Responds JSON; the page then polls the same endpoint as the QR flow.
+  def bunker
+    consume_pending_sessions!
+
+    result = Nostr::AuthService.new.start_bunker_session(params[:bunker_uri])
+
+    if result.nil?
+      render json: {
+        ok: false,
+        error: "That does not look like a usable bunker link. It should start with bunker:// and include at least one relay."
+      }, status: :unprocessable_content
+      return
+    end
+
+    session[:nostr_connect_session_id] = result[:session_id]
+    Nip46SupervisorJob.ensure_running
+
+    render json: { ok: true, relays: result[:relay_urls] }
+  rescue StandardError => e
+    Rails.logger.error("Bunker login failed: #{e.class} - #{e.message}")
+    render json: { ok: false, error: "Could not start the connection. Please try again." },
+           status: :internal_server_error
+  end
+
   def poll
     session_id = session[:nostr_connect_session_id]
 
@@ -69,12 +98,17 @@ class SessionsController < ApplicationController
     # The approval window is short (SESSION_EXPIRY). Once it lapses the record
     # leaves the `active` scope and no amount of further polling can ever
     # succeed — tell the client so it can offer a fresh QR instead of spinning.
-    unless NostrAuthSession.active.exists?(session_id: session_id)
+    pending = NostrAuthSession.active.find_by(session_id: session_id)
+    unless pending
       render json: { authenticated: false, expired: true }
       return
     end
 
-    render json: { authenticated: false }
+    # Some signers answer a request by demanding the user authorize in a browser
+    # window first. The supervisor stores that URL (https-only, validated there);
+    # without surfacing it the login just spins while the signer waits for a
+    # visit that never happens.
+    render json: { authenticated: false, auth_url: pending.auth_url.presence }.compact
   end
 
   def refresh_profile
@@ -92,7 +126,7 @@ class SessionsController < ApplicationController
   def callback
     pubkey_hex = if request.post?
       challenge = session.delete(:nostr_nip07_challenge)
-      Nostr::AuthService.new.verify_nip07_auth(params[:signed_event], challenge)
+      Nostr::AuthService.new.verify_nip07_auth(params[:signed_event], challenge, domain: request.host)
     else
       result = Nostr::AuthService.new.check_session(session[:nostr_connect_session_id])
       result[:pubkey] if result&.dig(:authenticated)

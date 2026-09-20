@@ -84,6 +84,36 @@
     </div>
 
     <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+      <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rating Engine</span>
+      <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
+        <p>Which AI rates how relevant each event is for each channel. Scores from both engines are on the same 0-100 scale, so channel thresholds keep working; events already rated keep their old score until re-rated.</p>
+      </div>
+      <% decision_available = Ai::DecisionClient.configured? %>
+      <fieldset class="space-y-3">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <%= f.radio_button :rating_engine, "chat", checked: f.object.rating_engine == "chat", class: "mt-1 h-4 w-4 border-gray-300 text-purple-600 focus:ring-purple-500" %>
+          <span>
+            <span class="block text-sm font-medium text-gray-900 dark:text-white">Chat model <span class="text-gray-500 dark:text-gray-400 font-normal">(default)</span></span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">One request per channel and event to <code><%= Ai::Client.model_for(:classification) %></code>. Writes a short reason with every score. Slower and costs more, but knows the world (recognises a conference hashtag, a person, a project).</span>
+          </span>
+        </label>
+        <label class="flex items-start gap-3 <%= decision_available ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed' %>">
+          <%= f.radio_button :rating_engine, "decision", checked: f.object.rating_engine == "decision", disabled: !decision_available, class: "mt-1 h-4 w-4 border-gray-300 text-purple-600 focus:ring-purple-500" %>
+          <span>
+            <span class="block text-sm font-medium text-gray-900 dark:text-white">Typed decision model <span class="text-gray-500 dark:text-gray-400 font-normal">(beta)</span></span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">
+              <% if decision_available %>
+                One request per event for all channels at once to <code><%= Ai::DecisionClient.model %></code>. About ten times faster, several times cheaper, and more consistent run to run; returns probabilities instead of a written reason and does not recognise references it has never seen. Runs on Venice's anonymized (not private) tier.
+              <% else %>
+                Not configured: add an <code>ai.decision</code> block to <code>config/lievik.yml</code> and set <code>VENICE_API_KEY</code> or <code>DECISION_API_KEY</code>.
+              <% end %>
+            </span>
+          </span>
+        </label>
+      </fieldset>
+    </div>
+
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
       <%= f.label :default_content_style, "Default Writing Style", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
       <div class="prose dark:prose-invert max-w-none mb-3 text-sm text-gray-600 dark:text-gray-400">
         <p>Default writing style used when creating new channels. You can customize it per channel in the channel settings.</p>

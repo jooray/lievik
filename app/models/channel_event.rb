@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
 class ChannelEvent < ApplicationRecord
+  # MariaDB has no native JSON type: `t.json` is a longtext plus a
+  # CHECK (json_valid(...)) constraint, and the adapter reports it back as
+  # `longtext`, so ActiveRecord types the attribute as Text and serializes a
+  # Hash with `to_s` — `{"engine" => "chat"}`, which is not JSON and trips the
+  # constraint. SQLite (dev) types it correctly and has no constraint, so this
+  # only ever fails in production. Every json column in this app needs this
+  # line. No default: NULL means "never rated", which is not the same as {}.
+  attribute :rating_details, :json
+
   belongs_to :channel
   belongs_to :event
 

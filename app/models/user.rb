@@ -34,6 +34,27 @@ class User < ApplicationRecord
     MARKDOWN_EDITORS.include?(editor) ? editor : "overtype"
   end
 
+  # Which AI engine rates events for channels. "chat" is Ai::RatingService
+  # (one chat completion per channel/event pair, with a written reason);
+  # "decision" is Ai::DecisionRatingService (a typed-decision model such as
+  # Venice's jev-latest: one request per event for every channel, calibrated
+  # probabilities, no written reason). "decision" silently falls back to
+  # "chat" when config/lievik.yml has no ai.decision block or no API key.
+  RATING_ENGINES = %w[chat decision].freeze
+
+  def rating_engine
+    engine = settings&.dig("rating_engine")
+    RATING_ENGINES.include?(engine) ? engine : "chat"
+  end
+
+  def rating_engine=(value)
+    self.settings = (settings || {}).merge("rating_engine" => value.to_s)
+  end
+
+  def decision_rating?
+    rating_engine == "decision" && Ai::DecisionClient.configured?
+  end
+
   DEFAULT_EVENT_LINK_TEMPLATE = "https://yakihonne.com/note/{eventid}"
   DEFAULT_NADDR_LINK_TEMPLATE = "https://yakihonne.com/article/{naddr}"
   DEFAULT_PROFILE_LINK_TEMPLATE = "https://yakihonne.com/profile/{npub}"

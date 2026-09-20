@@ -40,6 +40,27 @@ RSpec.describe Nostr::WebsocketFrameReader do
       .to raise_error(described_class::FrameError, /exceeds/)
   end
 
+  # Regression: the length ladder used two sequential `if`s instead of
+  # `if`/`elsif`. A 127-byte payload is too long for the 7-bit form, so it is
+  # encoded with the 126 (16-bit) form — whose extended length is the literal
+  # 127. The second `if` then fired and consumed 8 payload bytes as a bogus
+  # 64-bit length, desyncing the socket for the rest of the connection. Relay
+  # control messages (EOSE, OK, NOTICE, CLOSED) land on 127 bytes easily, so
+  # this killed logins intermittently and unreproducibly.
+  it "reads a 127-byte payload without mistaking it for a 64-bit length" do
+    payload = "x" * 127
+    socket = FakeSocket.new([ "\x81\x7e", [ 127 ].pack("n"), payload ])
+
+    expect(described_class.read(socket, deadline: 1.second.from_now)).to eq(payload)
+  end
+
+  it "still reads a genuine 64-bit length frame" do
+    payload = "y" * 70_000
+    socket = FakeSocket.new([ "\x81\x7f", [ payload.bytesize ].pack("Q>"), payload ])
+
+    expect(described_class.read(socket, deadline: 5.seconds.from_now)).to eq(payload)
+  end
+
   it "raises when the read deadline has already passed" do
     socket = FakeSocket.new([ "\x81\x02ok" ])
 

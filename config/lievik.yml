@@ -43,6 +43,14 @@ default: &default
       content_refinement: claude-sonnet-5
       content_humanization: claude-sonnet-5
 
+    # Optional typed-decision ("System One") model for the "decision" rating
+    # engine (User#rating_engine). Venice resells TypeSafe's Jev as jev-latest
+    # behind POST <endpoint>/decisions. Uses DECISION_API_KEY, else
+    # VENICE_API_KEY. Remove the block to hide the engine from the settings UI.
+    decision:
+      endpoint: https://api.venice.ai/api/v1
+      model: jev-latest
+
   rag:
     # Ollama embedding settings
     embedding:

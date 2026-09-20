@@ -48,6 +48,42 @@ module Nostr
       }
     end
 
+    # Start a signer-initiated (bunker://) login. The user pastes a URI naming
+    # the signer and its relays, so unlike nostrconnect we already know who we
+    # are talking to and we send the first message.
+    #
+    # Returns { session_id:, relay_urls: } or nil when the URI is unusable.
+    def start_bunker_session(bunker_uri)
+      pointer = KeyConverter.parse_bunker_uri(bunker_uri)
+      return nil if pointer.nil?
+
+      # Talk to the signer's relays *and* ours. The pointer is stored as the
+      # signer advertised it, but transport unions both: a signer that advertises
+      # one relay which is down is otherwise unreachable, and our auth relays are
+      # already known-good for ephemeral kind-24133 traffic.
+      relays = Security::EgressGuard.filter_relay_urls(pointer[:relays] | @auth_relays, max: 6)
+      return nil if relays.empty?
+
+      keypair = ::Nostr::Keygen.new.generate_key_pair
+      session_id = SecureRandom.uuid
+
+      NostrAuthSession.create!(
+        session_id: session_id,
+        flow: "bunker",
+        signer_pubkey: pointer[:pubkey],
+        temp_pubkey: keypair.public_key.to_s,
+        temp_privkey: keypair.private_key.to_s,
+        # A bunker URI may carry no secret. `secret` is NOT NULL and the
+        # nostrconnect flow compares against it, so store a value that can never
+        # equal a signer's reply and let the bunker branch decide what to send.
+        secret: pointer[:secret].presence || "",
+        relay_url: relays.to_json,
+        expires_at: SESSION_EXPIRY.from_now
+      )
+
+      { session_id: session_id, relay_urls: relays }
+    end
+
     # Check if a NIP-46 session has been authenticated
     def check_session(session_id)
       auth_session = NostrAuthSession.active.find_by(session_id: session_id)
@@ -99,7 +135,15 @@ module Nostr
     end
 
     # Verify a recent NIP-07 proof bound to a challenge stored in the Rails session.
-    def verify_nip07_auth(signed_event, challenge)
+    #
+    # `domain` binds the proof to the host that issued the challenge, so a proof
+    # signed for another site can never be presented here. It is verified when
+    # the event carries a `domain` tag and not required when it does not: the
+    # tag ships in the same deploy as the JS that produces it, and a browser
+    # holding a stale bundle would otherwise be locked out until it reloaded.
+    # Once a release has been out long enough that no stale bundles remain,
+    # make the tag mandatory.
+    def verify_nip07_auth(signed_event, challenge, domain: nil)
       return false if signed_event.blank? || challenge.blank?
 
       begin
@@ -108,6 +152,12 @@ module Nostr
         return false unless event_data["created_at"].between?(NIP07_MAX_AGE.ago.to_i, 1.minute.from_now.to_i)
         return false unless event_data["content"] == "Sign in to Lievik"
         return false unless event_data["tags"].include?(["challenge", challenge])
+
+        signed_domain = Array(event_data["tags"]).find { |t| t.is_a?(Array) && t.first == "domain" }&.second
+        if signed_domain.present? && domain.present? && !signed_domain.casecmp?(domain)
+          Rails.logger.warn("NIP-07 proof signed for #{signed_domain.inspect}, expected #{domain.inspect}")
+          return false
+        end
 
         event_data["pubkey"].downcase
       rescue JSON::ParserError, TypeError => e

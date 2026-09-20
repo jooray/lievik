@@ -9,10 +9,23 @@ module Nostr
   module WebsocketConnection
     MAX_UPGRADE_SIZE = 16.kilobytes
     CONNECT_TIMEOUT = 5.seconds
+    DEFAULT_USER_AGENT = "Lievik (+https://github.com/jooray/lievik)"
 
     class ConnectionError < StandardError; end
 
-    def self.open(uri, deadline:)
+    # Every relay socket in the app is opened here, so this is the one place
+    # that can enforce the app-wide egress invariant on ws(s) traffic. Relay
+    # URLs reach us from config, from user settings, and from relay hints
+    # parsed out of untrusted note content, so an unfiltered connect is an SSRF
+    # primitive. Callers already treat nil as "relay unreachable".
+    def self.open(uri, deadline:, headers: {})
+      begin
+        Security::EgressGuard.validate_websocket_url!(uri.to_s)
+      rescue Security::EgressGuard::BlockedError => e
+        Rails.logger.warn("Refusing to connect to relay #{uri}: #{e.message}")
+        return nil
+      end
+
       remaining = remaining_time(deadline)
       tcp_socket = Socket.tcp(uri.host, uri.port, connect_timeout: [ CONNECT_TIMEOUT, remaining ].min)
       tcp_socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
@@ -26,6 +39,11 @@ module Nostr
         "Connection: Upgrade",
         "Sec-WebSocket-Key: #{key}",
         "Sec-WebSocket-Version: 13",
+        # Some relays answer a User-Agent-less handshake with HTTP 403 rather
+        # than a 101 — inbox.nostr.wine does. The failure surfaces to callers
+        # only as a nil socket, so it is worth sending a UA on every connect.
+        "User-Agent: #{header_value(user_agent)}",
+        *headers.map { |name, value| "#{header_value(name)}: #{header_value(value)}" },
         "",
         ""
       ].join("\r\n")
@@ -38,6 +56,21 @@ module Nostr
       socket&.close
       tcp_socket&.close unless tcp_socket&.closed?
       nil
+    end
+
+    # Configurable so an operator can identify this deployment to relays that
+    # rate-limit or allowlist by User-Agent. Memoized: this is on every connect.
+    def self.user_agent
+      return @user_agent if defined?(@user_agent) && @user_agent
+
+      configured = Rails.application.config_for(:lievik).dig(:nostr, :user_agent)
+      @user_agent = configured.presence || DEFAULT_USER_AGENT
+    end
+
+    # Header values come from config and from callers, never from relays, but a
+    # stray CR/LF would still splice extra headers into the handshake.
+    def self.header_value(value)
+      value.to_s.delete("\r\n")
     end
 
     # --- Client -> server frames ---------------------------------------------
@@ -63,7 +96,9 @@ module Nostr
         8.times { |i| frame << ((bytes.length >> (56 - i * 8)) & 0xFF) }
       end
 
-      mask = 4.times.map { rand(256) }
+      # RFC 6455 §5.3 requires the mask to be unpredictable; Kernel#rand is a
+      # seeded PRNG, so it is not a valid source here.
+      mask = SecureRandom.random_bytes(4).bytes
       frame.concat(mask)
       bytes.each_with_index { |b, i| frame << (b ^ mask[i % 4]) }
       frame.pack("C*")

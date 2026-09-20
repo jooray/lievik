@@ -15,6 +15,11 @@
 
   /* Accent - warm amber/orange instead of blue */
   --color-accent: #d97706;
+  /* Button fills only. White on #d97706 is 3.19:1 — below the 4.5:1 floor for
+     button labels, so every primary button in dark mode was failing contrast.
+     White on #a54d06 is 5.73:1. Kept separate from --color-accent so borders
+     and focus rings keep the brighter amber, where the floor is 3:1. */
+  --color-accent-strong: #a54d06;
   --color-accent-light: #fbbf24;
   --color-accent-muted: #92400e;
 }
@@ -96,7 +101,7 @@
 }
 
 .dark .bg-purple-600 {
-  background-color: var(--color-accent) !important;
+  background-color: var(--color-accent-strong) !important;
 }
 
 .dark .bg-purple-600:hover,

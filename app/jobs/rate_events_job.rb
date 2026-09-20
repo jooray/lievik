@@ -82,7 +82,6 @@ class RateEventsJob < ApplicationJob
   end
 
   def rate_events(channel, ids)
-
     # Get events to rate
     events = if ids.present?
       channel.user.events.where(id: ids)
@@ -106,43 +105,13 @@ class RateEventsJob < ApplicationJob
       metadata: { channel_id: channel.id, total: total_events }
     )
 
-    rating_service = Ai::RatingService.new(channel, activity_log_id: activity_log.id)
-
-    Rails.logger.info("Rating #{total_events} events for channel #{channel.name}")
+    Rails.logger.info("Rating #{total_events} events for channel #{channel.name} (#{channel.user.decision_rating? ? 'decision' : 'chat'} engine)")
 
     begin
-      rated_count = 0
-      cancelled = false
-
-      events.find_each.with_index do |event, index|
-        # "Cancel" in the UI only flips the flag; without this check the job kept
-        # burning paid AI calls and then flipped the log back to "completed".
-        unless activity_log.reload.active?
-          Rails.logger.info("Rating for #{channel.name} cancelled after #{rated_count} events")
-          cancelled = true
-          break
-        end
-
-        result = rating_service.rate_event(event)
-
-        unless result[:error]
-          # A concurrent run may have inserted this pair already; the unique
-          # index would otherwise raise and kill the rest of the batch.
-          channel_event = ChannelEvent.create_or_find_by!(channel: channel, event: event)
-
-          channel_event.update!(
-            relevance_score: result[:score],
-            relevance_reason: result[:reason]
-          )
-
-          rated_count += 1
-          Rails.logger.info("Rated event #{event.id} for channel '#{channel.name}': score=#{result[:score]}, reason='#{result[:reason].truncate(200)}'")
-        end
-
-        # Update progress every 5 events
-        if (index + 1) % 5 == 0 || index + 1 == total_events
-          activity_log.update_progress(current: index + 1, total: total_events)
-        end
+      rated_count, cancelled = if channel.user.decision_rating?
+        rate_with_decision_engine(channel, events, total_events, activity_log)
+      else
+        rate_with_chat_engine(channel, events, total_events, activity_log)
       end
 
       # A cancelled log is already in its final state — don't overwrite the
@@ -188,6 +157,113 @@ class RateEventsJob < ApplicationJob
       rescue ActiveRecord::RecordNotFound, ActiveRecord::ActiveRecordError
         nil
       end
+    end
+  end
+
+  # One chat completion per channel/event pair (Ai::RatingService).
+  def rate_with_chat_engine(channel, events, total_events, activity_log)
+    rating_service = Ai::RatingService.new(channel, activity_log_id: activity_log.id)
+    rated_count = 0
+
+    events.find_each.with_index do |event, index|
+      return [ rated_count, true ] if cancelled?(activity_log, channel, rated_count)
+
+      result = rating_service.rate_event(event)
+
+      unless result[:error]
+        channel_event = find_or_create_channel_event(channel, event)
+
+        channel_event.update!(
+          relevance_score: result[:score],
+          relevance_reason: result[:reason],
+          rating_details: result[:details]
+        )
+
+        rated_count += 1
+        Rails.logger.info("Rated event #{event.id} for channel '#{channel.name}': score=#{result[:score]}, reason='#{result[:reason].truncate(200)}'")
+      end
+
+      report_progress(activity_log, index, total_events)
+    end
+
+    [ rated_count, false ]
+  end
+
+  # One decision request per event, carrying a question for this channel AND
+  # every other channel of the user that has no rating for the event yet
+  # (Ai::DecisionRatingService). The state (event content) is billed once per
+  # request, so rating an event for 40 channels costs about the same as for
+  # one, and the per-key request limit is spent per event rather than per
+  # pair. Sibling ratings are only ever *added*, never overwritten, so an
+  # explicit re-rate of this channel leaves the others alone.
+  def rate_with_decision_engine(channel, events, total_events, activity_log)
+    rating_service = Ai::DecisionRatingService.new(channel.user, activity_log_id: activity_log.id)
+    rated_count = 0
+
+    events.find_each.with_index do |event, index|
+      return [ rated_count, true ] if cancelled?(activity_log, channel, rated_count)
+
+      channels = [ channel ] + sibling_channels_missing_rating(channel, event)
+      results = rating_service.rate_event(event, channels)
+
+      channels.each do |target|
+        result = results[target.id]
+        next if result.nil? || result[:error]
+
+        channel_event = find_or_create_channel_event(target, event)
+        next if target.id != channel.id && channel_event.relevance_score.present?
+
+        channel_event.update!(
+          relevance_score: result[:score],
+          relevance_reason: result[:reason],
+          rating_details: result[:details]
+        )
+
+        if target.id == channel.id
+          rated_count += 1
+          Rails.logger.info("Rated event #{event.id} for channel '#{channel.name}' (+#{channels.size - 1} sibling channel(s)): score=#{result[:score]}")
+        end
+      end
+
+      report_progress(activity_log, index, total_events)
+    end
+
+    [ rated_count, false ]
+  end
+
+  # Re-rating an existing pair must update it, and a concurrent run may insert
+  # the pair between our lookup and our insert. `create_or_find_by!` cannot do
+  # this here: ChannelEvent validates uniqueness, so an existing pair raises
+  # RecordInvalid (which it does not rescue) before the unique index ever
+  # gets to raise RecordNotUnique.
+  def find_or_create_channel_event(channel, event)
+    ChannelEvent.find_or_create_by!(channel: channel, event: event)
+  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+    ChannelEvent.find_by!(channel: channel, event: event)
+  end
+
+  def sibling_channels_missing_rating(channel, event)
+    channel.user.channels
+      .where.not(id: channel.id)
+      .where.not(prompt: [ nil, "" ])
+      .where.not(id: ChannelEvent.where(event_id: event.id).select(:channel_id))
+      .order(:id)
+      .to_a
+  end
+
+  # "Cancel" in the UI only flips the flag; without this check the job kept
+  # burning paid AI calls and then flipped the log back to "completed".
+  def cancelled?(activity_log, channel, rated_count)
+    return false if activity_log.reload.active?
+
+    Rails.logger.info("Rating for #{channel.name} cancelled after #{rated_count} events")
+    true
+  end
+
+  # Update progress every 5 events
+  def report_progress(activity_log, index, total_events)
+    if (index + 1) % 5 == 0 || index + 1 == total_events
+      activity_log.update_progress(current: index + 1, total: total_events)
     end
   end
 end

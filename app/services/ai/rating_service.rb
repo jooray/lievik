@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module Ai
+  # The "chat" rating engine (default): one chat completion per
+  # channel/event pair, asking a reasoning model for {"score", "reason"}.
+  # The alternative is Ai::DecisionRatingService; User#rating_engine picks.
   class RatingService
     SYSTEM_PROMPT = <<~PROMPT
       You are a content relevance scoring assistant. Your task is to evaluate how relevant a piece of content is for a specific marketing channel based on the given criteria.
@@ -125,53 +128,9 @@ module Ai
 
     private
 
+    # Shared with the decision engine so both judge the same text.
     def prepare_content(event)
-      parts = []
-
-      if event.metadata["title"].present?
-        parts << "Title: #{event.metadata['title']}"
-      end
-
-      parts << event.content.truncate(2000)
-
-      if event.metadata["link"].present?
-        parts << "Link: #{event.metadata['link']}"
-      end
-
-      # Include linked content summaries for additional context
-      linked_context = prepare_linked_content(event)
-      parts << linked_context if linked_context.present?
-
-      parts.join("\n\n")
-    end
-
-    def prepare_linked_content(event)
-      linked_contents = event.linked_contents.fetched.limit(3)
-      return nil if linked_contents.empty?
-
-      summaries = linked_contents.filter_map do |lc|
-        # Skip if there was a fetch error
-        next if lc.metadata&.dig("fetch_error").present?
-
-        # Skip if content is too short to be meaningful
-        next if lc.content.to_s.length < 100
-
-        summary = lc.metadata&.dig("summary")
-        title = lc.title
-
-        # Only include if we have meaningful title or summary
-        next if title.blank? && summary.blank?
-
-        if summary.present?
-          "- #{title}: #{summary}"
-        else
-          "- #{title}"
-        end
-      end
-
-      return nil if summaries.empty?
-
-      "Linked content:\n#{summaries.join("\n")}"
+      Ai::RatingContent.prepare(event)
     end
 
     def build_user_message(content_text)
@@ -212,7 +171,7 @@ module Ai
       score = raw_score.round.clamp(0, 100)
       reason = data["reason"].to_s.truncate(500)
 
-      { score: score, reason: reason }
+      { score: score, reason: reason, details: { "engine" => "chat", "model" => Ai::Client.model_for(:classification) } }
     rescue JSON::ParserError
       { score: nil, reason: "Failed to parse AI response", error: true }
     end

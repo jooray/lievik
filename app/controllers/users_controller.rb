@@ -61,6 +61,6 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:system_prompt, :event_link_template, :naddr_link_template, :profile_link_template, :default_content_style)
+    params.require(:user).permit(:system_prompt, :event_link_template, :naddr_link_template, :profile_link_template, :default_content_style, :rating_engine)
   end
 end
