@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 export default class extends Controller {
   static targets = ["textarea", "saveBtn"]
@@ -19,11 +20,11 @@ export default class extends Controller {
       if (hasChanges) {
         this.saveBtnTarget.classList.remove("bg-blue-600", "hover:bg-blue-700")
         this.saveBtnTarget.classList.add("bg-orange-600", "hover:bg-orange-700")
-        this.saveBtnTarget.textContent = "Save Changes"
+        this.saveBtnTarget.value = t("content_editor.save_changes")
       } else {
         this.saveBtnTarget.classList.remove("bg-orange-600", "hover:bg-orange-700")
         this.saveBtnTarget.classList.add("bg-blue-600", "hover:bg-blue-700")
-        this.saveBtnTarget.textContent = "Save Draft"
+        this.saveBtnTarget.value = t("content_editor.save_draft")
       }
     }
   }

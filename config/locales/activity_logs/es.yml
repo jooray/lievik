@@ -1,0 +1,99 @@
+es:
+  activity_logs:
+    statuses:
+      pending: "pendiente"
+      running: "en curso"
+      completed: "completada"
+      failed: "fallida"
+    types:
+      ingestion: "Importación"
+      rating: "Valoración"
+    duration_in_words:
+      half_a_minute: "medio minuto"
+      less_than_x_seconds:
+        one: "menos de 1 segundo"
+        other: "menos de %{count} segundos"
+      x_seconds:
+        one: "1 segundo"
+        other: "%{count} segundos"
+      less_than_x_minutes:
+        one: "menos de un minuto"
+        other: "menos de %{count} minutos"
+      x_minutes:
+        one: "1 minuto"
+        other: "%{count} minutos"
+      about_x_hours:
+        one: "alrededor de 1 hora"
+        other: "alrededor de %{count} horas"
+      x_days:
+        one: "1 día"
+        other: "%{count} días"
+      about_x_months:
+        one: "alrededor de 1 mes"
+        other: "alrededor de %{count} meses"
+      x_months:
+        one: "1 mes"
+        other: "%{count} meses"
+      about_x_years:
+        one: "alrededor de 1 año"
+        other: "alrededor de %{count} años"
+      over_x_years:
+        one: "más de 1 año"
+        other: "más de %{count} años"
+      almost_x_years:
+        one: "casi 1 año"
+        other: "casi %{count} años"
+    index:
+      title: "Actividad"
+      subtitle: "Importaciones y valoraciones recientes"
+      developer_logs: "Registros técnicos"
+      active_jobs: "Tareas activas"
+      confirm_cleanup:
+        one: "Se marcará %{count} tarea atascada como fallida. ¿Continuar?"
+        other: "Se marcarán %{count} tareas atascadas como fallidas. ¿Continuar?"
+      cleanup:
+        one: "Limpiar %{count} tarea atascada"
+        other: "Limpiar %{count} tareas atascadas"
+      history: "Historial"
+      took: "Tardó %{duration}"
+      retry: "Reintentar"
+      retry_rating: "Reintentar esta valoración"
+      retry_ingestion: "Volver a actualizar esta fuente"
+      dev_logs:
+        one: "%{count} registro técnico"
+        other: "%{count} registros técnicos"
+      empty_title: "Aún no hay actividad"
+      empty_hint: "La actividad aparecerá aquí cuando actualices fuentes o valores publicaciones."
+    job_progress_card:
+      cancel: "Cancelar tarea"
+      confirm_cancel: "¿Cancelar esta tarea?"
+    all_dev_logs:
+      title: "Registros técnicos"
+      subtitle: "Detalle de las valoraciones con IA y de las importaciones"
+      back: "Volver a Actividad"
+      all_count: "Todos los registros técnicos (%{total})"
+      view_activity: "Ver actividad"
+    dev_logs:
+      heading: "Registros técnicos (%{total})"
+      json_details: "Detalles JSON"
+      view_details: "Ver detalles"
+      system_prompt: "Prompt de sistema"
+      user_prompt: "Prompt de usuario"
+      content_evaluated: "Contenido evaluado"
+      score: "Puntuación:"
+      reason: "Motivo:"
+      raw_response: "Respuesta sin procesar"
+      load_more: "Cargar más"
+      empty_title: "No hay registros técnicos"
+      empty_hint: "Cuando valores o importes publicaciones, aquí verás el detalle."
+    cancel:
+      notice: "Tarea cancelada."
+      already_finished: "La tarea ya está %{status}."
+    retry_job:
+      no_channel: "No se puede reintentar: esta tarea no tiene ningún canal asociado."
+      channel_missing: "No se puede reintentar: el canal ya no existe."
+      notice: "La valoración de %{channel} vuelve a estar en cola."
+    cleanup_stale:
+      notice:
+        one: "Se limpió %{count} tarea atascada."
+        other: "Se limpiaron %{count} tareas atascadas."

@@ -1,0 +1,31 @@
+es:
+  rag_chat:
+    date_format: "%-d %b %Y"
+    unknown_source: "Desconocido"
+    errors:
+      question_required: "Escribe una pregunta"
+      unexpected: "Se produjo un error inesperado"
+    index:
+      heading: "Preguntar al contenido"
+      intro: "Pregunta lo que quieras sobre tus publicaciones indexadas."
+      indexed_html:
+        one: "Publicaciones indexadas: <span class=\"font-medium\">%{indexed} de %{count}</span>."
+        other: "Publicaciones indexadas: <span class=\"font-medium\">%{indexed} de %{count}</span>."
+      clear_chat: "Borrar chat"
+      empty_title: "Todavía no hay publicaciones indexadas"
+      empty_text_html: "Las publicaciones nuevas se indexan automáticamente al importarlas. También puedes reindexarlas manualmente desde los %{link}."
+      settings_link: "ajustes"
+      welcome:
+        one: "¡Hola! Puedo ayudarte a buscar en tu %{count} publicación indexada. Prueba a preguntar, por ejemplo:"
+        other: "¡Hola! Puedo ayudarte a buscar en tus %{count} publicaciones indexadas. Prueba a preguntar, por ejemplo:"
+      example_topics: "¿Cuáles son los temas más comentados últimamente?"
+      example_summary: "Resume las conversaciones sobre [tema]"
+      example_person: "¿Qué dijo [persona] sobre [tema]?"
+      placeholder: "Haz una pregunta…"
+  js:
+    rag_chat:
+      thinking: "Pensando…"
+      sources: "Fuentes"
+      view: "Ver"
+      generic_error: "Se produjo un error"
+      failed_to_connect: "No se pudo conectar: %{message}"

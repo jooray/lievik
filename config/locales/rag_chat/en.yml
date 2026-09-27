@@ -1,0 +1,31 @@
+en:
+  rag_chat:
+    date_format: "%b %d, %Y"
+    unknown_source: "Unknown"
+    errors:
+      question_required: "Please enter a question"
+      unexpected: "An unexpected error occurred"
+    index:
+      heading: "Ask Your Content"
+      intro: "Chat with your indexed events using natural language."
+      indexed_html:
+        one: "<span class=\"font-medium\">%{indexed} of %{count}</span> event indexed."
+        other: "<span class=\"font-medium\">%{indexed} of %{count}</span> events indexed."
+      clear_chat: "Clear chat"
+      empty_title: "No events indexed yet"
+      empty_text_html: "New events will be automatically indexed when ingested. You can also manually reindex from your %{link}."
+      settings_link: "settings"
+      welcome:
+        one: "Hi! I can help you search through your %{count} indexed event. Try asking questions like:"
+        other: "Hi! I can help you search through your %{count} indexed events. Try asking questions like:"
+      example_topics: "What are the main topics discussed recently?"
+      example_summary: "Summarize discussions about [topic]"
+      example_person: "What did [person] say about [topic]?"
+      placeholder: "Ask a question..."
+  js:
+    rag_chat:
+      thinking: "Thinking..."
+      sources: "Sources"
+      view: "View"
+      generic_error: "An error occurred"
+      failed_to_connect: "Failed to connect: %{message}"

@@ -1,0 +1,132 @@
+sk:
+  channel_contents:
+    statuses:
+      draft: "Koncept"
+      published: "Publikované"
+    errors:
+      no_source_events: "Nenašli sa žiadne zdrojové príspevky"
+      instructions_required: "Zadajte pokyny pre AI."
+      nothing_to_refine: "Zatiaľ nie je čo doladiť."
+      unexpected: "Nastala neočakávaná chyba"
+    create:
+      notice: "Koncept je vytvorený. Generuje sa obsah…"
+    update:
+      notice: "Obsah je uložený."
+    destroy:
+      notice: "Obsah je zmazaný."
+    publish:
+      notice: "Obsah je publikovaný a zdrojové príspevky sú označené ako použité."
+    revert:
+      notice: "Predchádzajúca verzia je obnovená."
+      no_previous: "Predchádzajúca verzia neexistuje."
+    content_status:
+      status: "Stav:"
+      versions_saved:
+        one: "%{count} uložená verzia"
+        few: "%{count} uložené verzie"
+        other: "%{count} uložených verzií"
+      last_updated: "Naposledy upravené pred %{time}"
+    editor_container:
+      title_label: "Názov"
+      title_placeholder: "Názov (nepovinný)"
+      editor_placeholder: "Napíšte obsah alebo ho vygenerujte pomocou AI…"
+      content_placeholder: "Tu sa zobrazí obsah od AI, alebo začnite písať sami…"
+      save_draft: "Uložiť koncept"
+    editor_streaming:
+      generating: "Generuje sa obsah…"
+      please_wait: "Chvíľu strpenia, AI pripravuje obsah"
+      waiting: "Čaká sa na odpoveď…"
+    generation_prompt_panel:
+      heading: "Téma / smerovanie"
+      empty: "Téma ani smerovanie zatiaľ nie sú zadané."
+      placeholder: "Uhol pohľadu, témy alebo obmedzenia, ktorých sa má AI držať…"
+    index:
+      heading: "Vygenerovaný obsah"
+      subtitle: "Knižnica obsahu"
+      drafts: "Koncepty"
+      untitled_draft: "Koncept bez názvu"
+      untitled: "Bez názvu"
+      source_events:
+        one: "%{count} zdrojový príspevok"
+        few: "%{count} zdrojové príspevky"
+        other: "%{count} zdrojových príspevkov"
+      updated_ago: "Upravené pred %{time}"
+      published_heading: "Publikovaný obsah"
+      published_ago: "Publikované pred %{time}"
+      empty: "Zatiaľ tu nie je žiadny vygenerovaný obsah."
+      empty_hint: "V zobrazení kanála vyberte príspevky a vytvorte z nich obsah."
+    new:
+      heading: "Nový obsah"
+      subtitle:
+        one: "Vytvoriť obsah z %{count} vybraného príspevku"
+        few: "Vytvoriť obsah z %{count} vybraných príspevkov"
+        other: "Vytvoriť obsah z %{count} vybraných príspevkov"
+      no_events: "Nie sú vybrané žiadne príspevky. Vráťte sa do kanála a najprv nejaké vyberte."
+      back_to_channel: "← Späť na kanál"
+      title_label: "Názov"
+      title_placeholder: "Názov obsahu (nepovinný)"
+      direction_label: "Téma / smerovanie (nepovinné)"
+      direction_placeholder: "Napr. „Toto číslo bude o mesh sieťach, zapracujte túto tému do textu“, „Zamerajte sa na súkromie“, „Nech je to uvoľnené a vtipné“…"
+      direction_hint: "Nepovinné pokyny pre AI pri generovaní obsahu."
+      selected_events: "Vybrané zdrojové príspevky (%{count})"
+      submit: "Vytvoriť koncept a otvoriť editor"
+    edit:
+      default_title: "Úprava obsahu"
+      publish: "Publikovať"
+      publish_confirm: "Publikovať tento obsah? Všetky zdrojové príspevky sa označia ako použité."
+      content_editor: "Editor obsahu"
+      generate: "Vygenerovať pomocou AI"
+      regenerate: "Vygenerovať znova"
+      ai_edit: "Úprava pomocou AI"
+      ai_edit_hint: "Napíšte AI, ako má obsah upraviť"
+      refine_placeholder: "Napr. „Skráťte to“, „Pridajte výzvu na akciu“, „Preložte to do angličtiny“…"
+      apply_ai_edit: "Upraviť pomocou AI"
+      source_events: "Zdrojové príspevky"
+      events_used:
+        one: "Použitý %{count} príspevok"
+        few: "Použité %{count} príspevky"
+        other: "Použitých %{count} príspevkov"
+      version_history: "História verzií"
+      previous_versions:
+        one: "%{count} predchádzajúca verzia"
+        few: "%{count} predchádzajúce verzie"
+        other: "%{count} predchádzajúcich verzií"
+      restore_previous: "Obnoviť predchádzajúcu"
+      restoring: "Obnovuje sa…"
+      restore_confirm: "Obnoviť predchádzajúcu verziu? Aktuálny obsah sa uloží do histórie."
+      version: "Verzia %{number}"
+    show:
+      default_title: "Publikovaný obsah"
+      published_ago: "Publikované pred %{time}"
+      delete_confirm: "Naozaj chcete tento obsah zmazať? Nedá sa to vrátiť."
+      content: "Obsah"
+      copy_markdown: "Kopírovať Markdown"
+      source_events: "Zdrojové príspevky"
+      events_used:
+        one: "Použitý %{count} príspevok"
+        few: "Použité %{count} príspevky"
+        other: "Použitých %{count} príspevkov"
+  js:
+    content_builder:
+      connecting: "Pripája sa k AI…"
+      appears_below: "Obsah sa bude priebežne zobrazovať nižšie."
+      generating: "Generuje sa obsah…"
+      humanizing: "Obsah sa poľudšťuje…"
+      generation_complete: "Generovanie je hotové."
+      applying: "AI upravuje obsah…"
+      instruction: "Pokyn: %{text}"
+      refining: "Obsah sa dolaďuje…"
+      refinement_complete: "Doladenie je hotové."
+      instructions_required: "Zadajte pokyny pre AI"
+      generic_error: "Nastala chyba"
+      error: "Chyba: %{message}"
+      connection_error: "Chyba pripojenia. Skúste to znova."
+      request_failed: "Požiadavka zlyhala (%{status}). Skúste to znova."
+      connection_lost: "Spojenie sa prerušilo. Skúste to znova."
+    content_editor:
+      save_draft: "Uložiť koncept"
+      save_changes: "Uložiť zmeny"
+    template_selector:
+      replace_confirm: "Nahradiť aktuálny obsah touto šablónou?"
+    markdown_editor:
+      placeholder: "Sem napíšte obsah…"

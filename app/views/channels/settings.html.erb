@@ -5,7 +5,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
       </svg>
     <% end %>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Channel Settings</h1>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".title") %></h1>
   </div>
 
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
@@ -18,10 +18,10 @@
         <!-- Relevance Threshold -->
         <div>
           <label for="threshold" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Relevance Threshold
+            <%= t(".threshold_label") %>
           </label>
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-            Only show events with a relevance score at or above this threshold.
+            <%= t(".threshold_hint") %>
           </p>
 
           <div class="flex items-center gap-4"
@@ -47,8 +47,8 @@
           </div>
 
           <div class="mt-2 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>Show everything (0%)</span>
-            <span>Only high relevance (100%)</span>
+            <span><%= t(".show_everything") %></span>
+            <span><%= t(".only_high") %></span>
           </div>
         </div>
 
@@ -58,37 +58,37 @@
             read-only status until the feature actually exists. %>
         <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
           <h3 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Channel Type
+            <%= t(".channel_type") %>
           </h3>
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-            How you interact with this channel's content.
+            <%= t(".channel_type_hint") %>
           </p>
 
           <div class="space-y-2">
             <div class="flex items-start p-3 border border-gray-300 dark:border-gray-600 rounded-lg">
               <span class="mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                Current
+                <%= t(".current") %>
               </span>
               <div class="ml-3">
                 <span class="block text-sm font-medium text-gray-900 dark:text-white">
-                  Pull (Manual)
+                  <%= t(".pull") %>
                 </span>
                 <span class="block text-xs text-gray-500 dark:text-gray-400">
-                  You manually check and select content when needed
+                  <%= t(".pull_hint") %>
                 </span>
               </div>
             </div>
 
             <div class="flex items-start p-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg opacity-60">
               <span class="mt-0.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                Soon
+                <%= t(".soon") %>
               </span>
               <div class="ml-3">
                 <span class="block text-sm font-medium text-gray-900 dark:text-white">
-                  Proactive
+                  <%= t(".proactive") %>
                 </span>
                 <span class="block text-xs text-gray-500 dark:text-gray-400">
-                  Receive reminders when relevant content is available
+                  <%= t(".proactive_hint") %>
                 </span>
               </div>
             </div>
@@ -97,33 +97,33 @@
 
         <!-- Content Generation Settings -->
         <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Content Generation Settings</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4"><%= t(".generation_heading") %></h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Configure how AI generates content for this channel.
+            <%= t(".generation_hint") %>
           </p>
 
           <div class="space-y-4">
             <div>
               <label for="content_language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Content Language
+                <%= t(".content_language") %>
               </label>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                The language AI should use when generating content. Leave empty to use the channel's default language.
+                <%= t(".content_language_hint") %>
               </p>
               <%= form.text_field :content_language,
-                  placeholder: "e.g., Slovak, English, German...",
+                  placeholder: t(".content_language_placeholder"),
                   class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
             </div>
 
             <div>
               <label for="content_style" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Writing Style
+                <%= t(".writing_style") %>
               </label>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                Describe the tone and style for generated content.
+                <%= t(".writing_style_hint") %>
               </p>
               <%= form.text_field :content_style,
-                  placeholder: "e.g., Professional but approachable, casual and friendly...",
+                  placeholder: t(".writing_style_placeholder"),
                   class: "block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
             </div>
 
@@ -134,25 +134,25 @@
                      class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500 dark:bg-gray-700 mt-1">
               <div class="ml-3">
                 <label for="humanize_output" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Humanize AI Output
+                  <%= t(".humanize") %>
                 </label>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  Runs a second pass to remove AI-sounding patterns and make content sound more natural.
+                  <%= t(".humanize_hint") %>
                 </p>
               </div>
             </div>
 
             <div data-controller="template-selector">
               <label for="content_prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Content Formatting Instructions
+                <%= t(".formatting") %>
               </label>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                Detailed instructions for how AI should format and structure generated content.
+                <%= t(".formatting_hint") %>
               </p>
 
               <% if current_user.content_templates_list.any? %>
                 <div class="mb-3 flex items-center gap-2">
-                  <span class="text-xs text-gray-500 dark:text-gray-400">Load from template:</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400"><%= t(".load_from_template") %></span>
                   <% current_user.content_templates_list.each_with_index do |template, index| %>
                     <button type="button"
                             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-900 hover:text-purple-700 dark:hover:text-purple-300"
@@ -162,13 +162,13 @@
                     </button>
                   <% end %>
                   <%= link_to edit_user_path(anchor: "content-templates"), class: "text-xs text-purple-600 dark:text-purple-400 hover:underline ml-2" do %>
-                    Manage templates
+                    <%= t(".manage_templates") %>
                   <% end %>
                 </div>
               <% else %>
                 <div class="mb-3">
                   <%= link_to edit_user_path(anchor: "content-templates"), class: "text-xs text-purple-600 dark:text-purple-400 hover:underline" do %>
-                    Create templates in User Settings to quickly populate this field
+                    <%= t(".create_templates_hint") %>
                   <% end %>
                 </div>
               <% end %>
@@ -184,8 +184,8 @@
 
         <!-- Actions -->
         <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-          <%= link_to "Cancel", @channel, class: "text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
-          <%= form.submit "Save Settings", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" %>
+          <%= link_to t("common.cancel"), @channel, class: "text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" %>
+          <%= form.submit t(".save"), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" %>
         </div>
       <% end %>
     </div>
@@ -194,13 +194,13 @@
   <!-- Danger Zone -->
   <div class="bg-red-50 dark:bg-red-900/20 shadow rounded-lg">
     <div class="px-4 py-5 sm:p-6">
-      <h3 class="text-lg font-medium text-red-900 dark:text-red-200 mb-2">Danger Zone</h3>
+      <h3 class="text-lg font-medium text-red-900 dark:text-red-200 mb-2"><%= t(".danger_zone") %></h3>
       <p class="text-sm text-red-700 dark:text-red-300 mb-4">
-        Deleting a channel will remove all relevance ratings for this channel. This action cannot be undone.
+        <%= t(".danger_body") %>
       </p>
-      <%= button_to "Delete Channel", @channel,
+      <%= button_to t(".delete"), @channel,
           method: :delete,
-          data: { turbo_confirm: "Are you sure you want to delete this channel? This action cannot be undone." },
+          data: { turbo_confirm: t(".delete_confirm") },
           class: "inline-flex items-center px-4 py-2 border border-red-600 dark:border-red-500 text-sm font-medium rounded-md text-red-700 dark:text-red-300 bg-white dark:bg-red-900/40 hover:bg-red-50 dark:hover:bg-red-900/60" %>
     </div>
   </div>

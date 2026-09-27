@@ -1,11 +1,11 @@
 <div class="space-y-6">
   <div class="flex items-center gap-4">
-    <%= link_to events_path, class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
+    <%= link_to events_path, title: t(".back"), aria: { label: t(".back") }, class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
       </svg>
     <% end %>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Event Details</h1>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".title") %></h1>
   </div>
 
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
@@ -13,10 +13,10 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @event.original? ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' %>">
-            <%= @event.event_type.capitalize %>
+            <%= event_type_label(@event.event_type) %>
           </span>
           <span class="text-sm text-gray-500 dark:text-gray-400">
-            From <%= source_label(@event.source) %>
+            <%= t("events.from_source", source: source_label(@event.source)) %>
           </span>
         </div>
         <span class="text-sm text-gray-500 dark:text-gray-400">
@@ -49,7 +49,7 @@
                 <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
-                Open in <%= external_host(client_url) || "Nostr client" %>
+                <%= t(".open_in", client: external_host(client_url) || t(".nostr_client")) %>
               </a>
             <% end %>
 
@@ -60,11 +60,11 @@
                       data-controller="clipboard"
                       data-clipboard-text-value="<%= nostr_id %>"
                       data-action="click->clipboard#copy"
-                      title="Copy <%= id_kind %> to clipboard">
+                      title="<%= t(".copy_id_title", kind: id_kind) %>">
                 <svg class="h-4 w-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
-                <span data-clipboard-target="label">Copy <%= id_kind %></span>
+                <span data-clipboard-target="label"><%= t(".copy_id", kind: id_kind) %></span>
               </button>
             <% end %>
 
@@ -73,7 +73,7 @@
                 <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
-                View Original
+                <%= t(".view_original") %>
               </a>
             <% end %>
           </div>
@@ -88,11 +88,11 @@
     </div>
 
     <div class="flex justify-end mb-4 p-2">
-      <%= button_to bulk_rate_events_path(event_ids: [@event.id]), method: :post, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm", data: { turbo_confirm: "Rerate this event across all channels?" } do %>
+      <%= button_to bulk_rate_events_path(event_ids: [@event.id]), method: :post, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm", data: { turbo_confirm: t("events.rerate_one_confirm") } do %>
         <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
         </svg>
-        Rerate Event
+        <%= t(".rerate_event") %>
       <% end %>
     </div>
 
@@ -100,13 +100,13 @@
     <% if @channel_events.any? %>
       <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700" data-controller="bulk-select">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Channel Relevance (sorted by score)</h3>
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white"><%= t(".channel_relevance") %></h3>
           <div class="flex items-center gap-3">
             <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
               <input type="checkbox" data-action="change->bulk-select#toggleAll" data-bulk-select-target="selectAll" class="rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500">
-              <span>Select All</span>
+              <span><%= t(".select_all") %></span>
             </label>
-            <span data-bulk-select-target="count" class="text-xs text-gray-500 dark:text-gray-400">0 selected</span>
+            <span data-bulk-select-target="count" class="text-xs text-gray-500 dark:text-gray-400"><%= t("events.selected", count: 0) %></span>
           </div>
         </div>
 
@@ -132,7 +132,7 @@
                     </span>
                   </div>
                   <% if ce.used? %>
-                    <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Already used in this channel</span>
+                    <span class="text-xs text-purple-600 dark:text-purple-400 font-medium"><%= t(".already_used") %></span>
                   <% end %>
                   <% if ce.relevance_reason.present? %>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2"><%= ce.relevance_reason.truncate(150) %></p>
@@ -147,16 +147,16 @@
               <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              Mark as Used in Selected Channels
+              <%= t(".mark_used_selected") %>
             </button>
           </div>
         <% end %>
       </div>
     <% else %>
       <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
-        <p class="text-sm text-gray-500 dark:text-gray-400">This event hasn't been rated for any channels yet.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400"><%= t(".not_rated") %></p>
         <%= button_to bulk_rate_events_path(event_ids: [@event.id]), method: :post, class: "mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" do %>
-          Rate for all channels
+          <%= t(".rate_all_channels") %>
         <% end %>
       </div>
     <% end %>
@@ -164,18 +164,17 @@
     <!-- Raw Data (Collapsible) -->
     <details class="border-t border-gray-200 dark:border-gray-700">
       <summary class="px-6 py-4 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-        Raw Data
+        <%= t(".raw_data") %>
       </summary>
       <%# Long-form events carry tens of KB of raw JSON. Even inside <details>
           it is all in the HTML the browser has to parse, so cap it. %>
       <% raw_json = JSON.pretty_generate(@event.raw_data || {}) %>
       <% raw_limit = 4_000 %>
       <div class="px-6 pb-4">
-        <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto max-h-96"><%= raw_json.truncate(raw_limit, omission: "\n… truncated …") %></pre>
+        <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto max-h-96"><%= raw_json.truncate(raw_limit, omission: "\n… #{t(".truncated")} …") %></pre>
         <% if raw_json.length > raw_limit %>
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Showing the first <%= number_with_delimiter(raw_limit) %> of
-            <%= number_with_delimiter(raw_json.length) %> characters.
+            <%= t(".raw_truncated_note", shown: number_with_delimiter(raw_limit), total: number_with_delimiter(raw_json.length)) %>
           </p>
         <% end %>
       </div>

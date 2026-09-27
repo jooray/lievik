@@ -10,7 +10,7 @@ class ManualEventsController < ApplicationController
     @event = result.event
 
     if result.success?
-      redirect_to dashboard_path, notice: "Event added successfully. Rating in background."
+      redirect_to dashboard_path, notice: t(".added")
     else
       @event ||= Event.new(content: params[:event][:content])
       render :new, status: :unprocessable_entity

@@ -29,13 +29,13 @@ class ChannelAiChatController < ApplicationController
       end
 
     if conversation_history == :invalid || !conversation_history.is_a?(Array)
-      response.stream.write "event: error\ndata: #{({ message: "Invalid conversation history" }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_ai_chat.errors.invalid_history") }).to_json}\n\n"
       response.stream.close
       return
     end
 
     if message.blank?
-      response.stream.write "event: error\ndata: #{({ message: "Please enter a message" }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_ai_chat.errors.empty_message") }).to_json}\n\n"
       response.stream.close
       return
     end
@@ -57,7 +57,7 @@ class ChannelAiChatController < ApplicationController
       end
     rescue => e
       Rails.logger.error("Channel AI chat streaming error: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
-      response.stream.write "event: error\ndata: #{({ message: "An unexpected error occurred" }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_ai_chat.errors.unexpected") }).to_json}\n\n"
     ensure
       response.stream.close
     end
@@ -68,7 +68,7 @@ class ChannelAiChatController < ApplicationController
     templates_data = params[:templates] || []
 
     if channels_data.empty?
-      render json: { success: false, error: "No channels to create" }, status: :unprocessable_entity
+      render json: { success: false, error: t("channel_ai_chat.errors.no_channels") }, status: :unprocessable_entity
       return
     end
 

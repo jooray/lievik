@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 // Connects to data-controller="template-selector"
 export default class extends Controller {
@@ -11,7 +12,7 @@ export default class extends Controller {
     if (this.hasTextareaTarget && content) {
       // If textarea has content, confirm replacement
       if (this.textareaTarget.value.trim() && this.textareaTarget.value.trim() !== content.trim()) {
-        if (!confirm("Replace current content with this template?")) {
+        if (!confirm(t("template_selector.replace_confirm"))) {
           return
         }
       }

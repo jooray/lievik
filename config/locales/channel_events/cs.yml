@@ -1,0 +1,13 @@
+cs:
+  channel_events:
+    no_selection: "Nevybrali jste žádné příspěvky"
+    bulk_mark_used:
+      notice:
+        one: "%{count} příspěvek byl označen jako použitý."
+        few: "%{count} příspěvky byly označeny jako použité."
+        other: "%{count} příspěvků bylo označeno jako použité."
+    bulk_rate:
+      notice:
+        one: "Opětovné hodnocení %{count} příspěvku je ve frontě."
+        few: "Opětovné hodnocení %{count} příspěvků je ve frontě."
+        other: "Opětovné hodnocení %{count} příspěvků je ve frontě."

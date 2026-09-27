@@ -3,14 +3,14 @@
   <div class="flex-shrink-0 pb-4 border-b border-gray-200 dark:border-gray-700">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ask Your Content</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".heading") %></h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Chat with your indexed events using natural language.
-          <span class="font-medium"><%= @embedded_count %> of <%= @total_count %></span> events indexed.
+          <%= t(".intro") %>
+          <%= t(".indexed_html", indexed: @embedded_count, count: @total_count) %>
         </p>
       </div>
       <button type="button" data-action="click->rag-chat#clearChat" class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-        Clear chat
+        <%= t(".clear_chat") %>
       </button>
     </div>
   </div>
@@ -24,10 +24,9 @@
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No events indexed yet</h3>
+          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white"><%= t(".empty_title") %></h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            New events will be automatically indexed when ingested. You can also manually reindex from your
-            <%= link_to "settings", edit_user_path, class: "text-purple-600 dark:text-purple-400 hover:underline" %>.
+            <%= t(".empty_text_html", link: link_to(t(".settings_link"), edit_user_path, class: "text-purple-600 dark:text-purple-400 hover:underline")) %>
           </p>
         </div>
       </div>
@@ -37,12 +36,12 @@
         <div class="lg:col-span-2">
           <div class="max-w-3xl px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
             <p class="text-sm">
-              Hi! I can help you search through your <%= @embedded_count %> indexed events. Try asking questions like:
+              <%= t(".welcome", count: @embedded_count) %>
             </p>
             <ul class="mt-2 text-sm text-gray-600 dark:text-gray-300 space-y-1">
-              <li>&bull; What are the main topics discussed recently?</li>
-              <li>&bull; Summarize discussions about [topic]</li>
-              <li>&bull; What did [person] say about [topic]?</li>
+              <li>&bull; <%= t(".example_topics") %></li>
+              <li>&bull; <%= t(".example_summary") %></li>
+              <li>&bull; <%= t(".example_person") %></li>
             </ul>
           </div>
         </div>
@@ -59,7 +58,7 @@
         data-action="input->rag-chat#autoResize"
         rows="1"
         class="block w-full resize-none rounded-full border-0 bg-gray-100 dark:bg-gray-700 dark:text-white shadow-lg outline-none focus:outline-none focus:shadow-xl focus:bg-gray-50 dark:focus:bg-gray-600 transition-all pl-5 pr-14 py-4 text-base placeholder-gray-400"
-        placeholder="Ask a question..."
+        placeholder="<%= t(".placeholder") %>"
         <% if @embedded_count == 0 %>disabled<% end %>
       ></textarea>
       <button

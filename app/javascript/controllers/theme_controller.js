@@ -1,11 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 // Theme is stored per-device in localStorage (NOT in the user profile), so each
 // device keeps its own last-used mode across navigations. The inline script in
 // the layout <head> applies the same value before first paint to avoid a flash.
 const STORAGE_KEY = "theme"
 const THEMES = ["system", "light", "dark"]
-const THEME_LABELS = { system: "System", light: "Light", dark: "Dark" }
 
 export default class extends Controller {
   connect() {
@@ -78,9 +78,12 @@ export default class extends Controller {
   updateLabels(mode) {
     // Every toggle on the page (desktop + mobile nav) shares the state, so keep
     // their tooltips in sync when one of them is clicked.
-    const label = THEME_LABELS[mode] || THEME_LABELS.system
-    const next = THEMES[(THEMES.indexOf(mode) + 1) % THEMES.length]
-    const title = `Theme: ${label} (click for ${THEME_LABELS[next]})`
+    const current = THEMES.includes(mode) ? mode : "system"
+    const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length]
+    const title = t("theme.title", {
+      current: t(`theme.modes.${current}`),
+      next: t(`theme.modes.${next}`)
+    })
 
     document.querySelectorAll("[data-theme-target='button']").forEach((el) => {
       el.setAttribute("title", title)

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 export default class extends Controller {
   static targets = ["typeSelect", "identifierLabel", "identifierInput", "identifierHint", "nostrSettings"]
@@ -18,8 +19,8 @@ export default class extends Controller {
 
     // Update label
     this.identifierLabelTarget.textContent = isNostr
-      ? "Nostr Public Key (npub)"
-      : "Feed URL"
+      ? t("source_form.nostr_label")
+      : t("source_form.rss_label")
 
     // Update placeholder
     this.identifierInputTarget.placeholder = isNostr
@@ -28,8 +29,8 @@ export default class extends Controller {
 
     // Update hint
     this.identifierHintTarget.textContent = isNostr
-      ? "Enter the npub or hex public key of the account"
-      : "Enter the URL of the RSS or Atom feed"
+      ? t("source_form.nostr_hint")
+      : t("source_form.rss_hint")
 
     // Show/hide Nostr-specific settings
     if (this.hasNostrSettingsTarget) {

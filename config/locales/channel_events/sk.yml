@@ -1,0 +1,13 @@
+sk:
+  channel_events:
+    no_selection: "Nevybrali ste žiadne príspevky"
+    bulk_mark_used:
+      notice:
+        one: "%{count} príspevok bol označený ako použitý"
+        few: "%{count} príspevky boli označené ako použité"
+        other: "%{count} príspevkov bolo označených ako použité"
+    bulk_rate:
+      notice:
+        one: "Nové hodnotenie %{count} príspevku je vo fronte"
+        few: "Nové hodnotenie %{count} príspevkov je vo fronte"
+        other: "Nové hodnotenie %{count} príspevkov je vo fronte"

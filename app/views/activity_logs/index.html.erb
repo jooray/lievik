@@ -3,29 +3,29 @@
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Activity Log</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".title") %></h1>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        View ingestion and rating activity
+        <%= t(".subtitle") %>
       </p>
     </div>
     <%= link_to all_dev_logs_activity_logs_path, class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 dark:text-purple-300 dark:bg-purple-900/30 dark:hover:bg-purple-800/50 rounded-lg border border-purple-200 dark:border-purple-800 transition-colors" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
       </svg>
-      Developer Logs
+      <%= t(".developer_logs") %>
     <% end %>
   </div>
 
   <!-- Active Jobs -->
   <div class="<%= 'hidden' unless @active_jobs.any? %> bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4" data-controller="job-progress">
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-medium text-purple-800 dark:text-purple-200">Active Jobs</h2>
+      <h2 class="text-sm font-medium text-purple-800 dark:text-purple-200"><%= t(".active_jobs") %></h2>
       <% if @stale_jobs.any? %>
-        <%= button_to cleanup_stale_activity_logs_path, method: :post, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 dark:text-amber-300 dark:bg-amber-900/40 dark:hover:bg-amber-800/50 rounded-md transition-colors", data: { turbo_confirm: "This will mark #{@stale_jobs.count} stale job(s) as failed. Continue?" } do %>
+        <%= button_to cleanup_stale_activity_logs_path, method: :post, class: "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 dark:text-amber-300 dark:bg-amber-900/40 dark:hover:bg-amber-800/50 rounded-md transition-colors", data: { turbo_confirm: t(".confirm_cleanup", count: @stale_jobs.count) } do %>
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
           </svg>
-          Clean up <%= @stale_jobs.count %> stale job<%= @stale_jobs.count == 1 ? '' : 's' %>
+          <%= t(".cleanup", count: @stale_jobs.count) %>
         <% end %>
       <% end %>
     </div>
@@ -39,7 +39,7 @@
   <!-- Activity History -->
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
     <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-lg font-medium text-gray-900 dark:text-white">History</h2>
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white"><%= t(".history") %></h2>
     </div>
 
     <% if @activity_logs.any? %>
@@ -81,34 +81,34 @@
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= log.activity_type == 'ingestion' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' %>">
-                      <%= log.activity_type.capitalize %>
+                      <%= t("activity_logs.types.#{log.activity_type}", default: log.activity_type.capitalize) %>
                     </span>
                     <span class="text-sm text-gray-900 dark:text-gray-100"><%= log.message %></span>
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     <%= format_datetime(log.created_at) %>
                     <% if log.duration %>
-                      &middot; Took <%= distance_of_time_in_words(log.duration) %>
+                      &middot; <%= t(".took", duration: distance_of_time_in_words(log.duration, 0, scope: "activity_logs.duration_in_words")) %>
                     <% end %>
                   </p>
                 </div>
               </div>
               <% retry_button_class = "inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 dark:text-amber-300 dark:bg-amber-900/30 dark:hover:bg-amber-800/50 rounded-md border border-amber-200 dark:border-amber-800 transition-colors" %>
               <% if log.failed? && log.activity_type == "rating" && log.metadata["channel_id"].present? %>
-                <%= button_to retry_job_activity_log_path(log), method: :post, class: retry_button_class, title: "Retry this rating job" do %>
+                <%= button_to retry_job_activity_log_path(log), method: :post, class: retry_button_class, title: t(".retry_rating") do %>
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                   </svg>
-                  Retry
+                  <%= t(".retry") %>
                 <% end %>
               <%# Failed ingestions had no retry at all — re-running one is just
                   refreshing the source it came from. %>
               <% elsif log.failed? && log.activity_type == "ingestion" && user_source_ids.include?(log.metadata["source_id"].to_i) %>
-                <%= button_to refresh_source_path(log.metadata["source_id"]), method: :post, class: retry_button_class, title: "Retry by refreshing this source" do %>
+                <%= button_to refresh_source_path(log.metadata["source_id"]), method: :post, class: retry_button_class, title: t(".retry_ingestion") do %>
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                   </svg>
-                  Retry
+                  <%= t(".retry") %>
                 <% end %>
               <% end %>
             </div>
@@ -120,7 +120,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <%= dev_log_count %> Dev Log<%= 's' if dev_log_count != 1 %>
+                  <%= t(".dev_logs", count: dev_log_count) %>
                 <% end %>
               </div>
             <% end %>
@@ -132,9 +132,9 @@
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No activity yet</h3>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white"><%= t(".empty_title") %></h3>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Activity will appear here when you refresh sources or rate events.
+          <%= t(".empty_hint") %>
         </p>
       </div>
     <% end %>

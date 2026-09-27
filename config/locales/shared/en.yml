@@ -1,0 +1,18 @@
+en:
+  auth:
+    sign_in_required: "Please sign in to continue"
+  common:
+    cancel: "Cancel"
+    save: "Save"
+    edit: "Edit"
+    delete: "Delete"
+    back: "Back"
+    add: "Add"
+    close: "Close"
+    language: "Language"
+    confirm_delete: "Are you sure?"
+  js:
+    common:
+      copy: "Copy"
+      copied: "Copied!"
+      loading: "Loading…"

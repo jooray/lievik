@@ -1,0 +1,126 @@
+es:
+  channel_contents:
+    statuses:
+      draft: "Borrador"
+      published: "Publicado"
+    errors:
+      no_source_events: "No se encontraron publicaciones de origen"
+      instructions_required: "Escribe instrucciones para la IA."
+      nothing_to_refine: "No hay contenido que refinar."
+      unexpected: "Se produjo un error inesperado"
+    create:
+      notice: "Borrador creado. Generando contenido…"
+    update:
+      notice: "Contenido guardado."
+    destroy:
+      notice: "Contenido eliminado."
+    publish:
+      notice: "Contenido publicado. Las publicaciones de origen se marcaron como usadas."
+    revert:
+      notice: "Se restauró la versión anterior."
+      no_previous: "No hay ninguna versión anterior."
+    content_status:
+      status: "Estado:"
+      versions_saved:
+        one: "%{count} versión guardada"
+        other: "%{count} versiones guardadas"
+      last_updated: "Última actualización: hace %{time}"
+    editor_container:
+      title_label: "Título"
+      title_placeholder: "Título (opcional)"
+      editor_placeholder: "Escribe tu contenido aquí o genéralo con IA…"
+      content_placeholder: "El contenido aparecerá aquí cuando lo genere la IA. O empieza a escribir…"
+      save_draft: "Guardar borrador"
+    editor_streaming:
+      generating: "Generando contenido…"
+      please_wait: "La IA está escribiendo tu contenido"
+      waiting: "Esperando respuesta…"
+    generation_prompt_panel:
+      heading: "Tema / enfoque"
+      empty: "Todavía no hay tema ni enfoque."
+      placeholder: "Añade el ángulo, los temas o las restricciones que debe seguir la IA…"
+    index:
+      heading: "Contenido generado"
+      subtitle: "Biblioteca de contenido"
+      drafts: "Borradores"
+      untitled_draft: "Borrador sin título"
+      untitled: "Sin título"
+      source_events:
+        one: "%{count} publicación de origen"
+        other: "%{count} publicaciones de origen"
+      updated_ago: "Actualizado hace %{time}"
+      published_heading: "Contenido publicado"
+      published_ago: "Publicado hace %{time}"
+      empty: "Todavía no hay contenido generado."
+      empty_hint: "Selecciona publicaciones en la vista del canal para crear contenido a partir de ellas."
+    new:
+      heading: "Nuevo contenido"
+      subtitle:
+        one: "Crear contenido a partir de %{count} publicación seleccionada"
+        other: "Crear contenido a partir de %{count} publicaciones seleccionadas"
+      no_events: "No hay publicaciones seleccionadas. Vuelve al canal y selecciona algunas primero."
+      back_to_channel: "← Volver al canal"
+      title_label: "Título"
+      title_placeholder: "Título para este contenido (opcional)"
+      direction_label: "Tema / enfoque (opcional)"
+      direction_placeholder: "P. ej., «Este número va sobre redes mesh, integra ese tema en el texto», «Céntrate en la privacidad», «Hazlo informal y divertido»…"
+      direction_hint: "Indicaciones opcionales para la IA al generar el contenido."
+      selected_events: "Publicaciones de origen seleccionadas (%{count})"
+      submit: "Crear borrador y abrir el editor"
+    edit:
+      default_title: "Editar contenido"
+      publish: "Publicar"
+      publish_confirm: "¿Publicar este contenido? Todas las publicaciones de origen se marcarán como usadas."
+      content_editor: "Editor de contenido"
+      generate: "Generar con IA"
+      regenerate: "Volver a generar"
+      ai_edit: "Edición con IA"
+      ai_edit_hint: "Dile a la IA cómo modificar el contenido"
+      refine_placeholder: "P. ej., «Hazlo más conciso», «Añade una llamada a la acción», «Tradúcelo al inglés»…"
+      apply_ai_edit: "Aplicar edición con IA"
+      source_events: "Publicaciones de origen"
+      events_used:
+        one: "%{count} publicación usada"
+        other: "%{count} publicaciones usadas"
+      version_history: "Historial de versiones"
+      previous_versions:
+        one: "%{count} versión anterior"
+        other: "%{count} versiones anteriores"
+      restore_previous: "Restaurar la anterior"
+      restoring: "Restaurando…"
+      restore_confirm: "¿Restaurar la versión anterior? El contenido actual se guardará en el historial."
+      version: "Versión %{number}"
+    show:
+      default_title: "Contenido publicado"
+      published_ago: "Publicado hace %{time}"
+      delete_confirm: "¿Seguro que quieres eliminar este contenido? No se puede deshacer."
+      content: "Contenido"
+      copy_markdown: "Copiar Markdown"
+      source_events: "Publicaciones de origen"
+      events_used:
+        one: "%{count} publicación usada"
+        other: "%{count} publicaciones usadas"
+  js:
+    content_builder:
+      connecting: "Conectando con la IA…"
+      appears_below: "El contenido aparecerá abajo a medida que se genere."
+      generating: "Generando contenido…"
+      humanizing: "Humanizando el contenido…"
+      generation_complete: "Contenido generado."
+      applying: "Aplicando la edición de la IA…"
+      instruction: "Instrucción: %{text}"
+      refining: "Refinando el contenido…"
+      refinement_complete: "Contenido refinado."
+      instructions_required: "Escribe instrucciones para la IA"
+      generic_error: "Se produjo un error"
+      error: "Error: %{message}"
+      connection_error: "Error de conexión. Inténtalo de nuevo."
+      request_failed: "La solicitud falló (%{status}). Inténtalo de nuevo."
+      connection_lost: "Se perdió la conexión. Inténtalo de nuevo."
+    content_editor:
+      save_draft: "Guardar borrador"
+      save_changes: "Guardar cambios"
+    template_selector:
+      replace_confirm: "¿Reemplazar el contenido actual por esta plantilla?"
+    markdown_editor:
+      placeholder: "Escribe tu contenido aquí…"

@@ -73,6 +73,6 @@ class Source < ApplicationRecord
     return if Nostr::KeyConverter.valid_hex_pubkey?(value)
     return if Nostr::KeyConverter.valid_npub?(value)
 
-    errors.add(:identifier, "must be a valid npub or 64-character hex pubkey")
+    errors.add(:identifier, :invalid_npub)
   end
 end

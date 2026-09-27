@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 export default class extends Controller {
   static values = { text: String }
@@ -17,13 +18,13 @@ export default class extends Controller {
 
     navigator.clipboard.writeText(this.textValue).then(() => {
       const original = feedbackElement.textContent
-      feedbackElement.textContent = "Copied!"
+      feedbackElement.textContent = t("common.copied")
       setTimeout(() => {
         feedbackElement.textContent = original
       }, 1500)
     }).catch(() => {
       const original = feedbackElement.textContent
-      feedbackElement.textContent = "Copy failed"
+      feedbackElement.textContent = t("clipboard.copy_failed")
       setTimeout(() => {
         feedbackElement.textContent = original
       }, 1500)

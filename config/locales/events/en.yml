@@ -1,0 +1,69 @@
+en:
+  events:
+    show_more: "Show more"
+    from_source: "From %{source}"
+    view_details: "View details"
+    rerate_one_confirm: "Rerate this event across all channels?"
+    selected:
+      one: "%{count} selected"
+      other: "%{count} selected"
+    index:
+      title: "All Events"
+      subtitle:
+        one: "1 event from all sources"
+        other: "%{count} events from all sources"
+      search: "Search"
+      search_placeholder: "Search content..."
+      source: "Source"
+      all_sources: "All Sources"
+      type: "Type"
+      all_types: "All Types"
+      filter: "Filter"
+      clear: "Clear"
+      rate_cap_note: "Only the %{cap} most recent of %{total} matching events will be rated."
+      select_all_page: "Select All on This Page"
+      rerate_confirm:
+        one: "Rerate 1 matching event across all channels? This uses AI credits and cannot be undone."
+        other: "Rerate %{count} matching events across all channels? This uses AI credits and cannot be undone."
+      rerate_all: "Rerate All (%{count})"
+      rerate_one: "Rerate this event"
+      empty_title: "No events yet"
+      empty_body: "Add sources and refresh them to ingest events."
+    show:
+      back: "Back to events"
+      title: "Event Details"
+      open_in: "Open in %{client}"
+      nostr_client: "Nostr client"
+      copy_id_title: "Copy %{kind} to clipboard"
+      copy_id: "Copy %{kind}"
+      view_original: "View Original"
+      rerate_event: "Rerate Event"
+      channel_relevance: "Channel Relevance (sorted by score)"
+      select_all: "Select All"
+      already_used: "Already used in this channel"
+      mark_used_selected: "Mark as Used in Selected Channels"
+      not_rated: "This event hasn't been rated for any channels yet."
+      rate_all_channels: "Rate for all channels"
+      raw_data: "Raw Data"
+      truncated: "truncated"
+      raw_truncated_note: "Showing the first %{shown} of %{total} characters."
+    bulk_rate:
+      no_match: "No events match current filters"
+      no_channels: "No channels to rate against — create a channel first"
+      channels:
+        one: "across 1 channel"
+        other: "across %{count} channels"
+      queued_selected:
+        one: "Rating queued for 1 selected event %{channels}."
+        other: "Rating queued for %{count} selected events %{channels}."
+      queued_matching:
+        one: "Rerating queued for 1 matching event %{channels}."
+        other: "Rerating queued for %{count} matching events %{channels}."
+      skipped:
+        one: "1 older event was skipped — a single request rates at most %{max} events. Narrow the filters or repeat to cover the rest."
+        other: "%{count} older events were skipped — a single request rates at most %{max} events. Narrow the filters or repeat to cover the rest."
+    bulk_mark_used:
+      no_channels_selected: "No channels selected"
+      marked_used:
+        one: "Marked as used in 1 channel"
+        other: "Marked as used in %{count} channels"

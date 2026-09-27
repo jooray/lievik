@@ -1,0 +1,33 @@
+es:
+  dashboard:
+    index:
+      title: "Panel"
+      welcome_back: "Hola de nuevo, %{name}"
+      rate_all_unrated: "Valorar todo lo pendiente"
+      sources: "Fuentes"
+      channels: "Canales"
+      events: "Publicaciones"
+      ask_content: "Preguntar al contenido"
+      indexed: "%{embedded}/%{total} indexadas"
+      view_all: "Ver todo"
+      view_all_events: "Ver todas las publicaciones"
+      ask_content_link: "Preguntar al contenido"
+      jobs_running: "Hay tareas en segundo plano en curso"
+      step1_title: "Paso 1: añade una fuente"
+      step1_body: "Las fuentes son de donde llega el contenido: cuentas de Nostr (npubs) o feeds RSS. Añade tu cuenta y las que sigues, y Lievik traerá sus publicaciones para que elijas."
+      add_source: "Añadir fuente"
+      view_sources: "Ver fuentes"
+      step2_title: "Paso 2: crea un canal"
+      step2_body: "Los canales son el centro de Lievik: uno por cada sitio donde difundes contenido (boletín, grupo de chat, cuenta en redes sociales). Cada canal tiene sus propios criterios de relevancia, y la IA puntúa cada publicación importada según ellos para que solo veas lo que encaja."
+      create_channel: "Crear canal"
+      describe_to_ai: "Descríbeselo a la IA"
+      recent_events: "Publicaciones recientes"
+      no_events_title: "Aún no hay publicaciones"
+      no_events_body: "Actualiza tus fuentes para empezar a importar contenido, o añádelo a mano."
+      refresh_all_sources: "Actualizar todas las fuentes"
+      manage_sources: "Gestionar fuentes"
+      add_manually: "Añadir una publicación a mano"
+    rate_all:
+      queued:
+        one: "Valoración en cola para 1 canal."
+        other: "Valoraciones en cola para %{count} canales."

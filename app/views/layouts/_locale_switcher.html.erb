@@ -1,0 +1,16 @@
+<%# Compact language switcher for the nav footer. Each link reloads the current
+    page with ?locale=xx; ApplicationController#switch_locale saves the choice to
+    the user's settings and a cookie. Full reload (no Turbo) so <html lang> and
+    the lievik-i18n JSON are both fresh. Codes, not names, keep it to one line. %>
+<% close_action = local_assigns[:close_action] %>
+<nav aria-label="<%= t("common.language") %>" class="mt-3 flex items-center justify-center gap-1 text-xs">
+  <% locale_options.each_with_index do |(name, code), index| %>
+    <% if index > 0 %><span class="text-gray-300 dark:text-gray-600" aria-hidden="true">&middot;</span><% end %>
+    <% active = code == I18n.locale.to_s %>
+    <%= link_to code.upcase, locale_switch_path(code),
+          lang: code, hreflang: code, title: name,
+          aria: { current: (active ? "true" : nil), label: name },
+          data: { turbo: false, action: close_action }.compact,
+          class: "rounded px-1.5 py-0.5 font-medium #{active ? 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30' : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-700'}" %>
+  <% end %>
+</nav>

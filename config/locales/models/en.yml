@@ -1,0 +1,42 @@
+en:
+  activerecord:
+    models:
+      source:
+        one: "Source"
+        other: "Sources"
+      activity_log:
+        one: "Activity"
+        other: "Activity"
+      user:
+        one: "User"
+        other: "Users"
+    attributes:
+      source:
+        identifier: "Identifier"
+        name: "Name"
+        description: "Description"
+        distance: "Relevance distance"
+        source_type: "Source type"
+        settings_include_replies: "Include replies"
+        settings_include_reposts: "Include reposts"
+        settings_import_days: "Import days"
+      activity_log:
+        activity_type: "Activity type"
+        status: "Status"
+        message: "Message"
+      user:
+        npub: "npub"
+        pubkey_hex: "Public key"
+        system_prompt: "System prompt"
+        event_link_template: "Event link template"
+        naddr_link_template: "Article link template"
+        profile_link_template: "Profile link template"
+        default_content_style: "Default writing style"
+        rating_engine: "Rating engine"
+        locale: "Interface language"
+    errors:
+      models:
+        source:
+          attributes:
+            identifier:
+              invalid_npub: "must be a valid npub or 64-character hex pubkey"

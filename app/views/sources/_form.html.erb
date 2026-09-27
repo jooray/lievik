@@ -4,7 +4,7 @@
       <div class="flex">
         <div class="ml-3">
           <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-            <%= pluralize(source.errors.count, "error") %> prevented this source from being saved:
+            <%= t(".errors_header", count: source.errors.count) %>
           </h3>
           <div class="mt-2 text-sm text-red-700 dark:text-red-300">
             <ul class="list-disc pl-5 space-y-1">
@@ -19,9 +19,9 @@
   <% end %>
 
   <div>
-    <%= form.label :source_type, "Source Type", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+    <%= form.label :source_type, t(".source_type"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
     <%= form.select :source_type,
-      [["Nostr Account", "nostr"], ["RSS Feed", "rss"]],
+      [[t(".types.nostr"), "nostr"], [t(".types.rss"), "rss"]],
       {},
       class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm",
       data: { action: "change->source-form#typeChanged", source_form_target: "typeSelect" }
@@ -31,7 +31,7 @@
   <div>
     <%= form.label :identifier, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" do %>
       <span data-source-form-target="identifierLabel">
-        <%= source.nostr? ? "Nostr Public Key (npub)" : "Feed URL" %>
+        <%= source.nostr? ? t("js.source_form.nostr_label") : t("js.source_form.rss_label") %>
       </span>
     <% end %>
     <%= form.text_field :identifier,
@@ -40,51 +40,51 @@
       data: { source_form_target: "identifierInput" }
     %>
     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" data-source-form-target="identifierHint">
-      <%= source.nostr? ? "Enter the npub or hex public key of the account" : "Enter the URL of the RSS or Atom feed" %>
+      <%= source.nostr? ? t("js.source_form.nostr_hint") : t("js.source_form.rss_hint") %>
     </p>
   </div>
 
   <div>
     <%= form.label :name, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
-    <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm", placeholder: "Friendly name (optional)" %>
-    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Will be auto-populated from profile/feed if left blank</p>
+    <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm", placeholder: t(".name_placeholder") %>
+    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= t(".name_hint") %></p>
   </div>
 
   <div>
     <%= form.label :description, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
-    <%= form.text_area :description, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm", placeholder: "Describe what kind of content this source produces..." %>
+    <%= form.text_area :description, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm", placeholder: t(".description_placeholder") %>
   </div>
 
   <div>
-    <%= form.label :distance, "Relevance Distance (0-10)", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+    <%= form.label :distance, t(".distance"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
     <%= form.number_field :distance, min: 0, max: 10, class: "mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
-    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">0 = Your own content (most relevant), 10 = Distant contact (least relevant)</p>
+    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= t(".distance_hint") %></p>
   </div>
 
   <div class="border-t border-gray-200 dark:border-gray-700 pt-6" data-source-form-target="nostrSettings">
-    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Import Settings</h3>
+    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4"><%= t(".import_settings") %></h3>
 
     <div class="space-y-4">
       <div class="flex items-center">
         <%= form.check_box :settings_include_replies, { class: "h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" }, true, false %>
-        <%= form.label :settings_include_replies, "Include replies", class: "ml-2 block text-sm text-gray-700 dark:text-gray-300" %>
+        <%= form.label :settings_include_replies, t(".include_replies"), class: "ml-2 block text-sm text-gray-700 dark:text-gray-300" %>
       </div>
 
       <div class="flex items-center">
         <%= form.check_box :settings_include_reposts, { class: "h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500" }, true, false %>
-        <%= form.label :settings_include_reposts, "Include reposts", class: "ml-2 block text-sm text-gray-700 dark:text-gray-300" %>
+        <%= form.label :settings_include_reposts, t(".include_reposts"), class: "ml-2 block text-sm text-gray-700 dark:text-gray-300" %>
       </div>
 
       <div>
-        <%= form.label :settings_import_days, "Import days", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+        <%= form.label :settings_import_days, t(".import_days"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
         <%= form.number_field :settings_import_days, min: 1, max: 3650, class: "mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">How many days of history to import (max 10 years)</p>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= t(".import_days_hint") %></p>
       </div>
     </div>
   </div>
 
   <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-    <%= link_to "Cancel", sources_path, class: "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500" %>
-    <%= form.submit source.persisted? ? "Update Source" : "Add Source", class: "inline-flex justify-center rounded-md border border-transparent bg-purple-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer" %>
+    <%= link_to t("common.cancel"), sources_path, class: "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500" %>
+    <%= form.submit source.persisted? ? t(".update") : t(".create"), class: "inline-flex justify-center rounded-md border border-transparent bg-purple-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer" %>
   </div>
 <% end %>

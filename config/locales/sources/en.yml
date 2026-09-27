@@ -1,0 +1,81 @@
+en:
+  sources:
+    index:
+      title: "Sources"
+      subtitle: "Nostr accounts and RSS feeds to curate content from"
+      refresh_all: "Refresh All"
+      add_source: "Add Source"
+      empty_title: "No sources"
+      empty_hint: "Get started by adding a Nostr account to follow."
+      distance: "Distance: %{distance}"
+      events:
+        one: "%{count} event"
+        other: "%{count} events"
+      click_to_copy: "Click to copy"
+      view_profile: "View profile"
+    new:
+      title: "Add Source"
+      subtitle: "Add a Nostr account to curate content from"
+    edit:
+      title: "Edit Source"
+      danger_zone: "Danger Zone"
+      danger_hint: "Deleting this source will also delete all its events."
+      confirm_delete: "Delete this source? This will permanently delete all of its events too. This cannot be undone."
+      delete: "Delete Source"
+    show:
+      source_type:
+        nostr: "Nostr source"
+        rss: "RSS source"
+        manual: "Manual source"
+      distance: "Distance %{distance}"
+      events: "Events"
+      ago: "%{time} ago"
+      event_types:
+        original: "Original"
+        reply: "Reply"
+        repost: "Repost"
+      view_details: "View details"
+      empty: "No events from this source yet."
+    form:
+      errors_header:
+        one: "1 error prevented this source from being saved:"
+        other: "%{count} errors prevented this source from being saved:"
+      source_type: "Source Type"
+      types:
+        nostr: "Nostr Account"
+        rss: "RSS Feed"
+      name_placeholder: "Friendly name (optional)"
+      name_hint: "Will be auto-populated from profile/feed if left blank"
+      description_placeholder: "Describe what kind of content this source produces..."
+      distance: "Relevance Distance (0-10)"
+      distance_hint: "0 = Your own content (most relevant), 10 = Distant contact (least relevant)"
+      import_settings: "Import Settings"
+      include_replies: "Include replies"
+      include_reposts: "Include reposts"
+      import_days: "Import days"
+      import_days_hint: "How many days of history to import (max 10 years)"
+      create: "Add Source"
+      update: "Update Source"
+    create:
+      importing: "Source added — importing recent posts in the background. Check the Activity Log for progress."
+      notice: "Source added successfully"
+    update:
+      notice: "Source updated"
+    destroy:
+      notice: "Source removed"
+    refresh:
+      notice: "Refreshing %{name} in the background. Check Activity Log for progress."
+      notice_unnamed: "Refreshing source in the background. Check Activity Log for progress."
+      unsupported: "Cannot refresh this source type"
+    refresh_all:
+      notice:
+        one: "Refreshing %{count} source in the background. Check Activity Log for progress."
+        other: "Refreshing %{count} sources in the background. Check Activity Log for progress."
+  js:
+    source_form:
+      nostr_label: "Nostr Public Key (npub)"
+      rss_label: "Feed URL"
+      nostr_hint: "Enter the npub or hex public key of the account"
+      rss_hint: "Enter the URL of the RSS or Atom feed"
+    clipboard:
+      copy_failed: "Copy failed"

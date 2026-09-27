@@ -1,9 +1,9 @@
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">All Events</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".title") %></h1>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        <%= @events.total_count %> events from all sources
+        <%= t(".subtitle", count: @events.total_count) %>
       </p>
     </div>
   </div>
@@ -12,29 +12,29 @@
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
     <%= form_with url: events_path, method: :get, class: "flex flex-wrap gap-4 items-end" do |f| %>
       <div>
-        <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
-        <%= f.text_field :search, value: params[:search], placeholder: "Search content...", class: "mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+        <%= f.label :search, t(".search"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+        <%= f.text_field :search, value: params[:search], placeholder: t(".search_placeholder"), class: "mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
       </div>
       <div>
-        <%= f.label :source_id, "Source", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+        <%= f.label :source_id, t(".source"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
         <%# `source_label` keeps the auto-created "manual" source (which has no
             name) from rendering as a blank, unpickable option. %>
         <%= f.select :source_id,
             options_from_collection_for_select(@filter_sources, :id, ->(s) { source_label(s) }, params[:source_id]),
-            { include_blank: "All Sources" },
+            { include_blank: t(".all_sources") },
             class: "mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
       </div>
       <div>
-        <%= f.label :event_type, "Type", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+        <%= f.label :event_type, t(".type"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
         <%= f.select :event_type,
-            [["Original", "original"], ["Reply", "reply"], ["Repost", "repost"]],
-            { include_blank: "All Types" },
+            %w[original reply repost].map { |type| [event_type_label(type), type] },
+            { include_blank: t(".all_types") },
             class: "mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
       </div>
       <div>
-        <%= f.submit "Filter", class: "inline-flex justify-center rounded-md border border-transparent bg-purple-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer" %>
+        <%= f.submit t(".filter"), class: "inline-flex justify-center rounded-md border border-transparent bg-purple-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer" %>
         <% if params[:source_id].present? || params[:event_type].present? || params[:search].present? %>
-          <%= link_to "Clear", events_path, class: "ml-2 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500" %>
+          <%= link_to t(".clear"), events_path, class: "ml-2 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500" %>
         <% end %>
       </div>
     <% end %>
@@ -46,7 +46,7 @@
   <% rate_cap = EventsController::MAX_BULK_RATE_EVENTS %>
   <% rate_filters = { source_id: params[:source_id], event_type: params[:event_type], search: params[:search] }.compact_blank %>
   <% rate_count = [@events.total_count, rate_cap].min %>
-  <% rate_cap_note = @events.total_count > rate_cap ? " Only the #{rate_cap} most recent of #{@events.total_count} matching events will be rated." : "" %>
+  <% rate_cap_note = @events.total_count > rate_cap ? t(".rate_cap_note", cap: rate_cap, total: @events.total_count) : nil %>
 
   <div data-controller="bulk-select" class="space-y-4" data-bulk-select-total-value="<%= rate_count %>">
     <%= form_with url: bulk_rate_events_path(rate_filters), method: :post, data: { bulk_select_target: "form" } do %>
@@ -55,16 +55,16 @@
           <div class="flex items-center gap-4">
             <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <input type="checkbox" data-action="change->bulk-select#toggleAll" data-bulk-select-target="selectAll" class="rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500">
-              <span>Select All on This Page</span>
+              <span><%= t(".select_all_page") %></span>
             </label>
-            <span data-bulk-select-target="count" class="text-sm text-gray-500 dark:text-gray-400">0 selected</span>
+            <span data-bulk-select-target="count" class="text-sm text-gray-500 dark:text-gray-400"><%= t("events.selected", count: 0) %></span>
           </div>
           <div data-bulk-select-target="actions" class="">
-            <button type="submit" data-bulk-select-target="submitButton" data-turbo-confirm="Rerate <%= rate_count %> matching event(s) across all channels? This uses AI credits and cannot be undone.<%= rate_cap_note %>" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+            <button type="submit" data-bulk-select-target="submitButton" data-turbo-confirm="<%= [t(".rerate_confirm", count: rate_count), rate_cap_note].compact.join(" ") %>" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
               <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-bulk-select-target="submitIcon">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
               </svg>
-              <span data-bulk-select-target="submitText">Rerate All (<%= rate_count %>)</span>
+              <span data-bulk-select-target="submitText" data-bulk-select-kind="rerate"><%= t(".rerate_all", count: rate_count) %></span>
             </button>
           </div>
         </div>
@@ -93,21 +93,21 @@
                       </div>
                       <% if event.content.length > 300 %>
                         <button type="button" data-event-expander-target="button" data-action="click->event-expander#toggle" class="mt-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
-                          Show more
+                          <%= t("events.show_more") %>
                         </button>
                       <% end %>
                     </div>
                     <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span>From <%= source_label(event.source) %></span>
+                      <span><%= t("events.from_source", source: source_label(event.source)) %></span>
                       <span>&middot;</span>
-                      <span><%= time_ago_in_words(event.published_at) %> ago</span>
+                      <span><%= time_ago(event.published_at) %></span>
                       <span>&middot;</span>
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= event.original? ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' %>">
-                        <%= event.event_type.capitalize %>
+                        <%= event_type_label(event.event_type) %>
                       </span>
                       <span>&middot;</span>
-                      <%= link_to "View details", event_path(event), class: "text-purple-600 dark:text-purple-400 hover:underline" %>
-                      <button type="submit" form="rerate-event-<%= event.id %>" data-turbo-confirm="Rerate this event across all channels?" class="ml-2 inline-flex items-center px-2 py-0.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium rounded-full shadow-sm">
+                      <%= link_to t("events.view_details"), event_path(event), class: "text-purple-600 dark:text-purple-400 hover:underline" %>
+                      <button type="submit" form="rerate-event-<%= event.id %>" data-turbo-confirm="<%= t("events.rerate_one_confirm") %>" title="<%= t(".rerate_one") %>" aria-label="<%= t(".rerate_one") %>" class="ml-2 inline-flex items-center px-2 py-0.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium rounded-full shadow-sm">
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
@@ -133,9 +133,9 @@
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No events yet</h3>
+            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white"><%= t(".empty_title") %></h3>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Add sources and refresh them to ingest events.
+              <%= t(".empty_body") %>
             </p>
           </div>
         <% end %>

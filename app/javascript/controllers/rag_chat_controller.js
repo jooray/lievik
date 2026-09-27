@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 export default class extends Controller {
   static targets = ["messageList", "input", "submitButton", "loadingSpinner", "submitIcon"]
@@ -130,7 +131,7 @@ export default class extends Controller {
             }
           } else if (eventType === "error" && eventData) {
             const data = JSON.parse(eventData)
-            contentDiv.innerHTML = `<span class="text-red-500">${this.escapeHtml(data.message || "An error occurred")}</span>`
+            contentDiv.innerHTML = `<span class="text-red-500">${this.escapeHtml(data.message || t("rag_chat.generic_error"))}</span>`
             this.isStreaming = false
             this.setLoading(false)
           }
@@ -138,7 +139,7 @@ export default class extends Controller {
       }
 
     } catch (error) {
-      contentDiv.innerHTML = `<span class="text-red-500">Failed to connect: ${this.escapeHtml(error.message)}</span>`
+      contentDiv.innerHTML = `<span class="text-red-500">${this.escapeHtml(t("rag_chat.failed_to_connect", { message: error.message }))}</span>`
       this.isStreaming = false
       this.setLoading(false)
     }
@@ -206,7 +207,7 @@ export default class extends Controller {
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Thinking...
+        ${this.escapeHtml(t("rag_chat.thinking"))}
       </span>`
     } else {
       contentDiv.innerHTML = this.renderMarkdown(content)
@@ -271,7 +272,7 @@ export default class extends Controller {
     sourcesContainer.innerHTML = `
       <div class="sticky top-4 bg-white dark:bg-gray-800 shadow rounded-lg flex flex-col max-h-[calc(100vh-8rem)] overflow-hidden">
         <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Sources</h3>
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white">${this.escapeHtml(t("rag_chat.sources"))}</h3>
         </div>
         <div class="p-3 space-y-2 overflow-y-auto flex-1" data-sources-scroll>
           ${events.map(event => `
@@ -287,7 +288,7 @@ export default class extends Controller {
               <p class="font-medium text-gray-700 dark:text-gray-300 text-xs mb-1">${this.escapeHtml(event.source_name)}</p>
               <p class="text-gray-600 dark:text-gray-400 text-xs line-clamp-3">${this.escapeHtml(event.content)}</p>
               <a href="/events/${event.id}" class="text-xs text-purple-600 dark:text-purple-400 hover:underline mt-1 inline-block">
-                View &rarr;
+                ${this.escapeHtml(t("rag_chat.view"))} &rarr;
               </a>
             </div>
           `).join('')}

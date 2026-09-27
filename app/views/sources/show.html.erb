@@ -10,7 +10,7 @@
         <%= @source.name || @source.identifier.truncate(40) %>
       </h1>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        <%= @source.nostr? ? "Nostr" : (@source.rss? ? "RSS" : "Manual") %> source &middot; Distance <%= @source.distance %>
+        <%= t(".source_type.#{@source.source_type}") %> &middot; <%= t(".distance", distance: @source.distance) %>
       </p>
     </div>
     <div class="flex items-center gap-2 flex-shrink-0">
@@ -38,7 +38,7 @@
 
   <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
     <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-lg font-medium text-gray-900 dark:text-white">Events</h2>
+      <h2 class="text-lg font-medium text-gray-900 dark:text-white"><%= t(".events") %></h2>
     </div>
 
     <% if @events.any? %>
@@ -49,13 +49,13 @@
               <%= render_nostr_content(truncate(event.content, length: 300)) %>
             </p>
             <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-              <span><%= time_ago_in_words(event.published_at) %> ago</span>
+              <span><%= t(".ago", time: time_ago_in_words(event.published_at)) %></span>
               <span>&middot;</span>
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= event.original? ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' %>">
-                <%= event.event_type.capitalize %>
+                <%= t(".event_types.#{event.event_type}", default: event.event_type.capitalize) %>
               </span>
               <span>&middot;</span>
-              <%= link_to "View details", event_path(event), class: "text-purple-600 dark:text-purple-400 hover:underline" %>
+              <%= link_to t(".view_details"), event_path(event), class: "text-purple-600 dark:text-purple-400 hover:underline" %>
             </div>
           </li>
         <% end %>
@@ -65,7 +65,7 @@
       </div>
     <% else %>
       <div class="p-10 text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400">No events from this source yet.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400"><%= t(".empty") %></p>
       </div>
     <% end %>
   </div>

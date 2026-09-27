@@ -1,0 +1,11 @@
+es:
+  channel_events:
+    no_selection: "No has seleccionado ninguna publicación"
+    bulk_mark_used:
+      notice:
+        one: "%{count} publicación marcada como usada"
+        other: "%{count} publicaciones marcadas como usadas"
+    bulk_rate:
+      notice:
+        one: "Nueva valoración en cola para %{count} publicación"
+        other: "Nueva valoración en cola para %{count} publicaciones"

@@ -1,0 +1,81 @@
+es:
+  sources:
+    index:
+      title: "Fuentes"
+      subtitle: "Cuentas de Nostr y feeds RSS de los que seleccionas contenido"
+      refresh_all: "Actualizar todas"
+      add_source: "Añadir fuente"
+      empty_title: "No hay fuentes"
+      empty_hint: "Empieza añadiendo una cuenta de Nostr que quieras seguir."
+      distance: "Distancia: %{distance}"
+      events:
+        one: "%{count} publicación"
+        other: "%{count} publicaciones"
+      click_to_copy: "Haz clic para copiar"
+      view_profile: "Ver perfil"
+    new:
+      title: "Añadir fuente"
+      subtitle: "Añade una cuenta de Nostr de la que seleccionar contenido"
+    edit:
+      title: "Editar fuente"
+      danger_zone: "Zona de peligro"
+      danger_hint: "Al eliminar esta fuente también se eliminan todas sus publicaciones."
+      confirm_delete: "¿Eliminar esta fuente? También se eliminarán para siempre todas sus publicaciones. No se puede deshacer."
+      delete: "Eliminar fuente"
+    show:
+      source_type:
+        nostr: "Fuente de Nostr"
+        rss: "Fuente RSS"
+        manual: "Fuente manual"
+      distance: "Distancia %{distance}"
+      events: "Publicaciones"
+      ago: "hace %{time}"
+      event_types:
+        original: "Original"
+        reply: "Respuesta"
+        repost: "Repost"
+      view_details: "Ver detalles"
+      empty: "Esta fuente aún no tiene publicaciones."
+    form:
+      errors_header:
+        one: "No se pudo guardar la fuente por 1 error:"
+        other: "No se pudo guardar la fuente por %{count} errores:"
+      source_type: "Tipo de fuente"
+      types:
+        nostr: "Cuenta de Nostr"
+        rss: "Feed RSS"
+      name_placeholder: "Nombre para mostrar (opcional)"
+      name_hint: "Si lo dejas en blanco, se completa a partir del perfil o del feed"
+      description_placeholder: "Qué tipo de contenido publica esta fuente…"
+      distance: "Distancia de relevancia (0-10)"
+      distance_hint: "0 = tu propio contenido (lo más relevante), 10 = contacto lejano (lo menos relevante)"
+      import_settings: "Ajustes de importación"
+      include_replies: "Incluir respuestas"
+      include_reposts: "Incluir reposts"
+      import_days: "Días a importar"
+      import_days_hint: "Cuántos días de historial importar (máximo 10 años)"
+      create: "Añadir fuente"
+      update: "Guardar fuente"
+    create:
+      importing: "Fuente añadida. Las publicaciones recientes se importan en segundo plano; el progreso está en Actividad."
+      notice: "Fuente añadida"
+    update:
+      notice: "Fuente actualizada"
+    destroy:
+      notice: "Fuente eliminada"
+    refresh:
+      notice: "Actualizando %{name} en segundo plano. Consulta el progreso en Actividad."
+      notice_unnamed: "Actualizando la fuente en segundo plano. Consulta el progreso en Actividad."
+      unsupported: "Este tipo de fuente no se puede actualizar"
+    refresh_all:
+      notice:
+        one: "Actualizando %{count} fuente en segundo plano. Consulta el progreso en Actividad."
+        other: "Actualizando %{count} fuentes en segundo plano. Consulta el progreso en Actividad."
+  js:
+    source_form:
+      nostr_label: "Clave pública de Nostr (npub)"
+      rss_label: "URL del feed"
+      nostr_hint: "Introduce el npub o la clave pública en hex de la cuenta"
+      rss_hint: "Introduce la URL del feed RSS o Atom"
+    clipboard:
+      copy_failed: "No se pudo copiar"

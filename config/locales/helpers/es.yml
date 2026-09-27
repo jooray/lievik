@@ -1,0 +1,25 @@
+es:
+  time:
+    formats:
+      app_datetime: "%-d %b %Y, %H:%M"
+  app:
+    time_ago: "hace %{time}"
+    event_types:
+      original: "Original"
+      reply: "Respuesta"
+      repost: "Repost"
+    source_label:
+      unknown: "Fuente desconocida"
+      manual: "Entradas manuales"
+      unnamed: "Fuente sin nombre"
+    nostr:
+      referenced_note: "[publicación citada]"
+      unknown_author: "Autor desconocido"
+  views:
+    pagination:
+      aria_label: "Paginación"
+      first: "&laquo; Primera"
+      last: "Última &raquo;"
+      previous: "&lsaquo; Anterior"
+      next: "Siguiente &rsaquo;"
+      truncate: "&hellip;"

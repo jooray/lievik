@@ -1,0 +1,76 @@
+en:
+  users:
+    edit:
+      language:
+        label: "Interface language"
+        hint: "Also remembered in this browser. The language of generated content is set per channel."
+      title: "User Settings"
+      default_label: "Default:"
+      examples_label: "Examples:"
+      save: "Save Settings"
+      system_prompt:
+        label: "System Prompt (AI Context)"
+        intro_html: "This system prompt gives AI context about <strong>you</strong> for better relevance across channels. Default works out-of-box, but customize for optimal results."
+        make_it_yours_html: "<strong>Make it yours:</strong> Describe who you are, domains/projects (e.g., \"AI tools builder\"), style (concise/tech/promotional), audience (developers/creators), tone (professional/inspirational). Helps AI grasp your unique situation."
+        view_default: "View Default Prompt"
+      event_link:
+        label: "Event Link Template"
+        hint_html: "URL template for linking to Nostr events (notes) in generated content. Use <code>{eventid}</code> as placeholder for the nevent/note identifier."
+      naddr_link:
+        label: "Article Link Template (naddr)"
+        hint_html: "URL template for linking to Nostr long-form articles (replaceable events). Use <code>{naddr}</code> as placeholder for the naddr identifier."
+      profile_link:
+        label: "Profile Link Template"
+        hint_html: "URL template for linking to Nostr profiles. Use <code>{npub}</code> as placeholder for the npub identifier."
+      rating_engine:
+        label: "Rating Engine"
+        hint: "Which AI rates how relevant each event is for each channel. Scores from both engines are on the same 0-100 scale, so channel thresholds keep working; events already rated keep their old score until re-rated."
+        chat:
+          label: "Chat model"
+          badge: "(default)"
+          hint_html: "One request per channel and event to <code>%{model}</code>. Writes a short reason with every score. Slower and costs more, but knows the world (recognises a conference hashtag, a person, a project)."
+        decision:
+          label: "Typed decision model"
+          badge: "(beta)"
+          hint_html: "One request per event for all channels at once to <code>%{model}</code>. About ten times faster, several times cheaper, and more consistent run to run; returns probabilities instead of a written reason and does not recognise references it has never seen. Runs on Venice's anonymized (not private) tier."
+          not_configured_html: "Not configured: add an <code>ai.decision</code> block to <code>config/lievik.yml</code> and set <code>VENICE_API_KEY</code> or <code>DECISION_API_KEY</code>."
+      writing_style:
+        label: "Default Writing Style"
+        hint: "Default writing style used when creating new channels. You can customize it per channel in the channel settings."
+        placeholder: "E.g., Professional but approachable, use second person ('you'), avoid jargon, keep paragraphs short..."
+      templates:
+        title: "Content Format Templates"
+        subtitle: "Reusable templates for channel content formatting instructions. Select a template when creating or editing a channel."
+        add_from_preset: "Add Template from Preset"
+        confirm_delete: "Delete this template?"
+        name: "Template Name"
+        content: "Template Content"
+        save: "Save Template"
+        empty: "No templates yet. Add one from the presets above."
+        add_custom: "Add Custom Template"
+        name_placeholder: "e.g., Weekly Digest"
+        content_placeholder: "# Format\n\n## Output Format\n...\n\n## Writing Style\n..."
+        add: "Add Template"
+      search_index:
+        title: "Search Index"
+        subtitle: "Manage the semantic search index for your events."
+        status_html:
+          one: "%{indexed} of %{total} event indexed"
+          other: "%{indexed} of %{total} events indexed"
+        last_reindex: "Last full reindex: %{time}"
+        rebuild: "Rebuild Search Index"
+        confirm_rebuild: "This will regenerate embeddings for all your events. This may take a few minutes. Continue?"
+        try_search: "Try searching your content"
+    update:
+      notice: "Settings saved."
+    add_template:
+      default_name: "New Template"
+      notice: "Template added."
+    update_template:
+      notice: "Template updated."
+      alert: "Failed to update template."
+    delete_template:
+      notice: "Template deleted."
+      alert: "Failed to delete template."
+    reindex:
+      notice: "Reindexing started in background. This may take a few minutes."

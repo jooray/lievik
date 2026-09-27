@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { Turbo } from "@hotwired/turbo-rails"
+import { t } from "../lib/i18n"
 
 // Both stream endpoints mutate the draft (they save a version and overwrite the
 // content), so they are POST — which rules out EventSource. We POST with fetch()
@@ -101,13 +102,13 @@ export default class extends Controller {
       })
     } catch (e) {
       if (!controller.signal.aborted) {
-        handlers.error({ message: "Connection error. Please try again." })
+        handlers.error({ message: t("content_builder.connection_error") })
       }
       return
     }
 
     if (!response.ok || !response.body) {
-      handlers.error({ message: `Request failed (${response.status}). Please try again.` })
+      handlers.error({ message: t("content_builder.request_failed", { status: response.status }) })
       return
     }
 
@@ -121,7 +122,7 @@ export default class extends Controller {
         result = await reader.read()
       } catch (e) {
         if (!controller.signal.aborted) {
-          handlers.error({ message: "Connection lost. Please try again." })
+          handlers.error({ message: t("content_builder.connection_lost") })
         }
         return
       }
@@ -202,8 +203,8 @@ export default class extends Controller {
       error: (data) => {
         this.abortStream()
         this.endStreaming()
-        const message = (data && data.message) || "An error occurred"
-        statusEl.textContent = "Error: " + message
+        const message = (data && data.message) || t("content_builder.generic_error")
+        statusEl.textContent = t("content_builder.error", { message })
         spinnerEl.classList.remove("animate-spin")
         spinnerEl.innerHTML = `
           <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,8 +239,8 @@ export default class extends Controller {
             </svg>
           </div>
           <div>
-            <p class="text-sm font-medium text-purple-900 dark:text-purple-200" id="streaming-status">Connecting to AI...</p>
-            <p class="text-xs text-purple-700 dark:text-purple-300">Content will appear below as it's generated.</p>
+            <p class="text-sm font-medium text-purple-900 dark:text-purple-200" id="streaming-status">${this.escapeHtml(t("content_builder.connecting"))}</p>
+            <p class="text-xs text-purple-700 dark:text-purple-300">${this.escapeHtml(t("content_builder.appears_below"))}</p>
           </div>
         </div>
         <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 min-h-[400px]">
@@ -257,8 +258,8 @@ export default class extends Controller {
       contentEl,
       statusEl,
       spinnerEl,
-      phaseLabels: { generating: "Generating content...", humanizing: "Humanizing content..." },
-      doneLabel: "Generation complete!"
+      phaseLabels: { generating: t("content_builder.generating"), humanizing: t("content_builder.humanizing") },
+      doneLabel: t("content_builder.generation_complete")
     })
 
     this.streamSse(streamUrl, {}, handlers)
@@ -276,7 +277,7 @@ export default class extends Controller {
 
     const prompt = this.hasRefineInputTarget ? this.refineInputTarget.value.trim() : ""
     if (!prompt) {
-      alert("Please enter instructions for the AI")
+      alert(t("content_builder.instructions_required"))
       return
     }
 
@@ -294,8 +295,8 @@ export default class extends Controller {
             </svg>
           </div>
           <div>
-            <p class="text-sm font-medium text-blue-900 dark:text-blue-200" id="streaming-status">Applying AI edits...</p>
-            <p class="text-xs text-blue-700 dark:text-blue-300">Instruction: ${this.escapeHtml(prompt)}</p>
+            <p class="text-sm font-medium text-blue-900 dark:text-blue-200" id="streaming-status">${this.escapeHtml(t("content_builder.applying"))}</p>
+            <p class="text-xs text-blue-700 dark:text-blue-300">${this.escapeHtml(t("content_builder.instruction", { text: prompt }))}</p>
           </div>
         </div>
         <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 min-h-[400px]">
@@ -318,8 +319,8 @@ export default class extends Controller {
       contentEl,
       statusEl,
       spinnerEl,
-      phaseLabels: { refining: "Refining content...", humanizing: "Humanizing content..." },
-      doneLabel: "Refinement complete!"
+      phaseLabels: { refining: t("content_builder.refining"), humanizing: t("content_builder.humanizing") },
+      doneLabel: t("content_builder.refinement_complete")
     })
 
     this.streamSse(refineUrl, { user_prompt: prompt }, handlers)

@@ -25,6 +25,6 @@ class DashboardController < ApplicationController
   def rate_all
     channels = current_user.channels
     channels.each { |channel| RateEventsJob.perform_later(channel.id) }
-    redirect_to dashboard_path, notice: "Rating jobs queued for #{channels.count} channels."
+    redirect_to dashboard_path, notice: t(".queued", count: channels.count)
   end
 end

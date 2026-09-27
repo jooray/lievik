@@ -1,0 +1,77 @@
+cs:
+  users:
+    edit:
+      language:
+        label: "Jazyk rozhraní"
+        hint: "Zapamatuje se i v tomto prohlížeči. Jazyk generovaného obsahu se nastavuje u každého kanálu."
+      title: "Nastavení uživatele"
+      default_label: "Výchozí:"
+      examples_label: "Příklady:"
+      save: "Uložit nastavení"
+      system_prompt:
+        label: "Systémový prompt (kontext pro AI)"
+        intro_html: "Systémový prompt dává AI kontext o <strong>vás</strong>, takže lépe posoudí relevanci ve všech kanálech. Výchozí funguje hned, ale nejlepší výsledky dostanete, když si ho upravíte."
+        make_it_yours_html: "<strong>Přizpůsobte si ho:</strong> napište, kdo jste, jakým oblastem a projektům se věnujete (např. „tvůrce AI nástrojů“), jaký styl preferujete (stručný, technický, propagační), pro koho píšete (vývojáři, tvůrci) a jakým tónem (profesionálním, inspirativním). AI tak lépe pochopí vaši situaci."
+        view_default: "Zobrazit výchozí prompt"
+      event_link:
+        label: "Šablona odkazu na příspěvek"
+        hint_html: "Šablona URL pro odkazy na Nostr příspěvky (poznámky) v generovaném obsahu. Identifikátor nevent/note se dosadí za <code>{eventid}</code>."
+      naddr_link:
+        label: "Šablona odkazu na článek (naddr)"
+        hint_html: "Šablona URL pro odkazy na dlouhé Nostr články (nahraditelné eventy). Identifikátor naddr se dosadí za <code>{naddr}</code>."
+      profile_link:
+        label: "Šablona odkazu na profil"
+        hint_html: "Šablona URL pro odkazy na Nostr profily. Identifikátor npub se dosadí za <code>{npub}</code>."
+      rating_engine:
+        label: "Hodnoticí engine"
+        hint: "Která AI hodnotí, nakolik je příspěvek relevantní pro jednotlivé kanály. Oba enginy dávají skóre na stejné škále 0–100, takže prahy kanálů platí dál. Už ohodnocené příspěvky si staré skóre ponechají, dokud je neohodnotíte znovu."
+        chat:
+          label: "Chatový model"
+          badge: "(výchozí)"
+          hint_html: "Jeden požadavek na každou dvojici kanál a příspěvek, posílá se do <code>%{model}</code>. Ke každému skóre napíše krátké zdůvodnění. Je pomalejší a dražší, ale zná svět (pozná hashtag konference, člověka nebo projekt)."
+        decision:
+          label: "Typovaný rozhodovací model"
+          badge: "(beta)"
+          hint_html: "Jeden požadavek na příspěvek pro všechny kanály najednou, posílá se do <code>%{model}</code>. Zhruba desetkrát rychlejší, několikanásobně levnější a při opakování konzistentnější. Místo psaného zdůvodnění vrací pravděpodobnosti a nepozná odkazy, které nikdy neviděl. Běží na úrovni Venice „anonymized“, ne „private“."
+          not_configured_html: "Není nastaveno: přidejte blok <code>ai.decision</code> do <code>config/lievik.yml</code> a nastavte <code>VENICE_API_KEY</code> nebo <code>DECISION_API_KEY</code>."
+      writing_style:
+        label: "Výchozí styl psaní"
+        hint: "Styl psaní, který dostane každý nový kanál. V nastavení kanálu ho můžete změnit."
+        placeholder: "Např. profesionálně, ale přístupně, oslovovat čtenáře přímo, bez žargonu, krátké odstavce…"
+      templates:
+        title: "Šablony formátu obsahu"
+        subtitle: "Opakovaně použitelné šablony s pokyny pro formátování obsahu kanálu. Šablonu vyberete při vytváření nebo úpravě kanálu."
+        add_from_preset: "Přidat šablonu z předvoleb"
+        confirm_delete: "Smazat tuto šablonu?"
+        name: "Název šablony"
+        content: "Obsah šablony"
+        save: "Uložit šablonu"
+        empty: "Zatím nemáte žádné šablony. Přidejte si některou z předvoleb výše."
+        add_custom: "Přidat vlastní šablonu"
+        name_placeholder: "např. Týdenní přehled"
+        content_placeholder: "# Formát\n\n## Výstupní formát\n...\n\n## Styl psaní\n..."
+        add: "Přidat šablonu"
+      search_index:
+        title: "Vyhledávací index"
+        subtitle: "Správa sémantického vyhledávacího indexu vašich příspěvků."
+        status_html:
+          one: "Zaindexováno: %{indexed} z %{total} příspěvku"
+          few: "Zaindexováno: %{indexed} z %{total} příspěvků"
+          other: "Zaindexováno: %{indexed} z %{total} příspěvků"
+        last_reindex: "Poslední úplná reindexace: %{time}"
+        rebuild: "Znovu vytvořit index"
+        confirm_rebuild: "Embeddingy všech vašich příspěvků se vygenerují znovu. Může to trvat několik minut. Pokračovat?"
+        try_search: "Vyzkoušejte vyhledávání v obsahu"
+    update:
+      notice: "Nastavení bylo uloženo."
+    add_template:
+      default_name: "Nová šablona"
+      notice: "Šablona byla přidána."
+    update_template:
+      notice: "Šablona byla uložena."
+      alert: "Šablonu se nepodařilo uložit."
+    delete_template:
+      notice: "Šablona byla smazána."
+      alert: "Šablonu se nepodařilo smazat."
+    reindex:
+      notice: "Reindexace běží na pozadí. Může to trvat několik minut."

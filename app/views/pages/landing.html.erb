@@ -1,14 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="<%= I18n.locale %>">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta
       name="description"
-      content="Lievik helps Nostr creators send the right thing to the right audience."
+      content="<%= t(".meta_description") %>"
     />
-    <title>Lievik - The right thing, for the right people</title>
+    <title><%= t(".title") %></title>
+
+    <%# hreflang alternates of "/" plus a canonical pointing at this locale's own URL. %>
+    <link rel="canonical" href="<%= localized_landing_url(locale: I18n.locale) %>" />
+    <% I18n.available_locales.each do |alt_locale| %>
+    <link rel="alternate" hreflang="<%= alt_locale %>" href="<%= localized_landing_url(locale: alt_locale) %>" />
+    <% end %>
+    <link rel="alternate" hreflang="x-default" href="<%= root_url %>" />
 
     <%# Installable PWA (manifest-only — no service worker) from the entry point too. %>
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
@@ -661,6 +668,84 @@
         gap: 20px;
       }
 
+      .lang-menu {
+        position: relative;
+      }
+      .lang-menu summary {
+        list-style: none;
+        width: auto;
+        min-width: 39px;
+        padding: 0 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .lang-menu summary::-webkit-details-marker {
+        display: none;
+      }
+      .lang-menu[open] summary {
+        color: var(--ink);
+        border-color: var(--muted);
+      }
+      .lang-list {
+        position: absolute;
+        z-index: 10;
+        top: calc(100% + 8px);
+        right: 0;
+        min-width: 158px;
+        margin: 0;
+        padding: 6px;
+        list-style: none;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+      .lang-list a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 8px 10px;
+        color: var(--ink);
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .lang-list a:hover {
+        background: var(--canvas-deep);
+      }
+      .lang-list a[aria-current="page"] {
+        color: var(--purple);
+        font-weight: 750;
+      }
+      .lang-code {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .footer-lang-nav {
+        margin-top: 4px;
+      }
+      .footer-langs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .footer-langs a:hover {
+        color: var(--ink);
+      }
+      .footer-langs a[aria-current="page"] {
+        color: var(--ink);
+        font-weight: 750;
+      }
+
       @media (max-width: 850px) {
         .hero {
           padding: 63px 0 65px;
@@ -711,6 +796,7 @@
           padding: 14px 0;
         }
         .nav .button {
+          white-space: nowrap;
           min-height: 38px;
           padding: 0 11px;
           font-size: 12px;
@@ -718,6 +804,17 @@
         .theme-toggle {
           width: 37px;
           height: 37px;
+        }
+        .lang-menu summary {
+          width: auto;
+          padding: 0 9px;
+        }
+        /* Room for the language menu; GitHub stays linked in the footer. */
+        .nav-github {
+          display: none;
+        }
+        .nav-actions {
+          gap: 7px;
         }
         .hero {
           padding-top: 48px;
@@ -762,6 +859,14 @@
           margin-top: 8px;
         }
       }
+      @media (max-width: 380px) {
+        .nav {
+          gap: 10px;
+        }
+        .nav .button .arrow {
+          display: none;
+        }
+      }
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -775,17 +880,17 @@
   <body>
     <header class="site-header">
       <div class="shell nav">
-        <a class="wordmark" href="#top" aria-label="Lievik home"
+        <a class="wordmark" href="#top" aria-label="<%= t(".home_label") %>"
           ><span class="mark" aria-hidden="true"></span>Lievik</a
         >
         <div class="nav-actions">
           <a
-            class="theme-toggle"
+            class="theme-toggle nav-github"
             href="https://github.com/jooray/lievik"
             target="_blank"
             rel="noopener"
-            aria-label="View source on GitHub"
-            title="View source on GitHub"
+            aria-label="<%= t(".github_label") %>"
+            title="<%= t(".github_label") %>"
           >
             <svg
               class="theme-icon"
@@ -804,8 +909,8 @@
             id="theme-switch"
             class="theme-toggle"
             type="button"
-            aria-label="Switch color theme"
-            title="Switch color theme"
+            aria-label="<%= t(".theme_label") %>"
+            title="<%= t(".theme_label") %>"
           >
             <svg
               class="theme-icon moon"
@@ -833,8 +938,21 @@
               />
             </svg>
           </button>
+          <%# No-JS disclosure; the page script only adds close-on-outside-click/Escape. %>
+          <details class="lang-menu" id="lang-menu">
+            <summary class="theme-toggle" aria-label="<%= t(".language_label") %>: <%= ApplicationHelper::LOCALE_NAMES.fetch(I18n.locale, I18n.locale.to_s) %>" title="<%= t(".language_label") %>"><%= I18n.locale %></summary>
+            <ul class="lang-list">
+              <% I18n.available_locales.each do |lang| %>
+                <li>
+                  <a href="<%= localized_landing_path(locale: lang) %>" hreflang="<%= lang %>" lang="<%= lang %>"<% if lang == I18n.locale %> aria-current="page"<% end %>
+                    ><%= ApplicationHelper::LOCALE_NAMES.fetch(lang, lang.to_s) %><span class="lang-code"><%= lang %></span></a
+                  >
+                </li>
+              <% end %>
+            </ul>
+          </details>
           <a class="button" href="<%= nostr_login_path %>"
-            >Launch app <span class="arrow" aria-hidden="true">&#8599;</span></a
+            ><%= t(".nav_launch") %> <span class="arrow" aria-hidden="true">&#8599;</span></a
           >
         </div>
       </div>
@@ -844,21 +962,18 @@
       <section class="hero">
         <div class="shell hero-grid">
           <div>
-            <p class="eyebrow">Nostr-first content curation</p>
-            <h1>The right thing,<br />for the <em>right people.</em></h1>
+            <p class="eyebrow"><%= t(".hero.eyebrow") %></p>
+            <h1><%= t(".hero.headline_html") %></h1>
             <p class="lede">
-              Lievik is a quiet workspace for figuring out who needs to hear
-              what. Pull in what you publish and the feeds you follow, describe
-              the people you write for, and it surfaces what is worth sending to
-              each of them.
+              <%= t(".hero.lede") %>
             </p>
             <div class="hero-actions">
               <a class="button" href="<%= nostr_login_path %>"
-                >Launch Lievik
+                ><%= t(".hero.launch") %>
                 <span class="arrow" aria-hidden="true">&#8599;</span></a
               >
               <a class="button button-outline" href="#how-it-works"
-                >See how it works</a
+                ><%= t(".hero.see_how") %></a
               >
             </div>
             <p class="quiet-note">
@@ -874,59 +989,58 @@
                 <path d="M12 22s8-3.8 8-10V5l-8-3-8 3v7c0 6.2 8 10 8 10Z" />
                 <path d="m9 12 2 2 4-4" />
               </svg>
-              Sign in with your Nostr identity. No email or password.
+              <%= t(".hero.quiet_note") %>
             </p>
           </div>
 
           <div
             class="desk"
-            aria-label="An illustration of Lievik matching a Nostr note to audiences"
+            aria-label="<%= t(".desk.aria_label") %>"
           >
             <div class="workspace">
               <div class="workspace-top">
-                <span class="workspace-label">Your routing desk</span
+                <span class="workspace-label"><%= t(".desk.label") %></span
                 ><span class="identity"
                   ><span class="avatar">M</span> npub1mara...</span
                 >
               </div>
               <div class="workspace-body">
                 <div class="source-card">
-                  <p class="card-kicker">Something you made</p>
+                  <p class="card-kicker"><%= t(".desk.source_kicker") %></p>
                   <div class="note-head">
                     <span class="note-avatar" aria-hidden="true"></span>
                     <div>
-                      <p class="note-byline">Mara publishes a note</p>
-                      <p class="note-meta">Nostr · 2 hours ago</p>
+                      <p class="note-byline"><%= t(".desk.note_byline") %></p>
+                      <p class="note-meta"><%= t(".desk.note_meta") %></p>
                     </div>
                   </div>
                   <p class="note-copy">
-                    A short guide to picking a private messenger for a family
-                    group. What to look for, and what is not worth overthinking.
+                    <%= t(".desk.note_copy") %>
                   </p>
-                  <span class="note-link">long-form note · 6 min read</span>
+                  <span class="note-link"><%= t(".desk.note_link") %></span>
                 </div>
                 <div class="audience-card">
-                  <p class="card-kicker">Who should hear it?</p>
+                  <p class="card-kicker"><%= t(".desk.audience_kicker") %></p>
                   <div class="channel">
                     <span class="channel-icon" aria-hidden="true">✦</span>
-                    <p>Privacy course<small>students and alumni</small></p>
+                    <p><%= t(".desk.channel_privacy") %><small><%= t(".desk.channel_privacy_who") %></small></p>
                     <span class="score">96</span>
                   </div>
                   <div class="channel">
                     <span class="channel-icon" aria-hidden="true">#</span>
-                    <p>Local meetup<small>Bitcoin beginners</small></p>
+                    <p><%= t(".desk.channel_meetup") %><small><%= t(".desk.channel_meetup_who") %></small></p>
                     <span class="score">82</span>
                   </div>
                   <div class="channel">
                     <span class="channel-icon" aria-hidden="true">@</span>
-                    <p>Project update<small>open-source contributors</small></p>
+                    <p><%= t(".desk.channel_project") %><small><%= t(".desk.channel_project_who") %></small></p>
                     <span class="score low">14</span>
                   </div>
                 </div>
               </div>
               <div class="routing-line" aria-hidden="true"></div>
               <div class="workspace-footer">
-                Ready for the Privacy course newsletter
+                <%= t(".desk.ready") %>
               </div>
             </div>
           </div>
@@ -937,39 +1051,33 @@
         <div class="shell">
           <div class="statement-grid">
             <div>
-              <p class="eyebrow">A better question</p>
-              <h2>Content gets lost when every audience lives in your head.</h2>
+              <p class="eyebrow"><%= t(".statement.eyebrow") %></p>
+              <h2><%= t(".statement.heading") %></h2>
             </div>
             <p class="statement-copy">
-              A newsletter, a course, a chat group: each one has its own
-              context, and right now you are the only place that context lives.
-              Lievik turns that mental checklist into something that remembers
-              what each group cares about and what you have already sent them.
+              <%= t(".statement.copy") %>
             </p>
           </div>
           <div class="answer-grid">
             <article class="answer">
-              <span class="answer-number">01 / MAKE</span>
-              <h3>You made something</h3>
+              <span class="answer-number"><%= t(".statement.make.label") %></span>
+              <h3><%= t(".statement.make.title") %></h3>
               <p>
-                Find its natural audience instead of broadcasting it everywhere
-                or forgetting it entirely.
+                <%= t(".statement.make.copy") %>
               </p>
             </article>
             <article class="answer">
-              <span class="answer-number">02 / SPEAK</span>
-              <h3>You have someone to reach</h3>
+              <span class="answer-number"><%= t(".statement.speak.label") %></span>
+              <h3><%= t(".statement.speak.title") %></h3>
               <p>
-                Open their channel and see the useful things they have not heard
-                from you yet.
+                <%= t(".statement.speak.copy") %>
               </p>
             </article>
             <article class="answer">
-              <span class="answer-number">03 / REMEMBER</span>
-              <h3>You did this before</h3>
+              <span class="answer-number"><%= t(".statement.remember.label") %></span>
+              <h3><%= t(".statement.remember.title") %></h3>
               <p>
-                Track what went to each group, so your next update starts with
-                memory rather than guesswork.
+                <%= t(".statement.remember.copy") %>
               </p>
             </article>
           </div>
@@ -980,35 +1088,31 @@
         <div class="shell">
           <div class="how-heading">
             <div>
-              <p class="eyebrow">How Lievik works</p>
-              <h2>One source of truth for your many conversations.</h2>
+              <p class="eyebrow"><%= t(".how.eyebrow") %></p>
+              <h2><%= t(".how.heading") %></h2>
             </div>
-            <p>Built around how Nostr creators already publish and follow each other.</p>
+            <p><%= t(".how.subheading") %></p>
           </div>
           <div class="steps">
             <article class="step">
               <span class="step-index">01</span>
-              <h3>Gather your signal</h3>
+              <h3><%= t(".how.gather.title") %></h3>
               <p>
-                Add your Nostr identity, the people you follow, and any RSS
-                feeds you trust. Their notes, articles, and links all land in
-                one place.
+                <%= t(".how.gather.copy") %>
               </p>
             </article>
             <article class="step">
               <span class="step-index">02</span>
-              <h3>Name your audiences</h3>
+              <h3><%= t(".how.name.title") %></h3>
               <p>
-                Create channels for the real groups you write to. Describe what
-                they care about in your own words.
+                <%= t(".how.name.copy") %>
               </p>
             </article>
             <article class="step">
               <span class="step-index">03</span>
-              <h3>Share with intention</h3>
+              <h3><%= t(".how.share.title") %></h3>
               <p>
-                Lievik ranks what is relevant, helps you draft the update, and
-                remembers what you have already used.
+                <%= t(".how.share.copy") %>
               </p>
             </article>
           </div>
@@ -1018,11 +1122,11 @@
       <section class="closing">
         <div class="shell closing-grid">
           <div>
-            <p class="eyebrow">Nostr is home</p>
-            <h2>Make every message feel like it was meant for them.</h2>
+            <p class="eyebrow"><%= t(".closing.eyebrow") %></p>
+            <h2><%= t(".closing.heading") %></h2>
           </div>
           <a class="button" href="<%= nostr_login_path %>"
-            >Launch app <span class="arrow" aria-hidden="true">&#8599;</span></a
+            ><%= t(".closing.launch") %> <span class="arrow" aria-hidden="true">&#8599;</span></a
           >
         </div>
       </section>
@@ -1030,14 +1134,25 @@
 
     <footer>
       <div class="shell footer-inner">
-        <p>© Lievik. Send the right thing to the right people.</p>
-        <p>Sign in with NIP-07 or a NIP-46 remote signer.</p>
+        <p><%= t(".footer.tagline") %></p>
+        <p><%= t(".footer.sign_in") %></p>
         <p>
           <a href="https://github.com/jooray/lievik" target="_blank" rel="noopener"
-            >Open source on GitHub &#8599;</a
+            ><%= t(".footer.github") %> &#8599;</a
           >
         </p>
       </div>
+      <nav class="shell footer-lang-nav" aria-label="<%= t(".language_label") %>">
+        <ul class="footer-langs">
+          <% I18n.available_locales.each do |lang| %>
+            <li>
+              <a href="<%= localized_landing_path(locale: lang) %>" hreflang="<%= lang %>" lang="<%= lang %>"<% if lang == I18n.locale %> aria-current="page"<% end %>
+                ><%= ApplicationHelper::LOCALE_NAMES.fetch(lang, lang.to_s) %></a
+              >
+            </li>
+          <% end %>
+        </ul>
+      </nav>
     </footer>
 
     <script nonce="<%= content_security_policy_nonce %>">
@@ -1084,6 +1199,23 @@
               localStorage.setItem("theme", next);
             } catch (e) {}
             apply();
+          });
+        }
+
+        // The language <details> works without JS; this just closes it on an
+        // outside click or Escape like any other menu.
+        var langMenu = document.getElementById("lang-menu");
+        if (langMenu) {
+          document.addEventListener("click", function (event) {
+            if (langMenu.open && !langMenu.contains(event.target)) {
+              langMenu.open = false;
+            }
+          });
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && langMenu.open) {
+              langMenu.open = false;
+              langMenu.querySelector("summary").focus();
+            }
           });
         }
       })();

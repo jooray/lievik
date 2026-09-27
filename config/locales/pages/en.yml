@@ -1,0 +1,70 @@
+en:
+  pages:
+    landing:
+      title: "Lievik - The right thing, for the right people"
+      meta_description: "Lievik helps Nostr creators send the right thing to the right audience."
+      home_label: "Lievik home"
+      github_label: "View source on GitHub"
+      theme_label: "Switch color theme"
+      language_label: "Language"
+      nav_launch: "Launch app"
+      hero:
+        eyebrow: "Nostr-first content curation"
+        headline_html: "The right thing,<br />for the <em>right people.</em>"
+        lede: "Lievik is a quiet workspace for figuring out who needs to hear what. Pull in what you publish and the feeds you follow, describe the people you write for, and it surfaces what is worth sending to each of them."
+        launch: "Launch Lievik"
+        see_how: "See how it works"
+        quiet_note: "Sign in with your Nostr identity. No email or password."
+      desk:
+        aria_label: "An illustration of Lievik matching a Nostr note to audiences"
+        label: "Your routing desk"
+        source_kicker: "Something you made"
+        note_byline: "Mara publishes a note"
+        note_meta: "Nostr · 2 hours ago"
+        note_copy: "A short guide to picking a private messenger for a family group. What to look for, and what is not worth overthinking."
+        note_link: "long-form note · 6 min read"
+        audience_kicker: "Who should hear it?"
+        channel_privacy: "Privacy course"
+        channel_privacy_who: "students and alumni"
+        channel_meetup: "Local meetup"
+        channel_meetup_who: "Bitcoin beginners"
+        channel_project: "Project update"
+        channel_project_who: "open-source contributors"
+        ready: "Ready for the Privacy course newsletter"
+      statement:
+        eyebrow: "A better question"
+        heading: "Content gets lost when every audience lives in your head."
+        copy: "A newsletter, a course, a chat group: each one has its own context, and right now you are the only place that context lives. Lievik turns that mental checklist into something that remembers what each group cares about and what you have already sent them."
+        make:
+          label: "01 / MAKE"
+          title: "You made something"
+          copy: "Find its natural audience instead of broadcasting it everywhere or forgetting it entirely."
+        speak:
+          label: "02 / SPEAK"
+          title: "You have someone to reach"
+          copy: "Open their channel and see the useful things they have not heard from you yet."
+        remember:
+          label: "03 / REMEMBER"
+          title: "You did this before"
+          copy: "Track what went to each group, so your next update starts with memory rather than guesswork."
+      how:
+        eyebrow: "How Lievik works"
+        heading: "One source of truth for your many conversations."
+        subheading: "Built around how Nostr creators already publish and follow each other."
+        gather:
+          title: "Gather your signal"
+          copy: "Add your Nostr identity, the people you follow, and any RSS feeds you trust. Their notes, articles, and links all land in one place."
+        name:
+          title: "Name your audiences"
+          copy: "Create channels for the real groups you write to. Describe what they care about in your own words."
+        share:
+          title: "Share with intention"
+          copy: "Lievik ranks what is relevant, helps you draft the update, and remembers what you have already used."
+      closing:
+        eyebrow: "Nostr is home"
+        heading: "Make every message feel like it was meant for them."
+        launch: "Launch app"
+      footer:
+        tagline: "© Lievik. Send the right thing to the right people."
+        sign_in: "Sign in with NIP-07 or a NIP-46 remote signer."
+        github: "Open source on GitHub"

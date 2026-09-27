@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 // Keeps an open tab (or an installed PWA, which may live for days) from running
 // stale JS/CSS after a deploy. Polls /version.json and reloads when the build
@@ -86,7 +87,7 @@ export default class extends Controller {
       "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-purple-600 text-white " +
       "px-4 py-2 text-sm shadow-lg flex items-center gap-2"
     notice.setAttribute("role", "status")
-    notice.textContent = "A new version of Lievik is available — refreshing…"
+    notice.textContent = t("app_version.refreshing")
     document.body.appendChild(notice)
   }
 }

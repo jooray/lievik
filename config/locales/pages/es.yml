@@ -1,0 +1,70 @@
+es:
+  pages:
+    landing:
+      title: "Lievik: lo que importa, para quien importa"
+      meta_description: "Lievik ayuda a quienes publican en Nostr a mandar cada cosa a la gente a la que de verdad le interesa."
+      home_label: "Inicio de Lievik"
+      github_label: "Ver el código en GitHub"
+      theme_label: "Cambiar el tema de color"
+      language_label: "Idioma"
+      nav_launch: "Abrir la app"
+      hero:
+        eyebrow: "Selección de contenido hecha para Nostr"
+        headline_html: "Lo que importa,<br />para <em>quien importa.</em>"
+        lede: "Lievik es un sitio tranquilo para decidir quién tiene que enterarse de qué. Reúne lo que publicas y lo que sigues, describe para quién escribes y te enseña qué vale la pena mandarle a cada grupo."
+        launch: "Abrir Lievik"
+        see_how: "Ver cómo funciona"
+        quiet_note: "Entras con tu identidad de Nostr. Sin correo ni contraseña."
+      desk:
+        aria_label: "Ilustración: Lievik decide a qué audiencias le sirve una nota de Nostr"
+        label: "Tu mesa de reparto"
+        source_kicker: "Algo tuyo"
+        note_byline: "Mara publica una nota"
+        note_meta: "Nostr · hace 2 horas"
+        note_copy: "Una guía breve para elegir una app de mensajería privada para el grupo de la familia. Qué mirar y a qué no hace falta darle tantas vueltas."
+        note_link: "nota larga · 6 min de lectura"
+        audience_kicker: "¿A quién le interesa?"
+        channel_privacy: "Curso de privacidad"
+        channel_privacy_who: "alumnos y exalumnos"
+        channel_meetup: "Encuentro local"
+        channel_meetup_who: "gente que empieza con bitcoin"
+        channel_project: "Novedades del proyecto"
+        channel_project_who: "colaboradores de código abierto"
+        ready: "Lista para el boletín del curso de privacidad"
+      statement:
+        eyebrow: "Otra forma de verlo"
+        heading: "Si cada audiencia vive solo en tu cabeza, el contenido se pierde."
+        copy: "Un boletín, un curso, un grupo de chat: cada uno tiene su contexto, y hoy ese contexto solo lo guardas tú. Lievik pasa esa lista mental a un sitio que recuerda qué le interesa a cada grupo y qué le has mandado ya."
+        make:
+          label: "01 / CREAR"
+          title: "Tienes algo nuevo"
+          copy: "Encuentra a quién le sirve de verdad, en lugar de soltarlo en todas partes o dejar que se te olvide."
+        speak:
+          label: "02 / HABLAR"
+          title: "Quieres llegar a alguien"
+          copy: "Abre su canal y mira qué cosas útiles todavía no le has contado."
+        remember:
+          label: "03 / RECORDAR"
+          title: "No es la primera vez"
+          copy: "Apunta qué recibió cada grupo, y la próxima actualización empezará por lo que ya sabes, no por suposiciones."
+      how:
+        eyebrow: "Cómo funciona Lievik"
+        heading: "Un solo sitio para todas tus conversaciones."
+        subheading: "Parte de cómo ya publicas y sigues a otra gente en Nostr."
+        gather:
+          title: "Reúne lo que te llega"
+          copy: "Añade tu identidad de Nostr, las cuentas que sigues y los feeds RSS de los que te fías. Sus notas, artículos y enlaces acaban en el mismo sitio."
+        name:
+          title: "Ponle nombre a cada audiencia"
+          copy: "Crea un canal por cada grupo real al que escribes y cuenta con tus palabras qué le importa."
+        share:
+          title: "Comparte con criterio"
+          copy: "Lievik ordena por relevancia, te ayuda a redactar la actualización y recuerda lo que ya usaste."
+      closing:
+        eyebrow: "Nuestra casa es Nostr"
+        heading: "Que cada mensaje parezca escrito para quien lo lee."
+        launch: "Abrir la app"
+      footer:
+        tagline: "© Lievik. Lo que importa, para quien importa."
+        sign_in: "Inicia sesión con NIP-07 o con un firmador remoto NIP-46."
+        github: "Código abierto en GitHub"

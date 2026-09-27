@@ -1,0 +1,33 @@
+en:
+  dashboard:
+    index:
+      title: "Dashboard"
+      welcome_back: "Welcome back, %{name}"
+      rate_all_unrated: "Rate All Unrated"
+      sources: "Sources"
+      channels: "Channels"
+      events: "Events"
+      ask_content: "Ask Your Content"
+      indexed: "%{embedded}/%{total} indexed"
+      view_all: "View all"
+      view_all_events: "View all events"
+      ask_content_link: "Ask your content"
+      jobs_running: "Background Jobs Running"
+      step1_title: "Step 1: Add a source"
+      step1_body: "Sources are where content comes from — Nostr accounts (npubs) or RSS feeds. Add your own account and the accounts you follow, then Lievik ingests their posts for you to curate."
+      add_source: "Add Source"
+      view_sources: "View sources"
+      step2_title: "Step 2: Create a channel"
+      step2_body: "Channels are the heart of Lievik — one per marketing output (newsletter, chat group, social account). Each has its own relevance criteria, and AI scores every ingested event against them so you only see what fits."
+      create_channel: "Create Channel"
+      describe_to_ai: "Describe it to the AI instead"
+      recent_events: "Recent Events"
+      no_events_title: "No events yet"
+      no_events_body: "Refresh your sources to start ingesting content, or add content by hand."
+      refresh_all_sources: "Refresh all sources"
+      manage_sources: "Manage sources"
+      add_manually: "Add an event manually"
+    rate_all:
+      queued:
+        one: "Rating jobs queued for 1 channel."
+        other: "Rating jobs queued for %{count} channels."

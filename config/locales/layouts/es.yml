@@ -1,0 +1,34 @@
+es:
+  layouts:
+    navigation:
+      dashboard: "Panel"
+      sources: "Fuentes"
+      channels: "Canales"
+      events: "Publicaciones"
+      add_event: "Añadir publicación"
+      activity: "Actividad"
+      ask_content: "Preguntar al contenido"
+      theme: "Tema"
+      change_theme: "Cambiar el tema de color"
+      open_menu: "Abrir menú"
+      close_menu: "Cerrar menú"
+      profile: "Perfil"
+      nostr_user: "Usuario de Nostr"
+      refresh_profile: "Actualizar perfil"
+      sign_out: "Cerrar sesión"
+    flash:
+      success: "Listo:"
+      problem: "Problema:"
+      dismiss: "Cerrar este mensaje"
+  js:
+    theme:
+      title: "Tema: %{current} (haz clic para cambiar a %{next})"
+      modes:
+        system: "sistema"
+        light: "claro"
+        dark: "oscuro"
+    app_version:
+      refreshing: "Hay una nueva versión de Lievik. Recargando…"
+    event_expander:
+      show_more: "Mostrar más"
+      show_less: "Mostrar menos"

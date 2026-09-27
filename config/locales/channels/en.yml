@@ -1,0 +1,148 @@
+en:
+  activerecord:
+    models:
+      channel:
+        one: "Channel"
+        other: "Channels"
+    attributes:
+      channel:
+        name: "Name"
+        description: "Description"
+        language: "Language"
+        prompt: "Relevance criteria"
+        content_language: "Content language"
+        content_style: "Writing style"
+        content_prompt: "Content formatting instructions"
+  channels:
+    languages:
+      en: "English"
+      sk: "Slovak"
+      cs: "Czech"
+      de: "German"
+      es: "Spanish"
+      fr: "French"
+    index:
+      title: "Channels"
+      subtitle: "Marketing outputs for curated content"
+      create_with_ai: "Create with AI"
+      create_channel: "Create Channel"
+      empty_title: "No channels"
+      empty_body: "Create a channel for each marketing output."
+      pending:
+        one: "%{count} pending"
+        other: "%{count} pending"
+      view: "View"
+    new:
+      title: "Create Channel"
+      subtitle: "Set up a new marketing channel"
+    edit:
+      title: "Edit Channel"
+      subtitle: "Update relevance criteria for %{name}"
+    form:
+      errors_heading:
+        one: "%{count} error prevented this channel from being saved:"
+        other: "%{count} errors prevented this channel from being saved:"
+      name_placeholder: "e.g., Privacy Newsletter, Telegram Group"
+      description_placeholder: "Describe the purpose and audience of this channel..."
+      language_hint: "Primary language for this channel's content"
+      criteria_label: "Relevance Criteria"
+      criteria_hint: "Define what makes content relevant for this channel. AI will use this to score events."
+      create: "Create Channel"
+      update: "Update Channel"
+    show:
+      content_library: "Content Library"
+      settings: "Settings"
+      edit_criteria: "Edit Criteria"
+      relevant_content: "Relevant Content"
+      unused_count:
+        one: "%{count} unused"
+        other: "%{count} unused"
+      used_count:
+        one: "%{count} used"
+        other: "%{count} used"
+      sort_label: "Sort:"
+      sort_aria: "Sort order"
+      sort_relevance: "Rating"
+      sort_newest: "Newest"
+      sort_oldest: "Oldest"
+      threshold: "Threshold: %{value}%"
+      show_used: "Show used"
+      select_all_page: "Select All on This Page"
+      selected_count:
+        one: "%{count} selected"
+        other: "%{count} selected"
+      search_placeholder: "Search events..."
+      search: "Search"
+      clear: "Clear"
+      use_events: "Use Events in new content"
+      mark_used: "Mark as Used"
+      rate_events: "Rate Events"
+      empty: "No content matches your criteria yet."
+      ai_reasoning: "AI Reasoning: %{reason}"
+      used: "Used"
+      from_source: "from %{source}"
+      view_details: "View details"
+      show_more: "Show more"
+    settings:
+      title: "Channel Settings"
+      threshold_label: "Relevance Threshold"
+      threshold_hint: "Only show events with a relevance score at or above this threshold."
+      show_everything: "Show everything (0%)"
+      only_high: "Only high relevance (100%)"
+      channel_type: "Channel Type"
+      channel_type_hint: "How you interact with this channel's content."
+      current: "Current"
+      pull: "Pull (Manual)"
+      pull_hint: "You manually check and select content when needed"
+      soon: "Soon"
+      proactive: "Proactive"
+      proactive_hint: "Receive reminders when relevant content is available"
+      generation_heading: "Content Generation Settings"
+      generation_hint: "Configure how AI generates content for this channel."
+      content_language: "Content Language"
+      content_language_hint: "The language AI should use when generating content. Leave empty to use the channel's default language."
+      content_language_placeholder: "e.g., Slovak, English, German..."
+      writing_style: "Writing Style"
+      writing_style_hint: "Describe the tone and style for generated content."
+      writing_style_placeholder: "e.g., Professional but approachable, casual and friendly..."
+      humanize: "Humanize AI Output"
+      humanize_hint: "Runs a second pass to remove AI-sounding patterns and make content sound more natural."
+      formatting: "Content Formatting Instructions"
+      formatting_hint: "Detailed instructions for how AI should format and structure generated content."
+      load_from_template: "Load from template:"
+      manage_templates: "Manage templates"
+      create_templates_hint: "Create templates in User Settings to quickly populate this field"
+      save: "Save Settings"
+      danger_zone: "Danger Zone"
+      danger_body: "Deleting a channel will remove all relevance ratings for this channel. This action cannot be undone."
+      delete: "Delete Channel"
+      delete_confirm: "Are you sure you want to delete this channel? This action cannot be undone."
+    create:
+      notice: "Channel created successfully."
+      notice_capped: "Channel created successfully. Rating the %{count} most recent events in the background — use Rate to score older ones."
+      notice_queued:
+        one: "Channel created successfully. Rating %{count} recent event in the background."
+        other: "Channel created successfully. Rating %{count} recent events in the background."
+    update:
+      notice: "Channel updated"
+    destroy:
+      notice: "Channel deleted"
+    update_settings:
+      notice: "Settings updated"
+    rate:
+      notice: "Rating job queued. Events will be scored in the background."
+  js:
+    bulk_select:
+      selected:
+        one: "%{count} selected"
+        other: "%{count} selected"
+      rerate_all: "Rerate All (%{count})"
+      rerate_n:
+        one: "Rerate %{count} Event"
+        other: "Rerate %{count} Events"
+      mark_used: "Mark as Used"
+      mark_n: "Mark %{count} as Used"
+      use_events: "Use Events in new content"
+      use_n:
+        one: "Use %{count} Event in new content"
+        other: "Use %{count} Events in new content"

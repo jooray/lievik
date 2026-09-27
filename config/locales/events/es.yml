@@ -1,0 +1,69 @@
+es:
+  events:
+    show_more: "Mostrar más"
+    from_source: "Fuente: %{source}"
+    view_details: "Ver detalles"
+    rerate_one_confirm: "¿Volver a valorar esta publicación en todos los canales?"
+    selected:
+      one: "%{count} seleccionada"
+      other: "%{count} seleccionadas"
+    index:
+      title: "Todas las publicaciones"
+      subtitle:
+        one: "1 publicación de todas las fuentes"
+        other: "%{count} publicaciones de todas las fuentes"
+      search: "Buscar"
+      search_placeholder: "Buscar en el contenido…"
+      source: "Fuente"
+      all_sources: "Todas las fuentes"
+      type: "Tipo"
+      all_types: "Todos los tipos"
+      filter: "Filtrar"
+      clear: "Quitar filtros"
+      rate_cap_note: "Solo se valorarán las %{cap} más recientes de %{total} publicaciones coincidentes."
+      select_all_page: "Seleccionar todo en esta página"
+      rerate_confirm:
+        one: "¿Volver a valorar 1 publicación coincidente en todos los canales? Consume créditos de IA y no se puede deshacer."
+        other: "¿Volver a valorar %{count} publicaciones coincidentes en todos los canales? Consume créditos de IA y no se puede deshacer."
+      rerate_all: "Volver a valorar todo (%{count})"
+      rerate_one: "Volver a valorar la publicación"
+      empty_title: "Aún no hay publicaciones"
+      empty_body: "Añade fuentes y actualízalas para importar publicaciones."
+    show:
+      back: "Volver a las publicaciones"
+      title: "Detalle de la publicación"
+      open_in: "Abrir en %{client}"
+      nostr_client: "un cliente de Nostr"
+      copy_id_title: "Copiar %{kind} al portapapeles"
+      copy_id: "Copiar %{kind}"
+      view_original: "Ver original"
+      rerate_event: "Volver a valorar"
+      channel_relevance: "Relevancia por canal (por puntuación)"
+      select_all: "Seleccionar todo"
+      already_used: "Ya usada en este canal"
+      mark_used_selected: "Marcar como usada en los canales seleccionados"
+      not_rated: "Esta publicación aún no se ha valorado en ningún canal."
+      rate_all_channels: "Valorar en todos los canales"
+      raw_data: "Datos sin procesar"
+      truncated: "truncado"
+      raw_truncated_note: "Se muestran los primeros %{shown} de %{total} caracteres."
+    bulk_rate:
+      no_match: "Ninguna publicación coincide con los filtros actuales"
+      no_channels: "No hay canales con los que valorar: crea uno primero"
+      channels:
+        one: "en 1 canal"
+        other: "en %{count} canales"
+      queued_selected:
+        one: "Valoración de 1 publicación seleccionada puesta en cola %{channels}."
+        other: "Valoración de %{count} publicaciones seleccionadas puesta en cola %{channels}."
+      queued_matching:
+        one: "Nueva valoración de 1 publicación coincidente puesta en cola %{channels}."
+        other: "Nueva valoración de %{count} publicaciones coincidentes puesta en cola %{channels}."
+      skipped:
+        one: "Se omitió 1 publicación más antigua: una sola solicitud valora como máximo %{max} publicaciones. Acota los filtros o repite para cubrir el resto."
+        other: "Se omitieron %{count} publicaciones más antiguas: una sola solicitud valora como máximo %{max} publicaciones. Acota los filtros o repite para cubrir el resto."
+    bulk_mark_used:
+      no_channels_selected: "No has seleccionado ningún canal"
+      marked_used:
+        one: "Marcada como usada en 1 canal"
+        other: "Marcada como usada en %{count} canales"

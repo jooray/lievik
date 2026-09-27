@@ -1,0 +1,54 @@
+es:
+  sessions:
+    new:
+      subtitle: "Inicia sesión con tu identidad de Nostr"
+      extension_heading: "Extensión del navegador"
+      extension_button: "Continuar con la extensión"
+      signer_heading: "App de firma"
+      open_in_signer: "Abrir en tu firmador"
+      signer_hint: "Amber, Amethyst o cualquier firmador en este dispositivo"
+      scan_hint: "Escanea con un firmador desde otro dispositivo"
+      copy: "Copiar"
+      bunker_heading: "Pega un enlace bunker"
+      bunker_hint: "Crea una conexión en tu firmador y pega aquí el enlace que te dé."
+      bunker_label: "Enlace bunker"
+      connect: "Conectar"
+      waiting: "Esperando a tu firmador…"
+      stale_notice: "¿No llegó la aprobación? Deja esta pestaña abierta mientras apruebas, o empieza de nuevo con un código nuevo."
+      new_code: "Obtener un código nuevo"
+      auth_challenge: "Tu firmador necesita que lo apruebes en su propia ventana."
+      open_approval: "Abrir la página de aprobación"
+      expired: "Este código caducó por seguridad."
+      no_account: "No necesitas cuenta. Tu identidad es tu clave de Nostr."
+    unavailable:
+      try_again: "Intentar de nuevo"
+    unavailable_reasons:
+      busy:
+        title: "El inicio de sesión está saturado"
+        message: "Hay demasiada gente iniciando sesión a la vez. Espera unos segundos y vuelve a intentarlo."
+      rate_limited:
+        title: "Espera un momento"
+        message: "Has pedido varios códigos de inicio de sesión seguidos. Espera más o menos un minuto y vuelve a intentarlo."
+    bunker:
+      invalid_link: "Eso no parece un enlace bunker válido. Debe empezar por bunker:// e incluir al menos un relay."
+      failed: "No se pudo iniciar la conexión. Inténtalo de nuevo."
+    refresh_profile:
+      notice: "Estamos actualizando tu perfil desde los relays en segundo plano. Recarga en un momento para verlo."
+    callback:
+      failed: "La autenticación falló: la prueba no es válida o ha caducado."
+      welcome: "¡Hola, %{name}!"
+    destroy:
+      notice: "Has cerrado sesión."
+  js:
+    nostr_login:
+      paste_bunker_first: "Primero pega el enlace bunker de tu firmador."
+      connecting: "Conectando…"
+      bunker_unusable: "No se pudo usar ese enlace bunker."
+      waiting_approval: "Esperando a que tu firmador lo apruebe…"
+      server_unreachable: "No se pudo contactar con el servidor. Revisa tu conexión y vuelve a intentarlo."
+      no_extension: "No se encontró ninguna extensión NIP-07. Instala nos2x, Alby u otra extensión de Nostr."
+      no_pubkey: "No se pudo obtener la clave pública de la extensión."
+      extension_error: "Error de la extensión: %{message}"
+      unknown_error: "error desconocido"
+      lost_connection: "Se perdió la conexión con el servidor. Recarga la página para intentarlo de nuevo."
+      extension_button: "Continuar con la extensión"

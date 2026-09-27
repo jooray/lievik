@@ -84,11 +84,11 @@ class ChannelsController < ApplicationController
       # Auto-rate recent events (past 3 months) for the new channel
       queued = queue_initial_rating(@channel)
       notice = if queued.zero?
-        "Channel created successfully."
+        t(".notice")
       elsif queued >= MAX_BULK_RATE_EVENTS
-        "Channel created successfully. Rating the #{queued} most recent events in the background — use Rate to score older ones."
+        t(".notice_capped", count: queued)
       else
-        "Channel created successfully. Rating #{queued} recent events in the background."
+        t(".notice_queued", count: queued)
       end
       redirect_to @channel, notice: notice
     else
@@ -101,7 +101,7 @@ class ChannelsController < ApplicationController
 
   def update
     if @channel.update(channel_params)
-      redirect_to @channel, notice: "Channel updated"
+      redirect_to @channel, notice: t(".notice")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -109,7 +109,7 @@ class ChannelsController < ApplicationController
 
   def destroy
     @channel.destroy
-    redirect_to channels_path, notice: "Channel deleted"
+    redirect_to channels_path, notice: t(".notice")
   end
 
   def settings
@@ -117,7 +117,7 @@ class ChannelsController < ApplicationController
 
   def update_settings
     if @channel.update(settings_params)
-      redirect_to @channel, notice: "Settings updated"
+      redirect_to @channel, notice: t(".notice")
     else
       render :settings, status: :unprocessable_entity
     end
@@ -125,7 +125,7 @@ class ChannelsController < ApplicationController
 
   def rate
     @channel.rate_new_events!
-    redirect_to @channel, notice: "Rating job queued. Events will be scored in the background."
+    redirect_to @channel, notice: t(".notice")
   end
 
   private

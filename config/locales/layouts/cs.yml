@@ -1,0 +1,34 @@
+cs:
+  layouts:
+    navigation:
+      dashboard: "Přehled"
+      sources: "Zdroje"
+      channels: "Kanály"
+      events: "Příspěvky"
+      add_event: "Přidat příspěvek"
+      activity: "Aktivita"
+      ask_content: "Zeptat se obsahu"
+      theme: "Vzhled"
+      change_theme: "Změnit vzhled"
+      open_menu: "Otevřít menu"
+      close_menu: "Zavřít menu"
+      profile: "Profil"
+      nostr_user: "Uživatel Nostr"
+      refresh_profile: "Obnovit profil"
+      sign_out: "Odhlásit se"
+    flash:
+      success: "Hotovo:"
+      problem: "Problém:"
+      dismiss: "Zavřít zprávu"
+  js:
+    theme:
+      title: "Vzhled: %{current} (kliknutím přepnete na %{next})"
+      modes:
+        system: "podle systému"
+        light: "světlý"
+        dark: "tmavý"
+    app_version:
+      refreshing: "Je dostupná nová verze Lievika. Stránka se obnoví…"
+    event_expander:
+      show_more: "Zobrazit více"
+      show_less: "Zobrazit méně"

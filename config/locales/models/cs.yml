@@ -1,0 +1,45 @@
+cs:
+  activerecord:
+    models:
+      source:
+        one: "Zdroj"
+        few: "Zdroje"
+        other: "Zdroje"
+      activity_log:
+        one: "Aktivita"
+        few: "Aktivita"
+        other: "Aktivita"
+      user:
+        one: "Uživatel"
+        few: "Uživatelé"
+        other: "Uživatelé"
+    attributes:
+      source:
+        identifier: "Identifikátor"
+        name: "Název"
+        description: "Popis"
+        distance: "Vzdálenost relevance"
+        source_type: "Typ zdroje"
+        settings_include_replies: "Včetně odpovědí"
+        settings_include_reposts: "Včetně repostů"
+        settings_import_days: "Počet dní importu"
+      activity_log:
+        activity_type: "Typ aktivity"
+        status: "Stav"
+        message: "Zpráva"
+      user:
+        npub: "npub"
+        pubkey_hex: "Veřejný klíč"
+        system_prompt: "Systémový prompt"
+        event_link_template: "Šablona odkazu na příspěvek"
+        naddr_link_template: "Šablona odkazu na článek"
+        profile_link_template: "Šablona odkazu na profil"
+        default_content_style: "Výchozí styl psaní"
+        rating_engine: "Hodnoticí engine"
+        locale: "Jazyk rozhraní"
+    errors:
+      models:
+        source:
+          attributes:
+            identifier:
+              invalid_npub: "musí být platný npub nebo 64znakový veřejný klíč v hex formátu"

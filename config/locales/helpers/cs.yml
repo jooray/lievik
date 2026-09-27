@@ -1,0 +1,25 @@
+cs:
+  time:
+    formats:
+      app_datetime: "%-d. %-m. %Y v %H:%M"
+  app:
+    time_ago: "před %{time}"
+    event_types:
+      original: "Původní"
+      reply: "Odpověď"
+      repost: "Repost"
+    source_label:
+      unknown: "Neznámý zdroj"
+      manual: "Ručně přidané"
+      unnamed: "Nepojmenovaný zdroj"
+    nostr:
+      referenced_note: "[citovaný příspěvek]"
+      unknown_author: "Neznámý autor"
+  views:
+    pagination:
+      aria_label: "Stránkování"
+      first: "&laquo; První"
+      last: "Poslední &raquo;"
+      previous: "&lsaquo; Předchozí"
+      next: "Další &rsaquo;"
+      truncate: "&hellip;"

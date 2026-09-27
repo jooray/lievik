@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 export default class extends Controller {
   static targets = ["short", "full", "button"]
@@ -16,11 +17,11 @@ export default class extends Controller {
     if (this.isExpanded) {
       this.shortTarget.classList.add("hidden")
       this.fullTarget.classList.remove("hidden")
-      this.buttonTarget.textContent = "Show less"
+      this.buttonTarget.textContent = t("event_expander.show_less")
     } else {
       this.shortTarget.classList.remove("hidden")
       this.fullTarget.classList.add("hidden")
-      this.buttonTarget.textContent = "Show more"
+      this.buttonTarget.textContent = t("event_expander.show_more")
     }
   }
 }

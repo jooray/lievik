@@ -1,0 +1,158 @@
+cs:
+  activerecord:
+    models:
+      channel:
+        one: "Kanál"
+        few: "Kanály"
+        other: "Kanály"
+    attributes:
+      channel:
+        name: "Název"
+        description: "Popis"
+        language: "Jazyk"
+        prompt: "Kritéria relevance"
+        content_language: "Jazyk obsahu"
+        content_style: "Styl psaní"
+        content_prompt: "Pokyny k formátování obsahu"
+  channels:
+    languages:
+      en: "Angličtina"
+      sk: "Slovenština"
+      cs: "Čeština"
+      de: "Němčina"
+      es: "Španělština"
+      fr: "Francouzština"
+    index:
+      title: "Kanály"
+      subtitle: "Marketingové výstupy pro vybraný obsah"
+      create_with_ai: "Vytvořit s AI"
+      create_channel: "Vytvořit kanál"
+      empty_title: "Zatím žádné kanály"
+      empty_body: "Pro každý marketingový výstup si vytvořte samostatný kanál."
+      pending:
+        one: "Čeká: %{count}"
+        few: "Čeká: %{count}"
+        other: "Čeká: %{count}"
+      view: "Otevřít"
+    new:
+      title: "Vytvořit kanál"
+      subtitle: "Nastavte nový marketingový kanál"
+    edit:
+      title: "Upravit kanál"
+      subtitle: "Upravte kritéria relevance pro kanál %{name}"
+    form:
+      errors_heading:
+        one: "Kanál se nepodařilo uložit kvůli %{count} chybě:"
+        few: "Kanál se nepodařilo uložit kvůli %{count} chybám:"
+        other: "Kanál se nepodařilo uložit kvůli %{count} chybám:"
+      name_placeholder: "např. Newsletter o soukromí, Skupina na Telegramu"
+      description_placeholder: "K čemu kanál slouží a komu je určen…"
+      language_hint: "Hlavní jazyk obsahu v tomto kanálu"
+      criteria_label: "Kritéria relevance"
+      criteria_hint: "Popište, jaký obsah je pro tento kanál relevantní. Podle toho bude AI hodnotit příspěvky."
+      create: "Vytvořit kanál"
+      update: "Uložit kanál"
+    show:
+      content_library: "Knihovna obsahu"
+      settings: "Nastavení"
+      edit_criteria: "Upravit kritéria"
+      relevant_content: "Relevantní obsah"
+      unused_count:
+        one: "%{count} nepoužitý"
+        few: "%{count} nepoužité"
+        other: "%{count} nepoužitých"
+      used_count:
+        one: "%{count} použitý"
+        few: "%{count} použité"
+        other: "%{count} použitých"
+      sort_label: "Řadit:"
+      sort_aria: "Pořadí"
+      sort_relevance: "Hodnocení"
+      sort_newest: "Nejnovější"
+      sort_oldest: "Nejstarší"
+      threshold: "Práh: %{value} %"
+      show_used: "Zobrazit použité"
+      select_all_page: "Vybrat vše na této stránce"
+      selected_count:
+        one: "%{count} vybraný"
+        few: "%{count} vybrané"
+        other: "%{count} vybraných"
+      search_placeholder: "Hledat v příspěvcích…"
+      search: "Hledat"
+      clear: "Vymazat"
+      use_events: "Použít příspěvky v novém obsahu"
+      mark_used: "Označit jako použité"
+      rate_events: "Ohodnotit příspěvky"
+      empty: "Kritériím zatím neodpovídá žádný obsah."
+      ai_reasoning: "Zdůvodnění AI: %{reason}"
+      used: "Použité"
+      from_source: "zdroj: %{source}"
+      view_details: "Zobrazit detail"
+      show_more: "Zobrazit více"
+    settings:
+      title: "Nastavení kanálu"
+      threshold_label: "Práh relevance"
+      threshold_hint: "Zobrazí se jen příspěvky se skóre relevance rovným tomuto prahu nebo vyšším."
+      show_everything: "Zobrazit vše (0 %)"
+      only_high: "Jen vysoká relevance (100 %)"
+      channel_type: "Typ kanálu"
+      channel_type_hint: "Jak pracujete s obsahem tohoto kanálu."
+      current: "Aktuální"
+      pull: "Ruční výběr"
+      pull_hint: "Obsah si procházíte a vybíráte sami, když ho potřebujete."
+      soon: "Brzy"
+      proactive: "Proaktivní"
+      proactive_hint: "Upozornění, když přibude relevantní obsah."
+      generation_heading: "Generování obsahu"
+      generation_hint: "Jak má AI generovat obsah pro tento kanál."
+      content_language: "Jazyk obsahu"
+      content_language_hint: "V jakém jazyce má AI psát. Když pole necháte prázdné, použije se výchozí jazyk kanálu."
+      content_language_placeholder: "např. čeština, angličtina, němčina…"
+      writing_style: "Styl psaní"
+      writing_style_hint: "Popište tón a styl generovaného obsahu."
+      writing_style_placeholder: "např. profesionálně, ale přístupně; neformálně a přátelsky…"
+      humanize: "Polidštit výstup AI"
+      humanize_hint: "Druhým průchodem odstraní formulace typické pro AI, aby text zněl přirozeněji."
+      formatting: "Pokyny k formátování obsahu"
+      formatting_hint: "Podrobné pokyny, jak má AI obsah formátovat a strukturovat."
+      load_from_template: "Načíst ze šablony:"
+      manage_templates: "Spravovat šablony"
+      create_templates_hint: "Šablony si vytvořte v nastavení uživatele a toto pole vyplníte jedním kliknutím."
+      save: "Uložit nastavení"
+      danger_zone: "Nebezpečná zóna"
+      danger_body: "Smazáním kanálu zmizí i všechna jeho hodnocení relevance. Tuto akci nelze vrátit."
+      delete: "Smazat kanál"
+      delete_confirm: "Opravdu chcete tento kanál smazat? Tuto akci nelze vrátit."
+    create:
+      notice: "Kanál byl vytvořen."
+      notice_capped: "Kanál byl vytvořen. Na pozadí se hodnotí %{count} nejnovějších příspěvků, starší ohodnotíte tlačítkem „Ohodnotit příspěvky“."
+      notice_queued:
+        one: "Kanál byl vytvořen. Na pozadí se hodnotí %{count} nedávný příspěvek."
+        few: "Kanál byl vytvořen. Na pozadí se hodnotí %{count} nedávné příspěvky."
+        other: "Kanál byl vytvořen. Na pozadí se hodnotí %{count} nedávných příspěvků."
+    update:
+      notice: "Kanál byl uložen."
+    destroy:
+      notice: "Kanál byl smazán."
+    update_settings:
+      notice: "Nastavení bylo uloženo."
+    rate:
+      notice: "Hodnocení je ve frontě. Příspěvky se ohodnotí na pozadí."
+  js:
+    bulk_select:
+      selected:
+        one: "%{count} vybraný"
+        few: "%{count} vybrané"
+        other: "%{count} vybraných"
+      rerate_all: "Znovu ohodnotit vše (%{count})"
+      rerate_n:
+        one: "Znovu ohodnotit %{count} příspěvek"
+        few: "Znovu ohodnotit %{count} příspěvky"
+        other: "Znovu ohodnotit %{count} příspěvků"
+      mark_used: "Označit jako použité"
+      mark_n: "Označit jako použité (%{count})"
+      use_events: "Použít příspěvky v novém obsahu"
+      use_n:
+        one: "Použít %{count} příspěvek v novém obsahu"
+        few: "Použít %{count} příspěvky v novém obsahu"
+        other: "Použít %{count} příspěvků v novém obsahu"

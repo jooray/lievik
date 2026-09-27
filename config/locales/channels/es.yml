@@ -1,0 +1,148 @@
+es:
+  activerecord:
+    models:
+      channel:
+        one: "Canal"
+        other: "Canales"
+    attributes:
+      channel:
+        name: "Nombre"
+        description: "Descripción"
+        language: "Idioma"
+        prompt: "Criterios de relevancia"
+        content_language: "Idioma del contenido"
+        content_style: "Estilo de redacción"
+        content_prompt: "Instrucciones de formato del contenido"
+  channels:
+    languages:
+      en: "Inglés"
+      sk: "Eslovaco"
+      cs: "Checo"
+      de: "Alemán"
+      es: "Español"
+      fr: "Francés"
+    index:
+      title: "Canales"
+      subtitle: "Dónde difundes el contenido que seleccionas"
+      create_with_ai: "Crear con IA"
+      create_channel: "Crear canal"
+      empty_title: "Aún no hay canales"
+      empty_body: "Crea un canal por cada boletín, grupo o cuenta donde difundes contenido."
+      pending:
+        one: "%{count} pendiente"
+        other: "%{count} pendientes"
+      view: "Ver"
+    new:
+      title: "Crear canal"
+      subtitle: "Configura un nuevo canal de marketing"
+    edit:
+      title: "Editar canal"
+      subtitle: "Actualiza los criterios de relevancia de %{name}"
+    form:
+      errors_heading:
+        one: "No se pudo guardar el canal por %{count} error:"
+        other: "No se pudo guardar el canal por %{count} errores:"
+      name_placeholder: "P. ej., boletín de privacidad, grupo de Telegram"
+      description_placeholder: "Para qué sirve este canal y a quién va dirigido…"
+      language_hint: "Idioma principal del contenido de este canal"
+      criteria_label: "Criterios de relevancia"
+      criteria_hint: "Define qué contenido es relevante para este canal. La IA lo usará para puntuar las publicaciones."
+      create: "Crear canal"
+      update: "Guardar canal"
+    show:
+      content_library: "Biblioteca de contenido"
+      settings: "Ajustes"
+      edit_criteria: "Editar criterios"
+      relevant_content: "Contenido relevante"
+      unused_count:
+        one: "%{count} sin usar"
+        other: "%{count} sin usar"
+      used_count:
+        one: "%{count} usada"
+        other: "%{count} usadas"
+      sort_label: "Ordenar:"
+      sort_aria: "Orden"
+      sort_relevance: "Puntuación"
+      sort_newest: "Más recientes"
+      sort_oldest: "Más antiguas"
+      threshold: "Umbral: %{value} %"
+      show_used: "Mostrar usadas"
+      select_all_page: "Seleccionar todo en esta página"
+      selected_count:
+        one: "%{count} seleccionada"
+        other: "%{count} seleccionadas"
+      search_placeholder: "Buscar publicaciones…"
+      search: "Buscar"
+      clear: "Limpiar"
+      use_events: "Usar publicaciones en nuevo contenido"
+      mark_used: "Marcar como usadas"
+      rate_events: "Valorar publicaciones"
+      empty: "Todavía no hay contenido que cumpla tus criterios."
+      ai_reasoning: "Razonamiento de la IA: %{reason}"
+      used: "Usada"
+      from_source: "de %{source}"
+      view_details: "Ver detalles"
+      show_more: "Mostrar más"
+    settings:
+      title: "Ajustes del canal"
+      threshold_label: "Umbral de relevancia"
+      threshold_hint: "Solo se muestran las publicaciones con una puntuación de relevancia igual o superior a este umbral."
+      show_everything: "Mostrar todo (0 %)"
+      only_high: "Solo relevancia alta (100 %)"
+      channel_type: "Tipo de canal"
+      channel_type_hint: "Cómo trabajas con el contenido de este canal."
+      current: "Actual"
+      pull: "Manual"
+      pull_hint: "Revisas y eliges tú el contenido cuando lo necesitas"
+      soon: "Próximamente"
+      proactive: "Proactivo"
+      proactive_hint: "Recibe avisos cuando haya contenido relevante"
+      generation_heading: "Generación de contenido"
+      generation_hint: "Configura cómo genera la IA el contenido de este canal."
+      content_language: "Idioma del contenido"
+      content_language_hint: "El idioma en el que la IA debe escribir. Déjalo vacío para usar el idioma predeterminado del canal."
+      content_language_placeholder: "P. ej., español, inglés, alemán…"
+      writing_style: "Estilo de redacción"
+      writing_style_hint: "Describe el tono y el estilo del contenido generado."
+      writing_style_placeholder: "P. ej., profesional pero cercano, informal y amigable…"
+      humanize: "Humanizar el texto de la IA"
+      humanize_hint: "Hace una segunda pasada que quita las muletillas típicas de la IA para que el texto suene más natural."
+      formatting: "Instrucciones de formato del contenido"
+      formatting_hint: "Instrucciones detalladas sobre cómo debe la IA dar formato y estructura al contenido."
+      load_from_template: "Cargar desde plantilla:"
+      manage_templates: "Gestionar plantillas"
+      create_templates_hint: "Crea plantillas en tus ajustes para rellenar este campo con un clic"
+      save: "Guardar ajustes"
+      danger_zone: "Zona de peligro"
+      danger_body: "Al eliminar un canal se borran todas sus valoraciones de relevancia. Esta acción no se puede deshacer."
+      delete: "Eliminar canal"
+      delete_confirm: "¿Seguro que quieres eliminar este canal? Esta acción no se puede deshacer."
+    create:
+      notice: "Canal creado."
+      notice_capped: "Canal creado. Se están valorando en segundo plano las %{count} publicaciones más recientes; usa Valorar para puntuar las anteriores."
+      notice_queued:
+        one: "Canal creado. Se está valorando en segundo plano %{count} publicación reciente."
+        other: "Canal creado. Se están valorando en segundo plano %{count} publicaciones recientes."
+    update:
+      notice: "Canal actualizado"
+    destroy:
+      notice: "Canal eliminado"
+    update_settings:
+      notice: "Ajustes guardados"
+    rate:
+      notice: "Valoración en cola. Las publicaciones se puntúan en segundo plano."
+  js:
+    bulk_select:
+      selected:
+        one: "%{count} seleccionada"
+        other: "%{count} seleccionadas"
+      rerate_all: "Volver a valorar todo (%{count})"
+      rerate_n:
+        one: "Volver a valorar %{count} publicación"
+        other: "Volver a valorar %{count} publicaciones"
+      mark_used: "Marcar como usadas"
+      mark_n: "Marcar como usadas (%{count})"
+      use_events: "Usar publicaciones en nuevo contenido"
+      use_n:
+        one: "Usar %{count} publicación en nuevo contenido"
+        other: "Usar %{count} publicaciones en nuevo contenido"

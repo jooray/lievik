@@ -43,6 +43,14 @@ module Lievik
       same_site: :lax,
       secure: Rails.env.production?
 
+    # UI languages. Locale files are split per area under config/locales/
+    # (e.g. config/locales/channels/sk.yml); a missing key falls back to
+    # English rather than rendering "translation missing".
+    config.i18n.available_locales = %i[en sk cs es]
+    config.i18n.default_locale = :en
+    config.i18n.fallbacks = [:en]
+    config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
+
     # Don't generate system test files.
     config.generators.system_tests = nil
   end

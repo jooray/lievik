@@ -1,4 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
+import { t, locale } from "../lib/i18n"
+
+// Plural-aware lookup: picks `<key>.one|few|other` for the page's locale
+// (Slovak and Czech need "few"), falling back to `other`.
+function tp(key, count, vars = {}) {
+  let category = "other"
+  try { category = new Intl.PluralRules(locale()).select(count) } catch (e) { /* keep "other" */ }
+  const full = `${key}.${category}`
+  const text = t(full, { count, ...vars })
+  return text === full ? t(`${key}.other`, { count, ...vars }) : text
+}
 
 export default class extends Controller {
   static targets = ["selectAll", "checkbox", "count", "actions", "form", "submitText", "checkboxes", "contentForm", "contentCheckboxes", "contentSubmitText"]
@@ -27,7 +38,7 @@ export default class extends Controller {
     const selectedIds = this.checkboxTargets.filter(cb => cb.checked).map(cb => cb.value)
 
     if (this.hasCountTarget) {
-      this.countTarget.textContent = `${checkedCount} selected`
+      this.countTarget.textContent = tp("bulk_select.selected", checkedCount)
     }
 
     if (this.hasActionsTarget) {
@@ -55,20 +66,22 @@ export default class extends Controller {
 
     if (this.hasSubmitTextTarget) {
       let text
-      // Check if this is the events page (rerate) or channel page (mark as used)
-      const isRerate = this.submitTextTarget.textContent.includes('Rerate')
+      // The label element says which kind it is: data-bulk-select-kind=
+      // "rerate" (events page) or "mark-used" (channel page). Detected by
+      // attribute, not by the label text, because the label is translated.
+      const isRerate = this.submitTextTarget.dataset.bulkSelectKind === "rerate"
 
       if (isRerate) {
         if (checkedCount === 0) {
-          text = `Rerate All (${this.totalValue})`
+          text = t("bulk_select.rerate_all", { count: this.totalValue })
         } else {
-          text = `Rerate ${checkedCount} Event${checkedCount !== 1 ? 's' : ''}`
+          text = tp("bulk_select.rerate_n", checkedCount)
         }
       } else {
         if (checkedCount === 0) {
-          text = `Mark as Used`
+          text = t("bulk_select.mark_used")
         } else {
-          text = `Mark ${checkedCount} as Used`
+          text = t("bulk_select.mark_n", { count: checkedCount })
         }
       }
 
@@ -82,9 +95,9 @@ export default class extends Controller {
 
     if (this.hasContentSubmitTextTarget) {
       if (checkedCount === 0) {
-        this.contentSubmitTextTarget.value = `Use Events in new content`
+        this.contentSubmitTextTarget.value = t("bulk_select.use_events")
       } else {
-        this.contentSubmitTextTarget.value = `Use ${checkedCount} Event${checkedCount !== 1 ? 's' : ''} in new content`
+        this.contentSubmitTextTarget.value = tp("bulk_select.use_n", checkedCount)
       }
     }
   }

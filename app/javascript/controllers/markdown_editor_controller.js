@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "../lib/i18n"
 
 // The editor library itself is NOT imported here. It lives in a separate
 // esbuild entry point (editor_overtype.js, or editor_easymde.js for a user with
@@ -32,7 +33,7 @@ export default class extends Controller {
     if (this.editor || !this.hasTextareaTarget) return
 
     this.editor = window.LievikEditor.mount(this.textareaTarget, {
-      placeholder: this.hasPlaceholderValue ? this.placeholderValue : "Type your content here...",
+      placeholder: this.hasPlaceholderValue ? this.placeholderValue : t("markdown_editor.placeholder"),
       minHeight: this.hasMinHeightValue ? this.minHeightValue : "300px",
       onChange: (value) => this.sync(value)
     })

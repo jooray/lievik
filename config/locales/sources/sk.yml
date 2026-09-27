@@ -1,0 +1,84 @@
+sk:
+  sources:
+    index:
+      title: "Zdroje"
+      subtitle: "Nostr účty a RSS feedy, z ktorých vyberáte obsah"
+      refresh_all: "Obnoviť všetky"
+      add_source: "Pridať zdroj"
+      empty_title: "Žiadne zdroje"
+      empty_hint: "Začnite tým, že pridáte Nostr účet, ktorý chcete sledovať."
+      distance: "Vzdialenosť: %{distance}"
+      events:
+        one: "%{count} príspevok"
+        few: "%{count} príspevky"
+        other: "%{count} príspevkov"
+      click_to_copy: "Kliknutím skopírujete"
+      view_profile: "Zobraziť profil"
+    new:
+      title: "Pridať zdroj"
+      subtitle: "Pridajte Nostr účet, z ktorého chcete vyberať obsah"
+    edit:
+      title: "Upraviť zdroj"
+      danger_zone: "Nebezpečná zóna"
+      danger_hint: "Spolu so zdrojom sa zmažú aj všetky jeho príspevky."
+      confirm_delete: "Zmazať tento zdroj? Natrvalo sa zmažú aj všetky jeho príspevky. Nedá sa to vrátiť."
+      delete: "Zmazať zdroj"
+    show:
+      source_type:
+        nostr: "Nostr zdroj"
+        rss: "RSS zdroj"
+        manual: "Ručne pridaný zdroj"
+      distance: "vzdialenosť %{distance}"
+      events: "Príspevky"
+      ago: "pred %{time}"
+      event_types:
+        original: "Pôvodný"
+        reply: "Odpoveď"
+        repost: "Repost"
+      view_details: "Zobraziť detail"
+      empty: "Z tohto zdroja zatiaľ nie sú žiadne príspevky."
+    form:
+      errors_header:
+        one: "Zdroj sa nepodarilo uložiť pre 1 chybu:"
+        few: "Zdroj sa nepodarilo uložiť pre %{count} chyby:"
+        other: "Zdroj sa nepodarilo uložiť pre %{count} chýb:"
+      source_type: "Typ zdroja"
+      types:
+        nostr: "Nostr účet"
+        rss: "RSS feed"
+      name_placeholder: "Názov na zobrazenie (nepovinné)"
+      name_hint: "Ak pole necháte prázdne, doplní sa z profilu alebo feedu"
+      description_placeholder: "Aký obsah z tohto zdroja chodí…"
+      distance: "Vzdialenosť relevancie (0–10)"
+      distance_hint: "0 = váš vlastný obsah (najrelevantnejší), 10 = vzdialený kontakt (najmenej relevantný)"
+      import_settings: "Nastavenia importu"
+      include_replies: "Vrátane odpovedí"
+      include_reposts: "Vrátane repostov"
+      import_days: "Počet dní importu"
+      import_days_hint: "Koľko dní histórie sa má importovať (najviac 10 rokov)"
+      create: "Pridať zdroj"
+      update: "Uložiť zdroj"
+    create:
+      importing: "Zdroj je pridaný. Posledné príspevky sa importujú na pozadí, priebeh nájdete v Aktivite."
+      notice: "Zdroj je pridaný"
+    update:
+      notice: "Zdroj je uložený"
+    destroy:
+      notice: "Zdroj je zmazaný"
+    refresh:
+      notice: "Zdroj %{name} sa obnovuje na pozadí. Priebeh nájdete v Aktivite."
+      notice_unnamed: "Zdroj sa obnovuje na pozadí. Priebeh nájdete v Aktivite."
+      unsupported: "Tento typ zdroja sa nedá obnoviť"
+    refresh_all:
+      notice:
+        one: "Na pozadí sa obnovuje %{count} zdroj. Priebeh nájdete v Aktivite."
+        few: "Na pozadí sa obnovujú %{count} zdroje. Priebeh nájdete v Aktivite."
+        other: "Na pozadí sa obnovuje %{count} zdrojov. Priebeh nájdete v Aktivite."
+  js:
+    source_form:
+      nostr_label: "Verejný kľúč Nostr (npub)"
+      rss_label: "URL feedu"
+      nostr_hint: "Zadajte npub alebo verejný kľúč účtu v hex formáte"
+      rss_hint: "Zadajte URL RSS alebo Atom feedu"
+    clipboard:
+      copy_failed: "Kopírovanie zlyhalo"

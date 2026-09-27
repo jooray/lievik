@@ -1,4 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
+import { t, locale } from "../lib/i18n"
+
+// Plural-aware lookup: picks `<key>.one|few|other` for the page's locale
+// (Slovak and Czech need "few"), falling back to `other`.
+function tp(key, count, vars = {}) {
+  let category = "other"
+  try { category = new Intl.PluralRules(locale()).select(count) } catch (e) { /* keep "other" */ }
+  const full = `${key}.${category}`
+  const text = t(full, { count, ...vars })
+  return text === full ? t(`${key}.other`, { count, ...vars }) : text
+}
 
 export default class extends Controller {
   static targets = [
@@ -136,14 +147,14 @@ export default class extends Controller {
             contentDiv.innerHTML = this.renderMarkdown(displayContent)
           } else if (eventType === "error" && eventData) {
             const data = JSON.parse(eventData)
-            contentDiv.innerHTML = `<span class="text-red-500">${this.escapeHtml(data.message || "An error occurred")}</span>`
+            contentDiv.innerHTML = `<span class="text-red-500">${this.escapeHtml(data.message || t("channel_ai_chat.error"))}</span>`
             this.isStreaming = false
             this.setLoading(false)
           }
         }
       }
     } catch (error) {
-      contentDiv.innerHTML = `<span class="text-red-500">Failed to connect: ${this.escapeHtml(error.message)}</span>`
+      contentDiv.innerHTML = `<span class="text-red-500">${this.escapeHtml(t("channel_ai_chat.failed_to_connect", { message: error.message }))}</span>`
       this.isStreaming = false
       this.setLoading(false)
     }
@@ -182,7 +193,7 @@ export default class extends Controller {
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Thinking...
+        ${this.escapeHtml(t("channel_ai_chat.thinking"))}
       </span>`
     } else {
       contentDiv.innerHTML = this.renderMarkdown(content)
@@ -209,18 +220,18 @@ export default class extends Controller {
         <!-- Header -->
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-bold text-gray-900 dark:text-white">
-            Proposed Channels (${channels.length})
+            ${this.escapeHtml(t("channel_ai_chat.proposed_channels", { count: channels.length }))}
           </h2>
           <div class="flex gap-2">
             <button type="button"
                     data-action="click->channel-ai-chat#createSelected"
                     class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-              Create Selected
+              ${this.escapeHtml(t("channel_ai_chat.create_selected"))}
             </button>
             <button type="button"
                     data-action="click->channel-ai-chat#createAll"
                     class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
-              Create All
+              ${this.escapeHtml(t("channel_ai_chat.create_all"))}
             </button>
           </div>
         </div>
@@ -230,8 +241,8 @@ export default class extends Controller {
     if (templates.length > 0) {
       html += `
         <div class="space-y-2">
-          <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">New Templates</h3>
-          ${templates.map((t, i) => this.renderTemplateCard(t, i)).join("")}
+          <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">${this.escapeHtml(t("channel_ai_chat.new_templates"))}</h3>
+          ${templates.map((template, i) => this.renderTemplateCard(template, i)).join("")}
         </div>
       `
     }
@@ -274,12 +285,13 @@ export default class extends Controller {
             </div>
             <div contenteditable="true"
                  class="mt-1 text-sm text-gray-500 dark:text-gray-400 outline-none focus:ring-1 focus:ring-purple-500 rounded px-1 -mx-1"
-                 data-channel-description>${this.escapeHtml(channel.description || "No description")}</div>
+                 data-channel-description>${this.escapeHtml(channel.description || t("channel_ai_chat.no_description"))}</div>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0">
             <button type="button"
                     class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     data-action="click->channel-ai-chat#toggleCardExpand"
+                    aria-label="${this.escapeAttr(t("channel_ai_chat.expand"))}"
                     data-expand-button>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -287,7 +299,8 @@ export default class extends Controller {
             </button>
             <button type="button"
                     class="p-1 text-gray-400 hover:text-red-500"
-                    data-action="click->channel-ai-chat#removeCard">
+                    data-action="click->channel-ai-chat#removeCard"
+                    aria-label="${this.escapeAttr(t("channel_ai_chat.remove"))}">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
               </svg>
@@ -298,35 +311,35 @@ export default class extends Controller {
         <!-- Meta row -->
         <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
           ${channel.suggested_template ? `<span class="inline-flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>${this.escapeHtml(channel.suggested_template)}</span>` : ""}
-          <span>Threshold: ${threshold}</span>
-          ${channel.content_style ? `<span>Style: ${this.escapeHtml(channel.content_style)}</span>` : ""}
+          <span>${this.escapeHtml(t("channel_ai_chat.threshold", { value: threshold }))}</span>
+          ${channel.content_style ? `<span>${this.escapeHtml(t("channel_ai_chat.style", { value: channel.content_style }))}</span>` : ""}
         </div>
 
         <!-- Expandable details -->
         <div class="hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3" data-expand-section>
           <div>
-            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Language</label>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">${this.escapeHtml(t("channel_ai_chat.language"))}</label>
             <select class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-1"
                     data-channel-language>
               ${this.languageOptions(channel.language)}
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content Style</label>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">${this.escapeHtml(t("channel_ai_chat.content_style"))}</label>
             <input type="text"
                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-1"
                    value="${this.escapeAttr(channel.content_style || "")}"
                    data-channel-style>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Relevance Threshold</label>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">${this.escapeHtml(t("channel_ai_chat.relevance_threshold"))}</label>
             <input type="number" min="0" max="100"
                    class="block w-24 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-1"
                    value="${threshold}"
                    data-channel-threshold>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Relevance Criteria</label>
+            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">${this.escapeHtml(t("channel_ai_chat.relevance_criteria"))}</label>
             <textarea rows="8"
                       class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-1 font-mono"
                       data-channel-prompt>${this.escapeHtml(channel.prompt || "")}</textarea>
@@ -351,7 +364,8 @@ export default class extends Controller {
           </div>
           <button type="button"
                   class="p-1 text-gray-400 hover:text-red-500"
-                  data-action="click->channel-ai-chat#removeTemplateCard">
+                  data-action="click->channel-ai-chat#removeTemplateCard"
+                  aria-label="${this.escapeAttr(t("channel_ai_chat.remove"))}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -364,14 +378,9 @@ export default class extends Controller {
   }
 
   languageOptions(selected) {
-    const langs = [
-      ["en", "English"], ["sk", "Slovak"], ["cs", "Czech"],
-      ["de", "German"], ["es", "Spanish"], ["fr", "French"],
-      ["pt", "Portuguese"], ["it", "Italian"], ["pl", "Polish"],
-      ["uk", "Ukrainian"], ["nl", "Dutch"], ["hu", "Hungarian"]
-    ]
-    return langs.map(([code, name]) =>
-      `<option value="${code}" ${code === selected ? "selected" : ""}>${name} (${code})</option>`
+    const codes = ["en", "sk", "cs", "de", "es", "fr", "pt", "it", "pl", "uk", "nl", "hu"]
+    return codes.map(code =>
+      `<option value="${code}" ${code === selected ? "selected" : ""}>${this.escapeHtml(t(`channel_ai_chat.languages.${code}`))} (${code})</option>`
     ).join("")
   }
 
@@ -402,7 +411,7 @@ export default class extends Controller {
     const cards = this.proposalContentTarget.querySelectorAll("[data-channel-index]")
     const header = this.proposalContentTarget.querySelector("h2")
     if (header) {
-      header.textContent = `Proposed Channels (${cards.length})`
+      header.textContent = t("channel_ai_chat.proposed_channels", { count: cards.length })
     }
     if (cards.length === 0) {
       this.proposalAreaTarget.classList.add("hidden")
@@ -473,7 +482,7 @@ export default class extends Controller {
     const templates = this.collectTemplateData()
 
     if (channels.length === 0) {
-      alert("No channels selected to create.")
+      alert(t("channel_ai_chat.none_selected"))
       return
     }
 
@@ -498,18 +507,18 @@ export default class extends Controller {
       if (data.success) {
         // Show success message in chat
         this.addAssistantSuccessMessage(
-          `Created ${data.count} channel${data.count === 1 ? '' : 's'}! Redirecting to channels...`
+          tp("channel_ai_chat.created", data.count)
         )
         // Redirect after a brief delay
         setTimeout(() => {
           window.location.href = data.redirect_to || this.channelsUrlValue
         }, 1500)
       } else {
-        alert(`Failed to create channels: ${data.error}`)
+        alert(t("channel_ai_chat.create_failed", { error: data.error }))
         buttons.forEach(b => b.disabled = false)
       }
     } catch (error) {
-      alert(`Error: ${error.message}`)
+      alert(t("channel_ai_chat.generic_error", { message: error.message }))
       buttons.forEach(b => b.disabled = false)
     }
   }

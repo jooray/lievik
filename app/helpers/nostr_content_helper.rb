@@ -100,7 +100,7 @@ module NostrContentHelper
         author_name = resolve_author_name(fetched[:pubkey])
         render_inline_note_card(fetched[:content], author_name, url, identifier)
       else
-        link_to("[referenced note]", url, target: "_blank", rel: "noopener noreferrer",
+        link_to(t("app.nostr.referenced_note"), url, target: "_blank", rel: "noopener noreferrer",
                 class: "text-purple-600 dark:text-purple-400 hover:underline",
                 title: identifier)
       end
@@ -116,7 +116,7 @@ module NostrContentHelper
   end
 
   def render_inline_note_card(content, author_name, url, identifier)
-    author_label = author_name.present? ? h(author_name) : "Unknown"
+    author_label = author_name.present? ? h(author_name) : h(t("app.nostr.unknown_author"))
     truncated_content = h(content.truncate(300))
 
     <<~HTML

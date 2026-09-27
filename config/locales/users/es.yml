@@ -1,0 +1,76 @@
+es:
+  users:
+    edit:
+      language:
+        label: "Idioma de la interfaz"
+        hint: "También se recuerda en este navegador. El idioma del contenido generado se configura en cada canal."
+      title: "Ajustes de usuario"
+      default_label: "Por defecto:"
+      examples_label: "Ejemplos:"
+      save: "Guardar ajustes"
+      system_prompt:
+        label: "Prompt de sistema (contexto para la IA)"
+        intro_html: "Este prompt de sistema le da a la IA contexto sobre <strong>ti</strong> para valorar mejor la relevancia en todos los canales. El predeterminado funciona sin tocar nada, pero conseguirás mejores resultados si lo personalizas."
+        make_it_yours_html: "<strong>Hazlo tuyo:</strong> cuenta quién eres, a qué ámbitos y proyectos te dedicas (p. ej., «creador de herramientas de IA»), qué estilo prefieres (conciso, técnico, promocional), para quién escribes (desarrolladores, creadores) y con qué tono (profesional, inspirador). Así la IA entiende mejor tu situación."
+        view_default: "Ver prompt predeterminado"
+      event_link:
+        label: "Plantilla de enlace a publicación"
+        hint_html: "Plantilla de URL para enlazar publicaciones de Nostr (notas) en el contenido generado. Usa <code>{eventid}</code> donde deba ir el identificador nevent/note."
+      naddr_link:
+        label: "Plantilla de enlace a artículo (naddr)"
+        hint_html: "Plantilla de URL para enlazar artículos largos de Nostr (eventos reemplazables). Usa <code>{naddr}</code> donde deba ir el identificador naddr."
+      profile_link:
+        label: "Plantilla de enlace a perfil"
+        hint_html: "Plantilla de URL para enlazar perfiles de Nostr. Usa <code>{npub}</code> donde deba ir el identificador npub."
+      rating_engine:
+        label: "Motor de valoración"
+        hint: "Qué IA valora la relevancia de cada publicación para cada canal. Los dos motores puntúan en la misma escala de 0 a 100, así que los umbrales de los canales siguen funcionando; las publicaciones ya valoradas conservan su puntuación hasta que se vuelvan a valorar."
+        chat:
+          label: "Modelo de chat"
+          badge: "(predeterminado)"
+          hint_html: "Una petición por cada canal y publicación a <code>%{model}</code>. Escribe un breve motivo con cada puntuación. Es más lento y más caro, pero conoce el mundo (reconoce el hashtag de una conferencia, una persona o un proyecto)."
+        decision:
+          label: "Modelo de decisión tipado"
+          badge: "(beta)"
+          hint_html: "Una petición por publicación para todos los canales a la vez a <code>%{model}</code>. Unas diez veces más rápido, varias veces más barato y más consistente entre ejecuciones; devuelve probabilidades en lugar de un motivo escrito y no reconoce referencias que nunca ha visto. Funciona en el nivel anonymized (no private) de Venice."
+          not_configured_html: "No configurado: añade un bloque <code>ai.decision</code> a <code>config/lievik.yml</code> y define <code>VENICE_API_KEY</code> o <code>DECISION_API_KEY</code>."
+      writing_style:
+        label: "Estilo de escritura predeterminado"
+        hint: "Estilo de escritura que se usa al crear canales nuevos. Puedes cambiarlo en los ajustes de cada canal."
+        placeholder: "P. ej., profesional pero cercano, de tú al lector, sin jerga, párrafos cortos…"
+      templates:
+        title: "Plantillas de formato de contenido"
+        subtitle: "Plantillas reutilizables con instrucciones de formato para el contenido de los canales. Elige una al crear o editar un canal."
+        add_from_preset: "Añadir plantilla predefinida"
+        confirm_delete: "¿Eliminar esta plantilla?"
+        name: "Nombre de la plantilla"
+        content: "Contenido de la plantilla"
+        save: "Guardar plantilla"
+        empty: "Aún no hay plantillas. Añade una de las predefinidas de arriba."
+        add_custom: "Añadir plantilla personalizada"
+        name_placeholder: "P. ej., resumen semanal"
+        content_placeholder: "# Formato\n\n## Formato de salida\n...\n\n## Estilo de escritura\n..."
+        add: "Añadir plantilla"
+      search_index:
+        title: "Índice de búsqueda"
+        subtitle: "Gestiona el índice de búsqueda semántica de tus publicaciones."
+        status_html:
+          one: "%{indexed} de %{total} publicación indexada"
+          other: "%{indexed} de %{total} publicaciones indexadas"
+        last_reindex: "Última reindexación completa: %{time}"
+        rebuild: "Reconstruir índice de búsqueda"
+        confirm_rebuild: "Se volverán a generar los embeddings de todas tus publicaciones. Puede tardar unos minutos. ¿Continuar?"
+        try_search: "Prueba a buscar en tus publicaciones"
+    update:
+      notice: "Ajustes guardados."
+    add_template:
+      default_name: "Nueva plantilla"
+      notice: "Plantilla añadida."
+    update_template:
+      notice: "Plantilla actualizada."
+      alert: "No se pudo actualizar la plantilla."
+    delete_template:
+      notice: "Plantilla eliminada."
+      alert: "No se pudo eliminar la plantilla."
+    reindex:
+      notice: "La reindexación se está ejecutando en segundo plano. Puede tardar unos minutos."

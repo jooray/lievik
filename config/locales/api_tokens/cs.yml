@@ -1,0 +1,24 @@
+cs:
+  users:
+    api_tokens:
+      title: "API tokeny"
+      intro_html: "Tokeny umožňují programový přístup k Lieviku přes MCP endpoint <code class=\"text-xs\">/mcp</code>. Každý token jedná vaším jménem. Pro každého agenta vytvořte samostatný token, abyste je mohli zrušit nezávisle na sobě."
+      created_html: "Token <strong>%{name}</strong> byl vytvořen. Zkopírujte si ho hned, znovu se už nezobrazí."
+      new_token_label: "Váš nový API token"
+      name_label: "Název tokenu"
+      name_placeholder: "např. marketing-agent"
+      generate: "Vygenerovat token"
+      columns:
+        name: "Název"
+        created: "Vytvořen"
+        last_used: "Naposledy použit"
+      ago: "před %{time}"
+      never: "Nikdy"
+      revoke: "Zrušit"
+      confirm_revoke: "Zrušit tento token? Vše, co ho používá, ztratí přístup."
+      empty: "Zatím nemáte žádné tokeny."
+  api_tokens:
+    create:
+      name_required: "Zadejte název tokenu."
+    destroy:
+      notice: "Token byl zrušen."

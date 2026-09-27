@@ -1,0 +1,25 @@
+en:
+  time:
+    formats:
+      app_datetime: "%b %d, %Y at %H:%M"
+  app:
+    time_ago: "%{time} ago"
+    event_types:
+      original: "Original"
+      reply: "Reply"
+      repost: "Repost"
+    source_label:
+      unknown: "Unknown source"
+      manual: "Manual entries"
+      unnamed: "Unnamed source"
+    nostr:
+      referenced_note: "[referenced note]"
+      unknown_author: "Unknown"
+  views:
+    pagination:
+      aria_label: "Pagination"
+      first: "&laquo; First"
+      last: "Last &raquo;"
+      previous: "&lsaquo; Prev"
+      next: "Next &rsaquo;"
+      truncate: "&hellip;"

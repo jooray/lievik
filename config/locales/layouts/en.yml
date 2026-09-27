@@ -1,0 +1,34 @@
+en:
+  layouts:
+    navigation:
+      dashboard: "Dashboard"
+      sources: "Sources"
+      channels: "Channels"
+      events: "Events"
+      add_event: "Add Event"
+      activity: "Activity"
+      ask_content: "Ask Your Content"
+      theme: "Theme"
+      change_theme: "Change colour theme"
+      open_menu: "Open menu"
+      close_menu: "Close menu"
+      profile: "Profile"
+      nostr_user: "Nostr User"
+      refresh_profile: "Refresh Profile"
+      sign_out: "Sign out"
+    flash:
+      success: "Success:"
+      problem: "Problem:"
+      dismiss: "Dismiss this message"
+  js:
+    theme:
+      title: "Theme: %{current} (click for %{next})"
+      modes:
+        system: "System"
+        light: "Light"
+        dark: "Dark"
+    app_version:
+      refreshing: "A new version of Lievik is available — refreshing…"
+    event_expander:
+      show_more: "Show more"
+      show_less: "Show less"

@@ -43,7 +43,8 @@ class RateEventsJob < ApplicationJob
       return
     end
 
-    # Skip if a rating job is already running for this channel.
+    # Skip if a sweep is already running (see `lock_key` for what "already
+    # running" means per engine).
     #
     # This guard applies only to the "rate whatever is unrated" path — that job
     # is queued from several places and re-queues itself, so overlapping runs
@@ -55,8 +56,8 @@ class RateEventsJob < ApplicationJob
     # the channel_events unique index, killing one job mid-batch.
     if ids.empty?
       lock_token = SecureRandom.hex(16)
-      unless claim_lock(channel.id, lock_token)
-        Rails.logger.info("Skipping rating for #{channel.name} — already running")
+      unless claim_lock(channel, lock_token)
+        Rails.logger.info("Skipping rating for #{channel.name} — a sweep is already running")
         return
       end
     end
@@ -64,20 +65,40 @@ class RateEventsJob < ApplicationJob
     begin
       rate_events(channel, ids)
     ensure
-      release_lock(channel.id, lock_token) if lock_token
+      release_lock(channel, lock_token) if lock_token
     end
   end
 
   private
 
-  def lock_key(channel_id) = "rate-events-job:channel:#{channel_id}"
-
-  def claim_lock(channel_id, token)
-    Rails.cache.write(lock_key(channel_id), token, unless_exist: true, expires_in: LOCK_TTL)
+  # What counts as "already running" depends on the engine, because the two
+  # engines have different units of work.
+  #
+  # A decision-engine job rates the primary channel *and every sibling channel
+  # missing a rating for that event*, so one sweep already covers the whole
+  # user. Two sweeps for different channels of the same user compute the same
+  # sibling set and pay for the same requests twice: measured at exactly 2x on
+  # 2026-09-20 (28 `/decisions` calls where 14 sufficed — two jobs, 7 events,
+  # 2 slices each). Worker threads bound the multiple, so raising
+  # JOB_CONCURRENCY would scale the waste linearly. Hence a user-scoped claim.
+  #
+  # The chat engine has no sibling mechanism — a job rates only its own
+  # channel — so it must stay per-channel. Scoping it to the user would make
+  # overlapping jobs skip channels that nothing else would ever rate.
+  def lock_key(channel)
+    if channel.user.decision_rating?
+      "rate-events-job:user:#{channel.user_id}"
+    else
+      "rate-events-job:channel:#{channel.id}"
+    end
   end
 
-  def release_lock(channel_id, token)
-    key = lock_key(channel_id)
+  def claim_lock(channel, token)
+    Rails.cache.write(lock_key(channel), token, unless_exist: true, expires_in: LOCK_TTL)
+  end
+
+  def release_lock(channel, token)
+    key = lock_key(channel)
     Rails.cache.delete(key) if Rails.cache.read(key) == token
   end
 

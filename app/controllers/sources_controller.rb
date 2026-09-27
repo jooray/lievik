@@ -24,9 +24,9 @@ class SourcesController < ApplicationController
       # small refresh icon — the first-run flow reads as broken.
       if @source.nostr? || @source.rss?
         SourceIngestionJob.perform_later(@source.id)
-        notice = "Source added — importing recent posts in the background. Check the Activity Log for progress."
+        notice = t(".importing")
       else
-        notice = "Source added successfully"
+        notice = t(".notice")
       end
 
       redirect_to sources_path, notice: notice
@@ -40,7 +40,7 @@ class SourcesController < ApplicationController
 
   def update
     if @source.update(source_params)
-      redirect_to sources_path, notice: "Source updated"
+      redirect_to sources_path, notice: t(".notice")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -48,15 +48,15 @@ class SourcesController < ApplicationController
 
   def destroy
     @source.destroy
-    redirect_to sources_path, notice: "Source removed"
+    redirect_to sources_path, notice: t(".notice")
   end
 
   def refresh
     if @source.nostr? || @source.rss?
       SourceIngestionJob.perform_later(@source.id)
-      redirect_to sources_path, notice: "Refreshing #{@source.name || 'source'} in the background. Check Activity Log for progress."
+      redirect_to sources_path, notice: (@source.name.present? ? t(".notice", name: @source.name) : t(".notice_unnamed"))
     else
-      redirect_to sources_path, alert: "Cannot refresh this source type"
+      redirect_to sources_path, alert: t(".unsupported")
     end
   end
 
@@ -66,7 +66,7 @@ class SourcesController < ApplicationController
       SourceIngestionJob.perform_later(source.id)
     end
 
-    redirect_to sources_path, notice: "Refreshing #{sources.count} sources in the background. Check Activity Log for progress."
+    redirect_to sources_path, notice: t(".notice", count: sources.count)
   end
 
   private

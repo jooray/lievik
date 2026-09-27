@@ -1,4 +1,21 @@
 module ApplicationHelper
+  # The `js.*` subtree for the current locale, English-backfilled so a key
+  # missing from sk/cs/es still shows English rather than the raw key.
+  # to_json escapes <, > and & as \u003c etc., so this is safe inside <script>.
+  def js_translations
+    english = I18n.t("js", locale: :en, default: {})
+    return english if I18n.locale == :en
+
+    english.deep_merge(I18n.t("js", default: {}))
+  end
+
+  # Language names in their own language, for switchers.
+  LOCALE_NAMES = { en: "English", sk: "Slovenčina", cs: "Čeština", es: "Español" }.freeze
+
+  def locale_options
+    I18n.available_locales.map { |l| [LOCALE_NAMES.fetch(l, l.to_s), l.to_s] }
+  end
+
   MARKDOWN_RENDERER = Redcarpet::Markdown.new(
     Redcarpet::Render::HTML.new(
       filter_html: true,
@@ -14,8 +31,9 @@ module ApplicationHelper
   )
 
   # ONE absolute date/time format for the whole app. Views used to carry five
-  # different strftime strings; always go through this instead.
-  APP_DATETIME_FORMAT = "%b %d, %Y at %H:%M"
+  # different strftime strings; always go through this instead. The pattern
+  # itself is per-locale: `time.formats.app_datetime` in config/locales/helpers/.
+  APP_DATETIME_FORMAT = :app_datetime
 
   # Accepts a Time/DateTime/Date, or a string (e.g. a timestamp read back out of
   # a JSON column). Returns "" rather than blowing up on nil or garbage.
@@ -29,19 +47,41 @@ module ApplicationHelper
     end
     return "" if time.blank?
 
-    time.strftime(APP_DATETIME_FORMAT)
+    l(time, format: APP_DATETIME_FORMAT)
+  end
+
+  # "3 hours ago" in the current locale. Never concatenate "ago" by hand:
+  # Slovak/Czech/Spanish put the preposition first and inflect the noun.
+  def time_ago(time)
+    return "" if time.blank?
+
+    t("app.time_ago", time: time_ago_in_words(time))
+  end
+
+  # Event#event_type is a code value (original/reply/repost); this is its label.
+  def event_type_label(event_type)
+    t("app.event_types.#{event_type}", default: event_type.to_s.humanize)
+  end
+
+  # Link target for the language switcher: the page being viewed, with
+  # ?locale= set (switch_locale remembers it). Pages rendered from a POST
+  # (e.g. a failed form) have no GET twin, so they fall back to the dashboard.
+  def locale_switch_path(code)
+    return dashboard_path(locale: code) unless request.get? || request.head?
+
+    "#{request.path}?#{request.query_parameters.merge("locale" => code.to_s).to_query}"
   end
 
   # A source's display name is optional (and the auto-created "manual" source
   # has none), so never interpolate `source.name` straight into a view — that
   # renders a dangling "from ".
   def source_label(source)
-    return "Unknown source" if source.nil?
+    return t("app.source_label.unknown") if source.nil?
     return source.name if source.name.present?
 
     case source.source_type
-    when "manual" then "Manual entries"
-    else source.identifier.presence&.truncate(30) || "Unnamed source"
+    when "manual" then t("app.source_label.manual")
+    else source.identifier.presence&.truncate(30) || t("app.source_label.unnamed")
     end
   end
 

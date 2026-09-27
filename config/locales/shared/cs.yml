@@ -1,0 +1,18 @@
+cs:
+  auth:
+    sign_in_required: "Pro pokračování se přihlaste"
+  common:
+    cancel: "Zrušit"
+    save: "Uložit"
+    edit: "Upravit"
+    delete: "Smazat"
+    back: "Zpět"
+    add: "Přidat"
+    close: "Zavřít"
+    language: "Jazyk"
+    confirm_delete: "Opravdu?"
+  js:
+    common:
+      copy: "Kopírovat"
+      copied: "Zkopírováno!"
+      loading: "Načítá se…"

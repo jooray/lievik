@@ -1,0 +1,54 @@
+sk:
+  sessions:
+    new:
+      subtitle: "Prihláste sa svojou Nostr identitou"
+      extension_heading: "Rozšírenie prehliadača"
+      extension_button: "Pokračovať cez rozšírenie"
+      signer_heading: "Aplikácia na podpisovanie"
+      open_in_signer: "Otvoriť v podpisovači"
+      signer_hint: "Amber, Amethyst alebo iný podpisovač v tomto zariadení"
+      scan_hint: "Naskenujte podpisovačom v inom zariadení"
+      copy: "Kopírovať"
+      bunker_heading: "Vložiť bunker odkaz"
+      bunker_hint: "V podpisovači vytvorte spojenie a vložte sem odkaz, ktorý vám dá."
+      bunker_label: "Bunker odkaz"
+      connect: "Pripojiť"
+      waiting: "Čaká sa na podpisovač…"
+      stale_notice: "Schválenie neprišlo? Počas schvaľovania nechajte túto kartu otvorenú alebo začnite znova s novým kódom."
+      new_code: "Získať nový kód"
+      auth_challenge: "Podpisovač chce, aby ste to schválili v jeho vlastnom okne."
+      open_approval: "Otvoriť stránku na schválenie"
+      expired: "Platnosť kódu z bezpečnostných dôvodov vypršala."
+      no_account: "Účet nepotrebujete. Vaša identita je váš Nostr kľúč."
+    unavailable:
+      try_again: "Skúsiť znova"
+    unavailable_reasons:
+      busy:
+        title: "Prihlasovanie je práve vyťažené"
+        message: "Naraz sa prihlasuje priveľa ľudí. Počkajte pár sekúnd a skúste to znova."
+      rate_limited:
+        title: "Trochu spomaľte"
+        message: "V krátkom čase ste si vypýtali niekoľko prihlasovacích kódov. Počkajte asi minútu a skúste to znova."
+    bunker:
+      invalid_link: "Toto nevyzerá ako použiteľný bunker odkaz. Mal by začínať na bunker:// a obsahovať aspoň jeden relay."
+      failed: "Spojenie sa nepodarilo nadviazať. Skúste to znova."
+    refresh_profile:
+      notice: "Váš profil sa na pozadí načítava z relayov. O chvíľu stránku obnovte."
+    callback:
+      failed: "Prihlásenie zlyhalo: dôkaz je neplatný alebo mu vypršala platnosť."
+      welcome: "Vitajte, %{name}!"
+    destroy:
+      notice: "Boli ste odhlásení."
+  js:
+    nostr_login:
+      paste_bunker_first: "Najprv vložte bunker odkaz z podpisovača."
+      connecting: "Pripája sa…"
+      bunker_unusable: "Tento bunker odkaz sa nedá použiť."
+      waiting_approval: "Čaká sa na schválenie v podpisovači…"
+      server_unreachable: "Server je nedostupný. Skontrolujte pripojenie a skúste to znova."
+      no_extension: "Nenašlo sa žiadne rozšírenie NIP-07. Nainštalujte si nos2x, Alby alebo iné Nostr rozšírenie."
+      no_pubkey: "Z rozšírenia sa nepodarilo získať verejný kľúč."
+      extension_error: "Chyba rozšírenia: %{message}"
+      unknown_error: "neznáma chyba"
+      lost_connection: "Spojenie so serverom sa prerušilo. Obnovte stránku a skúste to znova."
+      extension_button: "Pokračovať cez rozšírenie"

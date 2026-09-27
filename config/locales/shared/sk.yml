@@ -1,0 +1,18 @@
+sk:
+  auth:
+    sign_in_required: "Ak chcete pokračovať, prihláste sa."
+  common:
+    cancel: "Zrušiť"
+    save: "Uložiť"
+    edit: "Upraviť"
+    delete: "Zmazať"
+    back: "Späť"
+    add: "Pridať"
+    close: "Zavrieť"
+    language: "Jazyk"
+    confirm_delete: "Naozaj?"
+  js:
+    common:
+      copy: "Kopírovať"
+      copied: "Skopírované!"
+      loading: "Načítava sa…"

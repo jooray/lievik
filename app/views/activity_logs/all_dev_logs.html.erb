@@ -1,23 +1,23 @@
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Developer Logs</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".title") %></h1>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Detailed logging from AI rating and ingestion processes
+        <%= t(".subtitle") %>
       </p>
     </div>
     <%= link_to activity_logs_path, class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
-      Back to Activity
+      <%= t(".back") %>
     <% end %>
   </div>
 
   <% if @dev_logs.any? %>
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
       <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-        <h3 class="font-medium text-sm text-gray-900 dark:text-white">All Developer Logs (<%= @dev_logs.total_count %>)</h3>
+        <h3 class="font-medium text-sm text-gray-900 dark:text-white"><%= t(".all_count", total: @dev_logs.total_count) %></h3>
       </div>
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         <% @dev_logs.each do |log| %>
@@ -39,13 +39,13 @@
                   <% if log.parent.present? %>
                     &middot;
                     <% if log.parent.is_a?(ActivityLog) %>
-                      <%= link_to "View Activity", dev_logs_activity_log_path(log.parent), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                      <%= link_to t(".view_activity"), dev_logs_activity_log_path(log.parent), class: "text-blue-600 hover:underline dark:text-blue-400" %>
                     <% end %>
                   <% end %>
                 </p>
                 <% if log.details.present? %>
                   <details class="mt-2 p-2 bg-gray-50 dark:bg-gray-900 rounded text-xs">
-                    <summary class="cursor-pointer font-medium text-blue-600 dark:text-blue-400">View Details</summary>
+                    <summary class="cursor-pointer font-medium text-blue-600 dark:text-blue-400"><%= t("activity_logs.dev_logs.view_details") %></summary>
                     <pre class="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-60 text-xs"><%= JSON.pretty_generate(log.details) %></pre>
                   </details>
                 <% end %>
@@ -66,9 +66,9 @@
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
       </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No developer logs</h3>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white"><%= t("activity_logs.dev_logs.empty_title") %></h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Run rating or ingestion jobs to see detailed logs here.
+        <%= t("activity_logs.dev_logs.empty_hint") %>
       </p>
     </div>
   <% end %>

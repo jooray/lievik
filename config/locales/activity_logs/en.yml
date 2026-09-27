@@ -1,0 +1,102 @@
+en:
+  activity_logs:
+    statuses:
+      pending: "pending"
+      running: "running"
+      completed: "completed"
+      failed: "failed"
+    types:
+      ingestion: "Ingestion"
+      rating: "Rating"
+    # "Took %{duration}": the stock datetime.distance_in_words phrasing is
+    # built for "ago" and in sk/cs is in the instrumental case, so durations
+    # get their own scope.
+    duration_in_words:
+      half_a_minute: "half a minute"
+      less_than_x_seconds:
+        one: "less than 1 second"
+        other: "less than %{count} seconds"
+      x_seconds:
+        one: "1 second"
+        other: "%{count} seconds"
+      less_than_x_minutes:
+        one: "less than a minute"
+        other: "less than %{count} minutes"
+      x_minutes:
+        one: "1 minute"
+        other: "%{count} minutes"
+      about_x_hours:
+        one: "about 1 hour"
+        other: "about %{count} hours"
+      x_days:
+        one: "1 day"
+        other: "%{count} days"
+      about_x_months:
+        one: "about 1 month"
+        other: "about %{count} months"
+      x_months:
+        one: "1 month"
+        other: "%{count} months"
+      about_x_years:
+        one: "about 1 year"
+        other: "about %{count} years"
+      over_x_years:
+        one: "over 1 year"
+        other: "over %{count} years"
+      almost_x_years:
+        one: "almost 1 year"
+        other: "almost %{count} years"
+    index:
+      title: "Activity Log"
+      subtitle: "View ingestion and rating activity"
+      developer_logs: "Developer Logs"
+      active_jobs: "Active Jobs"
+      confirm_cleanup:
+        one: "This will mark %{count} stale job as failed. Continue?"
+        other: "This will mark %{count} stale jobs as failed. Continue?"
+      cleanup:
+        one: "Clean up %{count} stale job"
+        other: "Clean up %{count} stale jobs"
+      history: "History"
+      took: "Took %{duration}"
+      retry: "Retry"
+      retry_rating: "Retry this rating job"
+      retry_ingestion: "Retry by refreshing this source"
+      dev_logs:
+        one: "%{count} Dev Log"
+        other: "%{count} Dev Logs"
+      empty_title: "No activity yet"
+      empty_hint: "Activity will appear here when you refresh sources or rate events."
+    job_progress_card:
+      cancel: "Cancel job"
+      confirm_cancel: "Cancel this job?"
+    all_dev_logs:
+      title: "Developer Logs"
+      subtitle: "Detailed logging from AI rating and ingestion processes"
+      back: "Back to Activity"
+      all_count: "All Developer Logs (%{total})"
+      view_activity: "View Activity"
+    dev_logs:
+      heading: "Developer Logs (%{total})"
+      json_details: "JSON Details"
+      view_details: "View Details"
+      system_prompt: "System Prompt"
+      user_prompt: "User Prompt"
+      content_evaluated: "Content Being Evaluated"
+      score: "Score:"
+      reason: "Reason:"
+      raw_response: "Raw Response"
+      load_more: "Load More"
+      empty_title: "No developer logs"
+      empty_hint: "Run rating or ingestion jobs to see detailed logs here."
+    cancel:
+      notice: "Job cancelled."
+      already_finished: "Job is already %{status}."
+    retry_job:
+      no_channel: "Cannot retry — no channel associated with this job."
+      channel_missing: "Cannot retry — channel no longer exists."
+      notice: "Re-queued rating job for %{channel}."
+    cleanup_stale:
+      notice:
+        one: "Cleaned up %{count} stale job."
+        other: "Cleaned up %{count} stale jobs."

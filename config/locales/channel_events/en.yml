@@ -1,0 +1,11 @@
+en:
+  channel_events:
+    no_selection: "No events selected"
+    bulk_mark_used:
+      notice:
+        one: "Marked %{count} event as used"
+        other: "Marked %{count} events as used"
+    bulk_rate:
+      notice:
+        one: "Rerating queued for %{count} event"
+        other: "Rerating queued for %{count} events"

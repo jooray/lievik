@@ -24,6 +24,7 @@ RSpec.describe RateEventsJob do
       allow(Ai::DecisionClient).to receive(:configured?).and_return(true)
     end
 
+
     it "rates the requested channel and every sibling missing a rating in one call" do
       captured = nil
       service = instance_double(Ai::DecisionRatingService)
@@ -102,6 +103,46 @@ RSpec.describe RateEventsJob do
       expect(ChannelEvent.where(event: event).count).to eq(2) # primary + the pre-existing one
     end
   end
+
+  describe "the unrated sweep claim" do
+    around do |example|
+      original = Rails.cache
+      Rails.cache = ActiveSupport::Cache::MemoryStore.new
+      example.run
+    ensure
+      Rails.cache = original
+    end
+
+    # Records which sweeps got past the claim, and re-enters once from inside
+    # the first one so the two overlap the way two worker threads do.
+    def overlapping_sweeps
+      ran = []
+      allow_any_instance_of(described_class).to receive(:rate_events) do |_job, ch, _ids|
+        ran << ch.id
+        described_class.perform_now(sibling.id) if ran.size == 1
+      end
+      described_class.perform_now(primary.id)
+      ran
+    end
+
+    it "is user-scoped on the decision engine, so a second sweep backs off" do
+      user.update!(rating_engine: "decision")
+      allow(Ai::DecisionClient).to receive(:configured?).and_return(true)
+
+      # A decision sweep rates the primary channel plus every sibling, so it
+      # already covers the whole user. Letting both run duplicates every
+      # /decisions call — exactly 2x, measured in production 2026-09-20.
+      expect(overlapping_sweeps).to eq([ primary.id ])
+    end
+
+    it "stays channel-scoped on the chat engine, so no channel is skipped" do
+      user.update!(rating_engine: "chat")
+
+      # Chat rates only its own channel and has no sibling mechanism, so a
+      # user-scoped claim here would strand channels nothing else rates.
+      expect(overlapping_sweeps).to eq([ primary.id, sibling.id ])
+    end
+  end
 end
 
 RSpec.describe User, "#rating_engine" do
@@ -122,4 +163,7 @@ RSpec.describe User, "#rating_engine" do
     allow(Ai::DecisionClient).to receive(:configured?).and_return(true)
     expect(user.decision_rating?).to be(true)
   end
+  # The unrated-path claim only means anything with a real cache store; the
+  # test env uses :null_store, under which every claim succeeds and the guard
+  # silently does nothing.
 end

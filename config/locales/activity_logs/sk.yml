@@ -1,0 +1,114 @@
+sk:
+  activity_logs:
+    statuses:
+      pending: "čakajúca"
+      running: "bežiaca"
+      completed: "dokončená"
+      failed: "zlyhaná"
+    types:
+      ingestion: "Import"
+      rating: "Hodnotenie"
+    duration_in_words:
+      half_a_minute: "pol minúty"
+      less_than_x_seconds:
+        one: "necelú sekundu"
+        few: "necelé %{count} sekundy"
+        other: "necelých %{count} sekúnd"
+      x_seconds:
+        one: "1 sekundu"
+        few: "%{count} sekundy"
+        other: "%{count} sekúnd"
+      less_than_x_minutes:
+        one: "necelú minútu"
+        few: "necelé %{count} minúty"
+        other: "necelých %{count} minút"
+      x_minutes:
+        one: "1 minútu"
+        few: "%{count} minúty"
+        other: "%{count} minút"
+      about_x_hours:
+        one: "asi hodinu"
+        few: "asi %{count} hodiny"
+        other: "asi %{count} hodín"
+      x_days:
+        one: "1 deň"
+        few: "%{count} dni"
+        other: "%{count} dní"
+      about_x_months:
+        one: "asi mesiac"
+        few: "asi %{count} mesiace"
+        other: "asi %{count} mesiacov"
+      x_months:
+        one: "1 mesiac"
+        few: "%{count} mesiace"
+        other: "%{count} mesiacov"
+      about_x_years:
+        one: "asi rok"
+        few: "asi %{count} roky"
+        other: "asi %{count} rokov"
+      over_x_years:
+        one: "viac ako rok"
+        few: "viac ako %{count} roky"
+        other: "viac ako %{count} rokov"
+      almost_x_years:
+        one: "takmer rok"
+        few: "takmer %{count} roky"
+        other: "takmer %{count} rokov"
+    index:
+      title: "Aktivita"
+      subtitle: "Prehľad importov a hodnotení"
+      developer_logs: "Vývojárske logy"
+      active_jobs: "Aktívne úlohy"
+      confirm_cleanup:
+        one: "%{count} zaseknutá úloha sa označí ako zlyhaná. Pokračovať?"
+        few: "%{count} zaseknuté úlohy sa označia ako zlyhané. Pokračovať?"
+        other: "%{count} zaseknutých úloh sa označí ako zlyhané. Pokračovať?"
+      cleanup:
+        one: "Upratať %{count} zaseknutú úlohu"
+        few: "Upratať %{count} zaseknuté úlohy"
+        other: "Upratať %{count} zaseknutých úloh"
+      history: "História"
+      took: "trvalo %{duration}"
+      retry: "Skúsiť znova"
+      retry_rating: "Spustiť toto hodnotenie znova"
+      retry_ingestion: "Skúsiť znova obnovením zdroja"
+      dev_logs:
+        one: "%{count} vývojársky log"
+        few: "%{count} vývojárske logy"
+        other: "%{count} vývojárskych logov"
+      empty_title: "Zatiaľ žiadna aktivita"
+      empty_hint: "Aktivita sa tu zobrazí, keď obnovíte zdroje alebo ohodnotíte príspevky."
+    job_progress_card:
+      cancel: "Zrušiť úlohu"
+      confirm_cancel: "Zrušiť túto úlohu?"
+    all_dev_logs:
+      title: "Vývojárske logy"
+      subtitle: "Podrobné logy z AI hodnotenia a importu"
+      back: "Späť na Aktivitu"
+      all_count: "Všetky vývojárske logy (%{total})"
+      view_activity: "Zobraziť aktivitu"
+    dev_logs:
+      heading: "Vývojárske logy (%{total})"
+      json_details: "Podrobnosti v JSON"
+      view_details: "Zobraziť podrobnosti"
+      system_prompt: "Systémový prompt"
+      user_prompt: "Používateľský prompt"
+      content_evaluated: "Hodnotený obsah"
+      score: "Skóre:"
+      reason: "Zdôvodnenie:"
+      raw_response: "Surová odpoveď"
+      load_more: "Načítať ďalšie"
+      empty_title: "Žiadne vývojárske logy"
+      empty_hint: "Podrobné logy sa tu zobrazia, keď spustíte hodnotenie alebo import."
+    cancel:
+      notice: "Úloha je zrušená."
+      already_finished: "Úloha už je %{status}."
+    retry_job:
+      no_channel: "Nedá sa spustiť znova: úloha nemá priradený kanál."
+      channel_missing: "Nedá sa spustiť znova: kanál už neexistuje."
+      notice: "Hodnotenie pre %{channel} je znova vo fronte."
+    cleanup_stale:
+      notice:
+        one: "Upratala sa %{count} zaseknutá úloha."
+        few: "Upratali sa %{count} zaseknuté úlohy."
+        other: "Upratalo sa %{count} zaseknutých úloh."

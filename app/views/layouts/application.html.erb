@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full">
+<html class="h-full" lang="<%= I18n.locale %>">
   <head>
     <title><%= content_for(:title) || "Lievik" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -51,6 +51,10 @@
         data-controller="app-version"
         data-app-version-current-value="<%= Lievik::BUILD_VERSION %>"
         data-app-version-url-value="<%= app_version_path %>">
+    <%# Strings for Stimulus controllers — see app/javascript/lib/i18n.js. A JSON
+        data block is never executed; the nonce only keeps the CSP spec's
+        "every inline <script> has a nonce" rule simple. %>
+    <script type="application/json" id="lievik-i18n" nonce="<%= content_security_policy_nonce %>"><%= js_translations.to_json.html_safe %></script>
     <% if user_signed_in? %>
       <%= render "layouts/navigation" %>
     <% end %>

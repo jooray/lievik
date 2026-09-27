@@ -34,7 +34,7 @@ class EventsController < ApplicationController
     matching_count = scope.count
 
     if matching_count.zero?
-      redirect_to events_path(filter_params), alert: "No events match current filters"
+      redirect_to events_path(filter_params), alert: t(".no_match")
       return
     end
 
@@ -44,7 +44,7 @@ class EventsController < ApplicationController
     channel_count = current_user.channels.count
 
     if channel_count.zero?
-      redirect_to events_path(filter_params), alert: "No channels to rate against — create a channel first"
+      redirect_to events_path(filter_params), alert: t(".no_channels")
       return
     end
 
@@ -52,14 +52,15 @@ class EventsController < ApplicationController
       RateEventsJob.enqueue_batches(channel.id, event_ids)
     end
 
+    channels_text = t(".channels", count: channel_count)
     notice = if explicit_selection
-      "Rating queued for #{event_ids.size} selected events across #{channel_count} channel(s)"
+      t(".queued_selected", count: event_ids.size, channels: channels_text)
     else
-      "Rerating queued for #{event_ids.size} matching events across #{channel_count} channel(s)"
+      t(".queued_matching", count: event_ids.size, channels: channels_text)
     end
 
     if skipped > 0
-      notice += ". #{skipped} older event(s) were skipped — a single request rates at most #{MAX_BULK_RATE_EVENTS} events. Narrow the filters or repeat to cover the rest."
+      notice = [notice, t(".skipped", count: skipped, max: MAX_BULK_RATE_EVENTS)].join(" ")
     end
 
     redirect_to events_path(filter_params), notice: notice
@@ -76,7 +77,7 @@ class EventsController < ApplicationController
     end
 
     if channel_event_ids.empty?
-      redirect_to event_path(@event), alert: "No channels selected"
+      redirect_to event_path(@event), alert: t(".no_channels_selected")
       return
     end
 
@@ -87,7 +88,7 @@ class EventsController < ApplicationController
 
     updated_count = channel_events.update_all(used: true, used_at: Time.current)
 
-    redirect_to event_path(@event), notice: "Marked as used in #{updated_count} channel(s)"
+    redirect_to event_path(@event), notice: t(".marked_used", count: updated_count)
   end
 
   private

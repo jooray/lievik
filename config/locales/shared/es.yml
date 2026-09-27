@@ -1,0 +1,18 @@
+es:
+  auth:
+    sign_in_required: "Inicia sesión para continuar"
+  common:
+    cancel: "Cancelar"
+    save: "Guardar"
+    edit: "Editar"
+    delete: "Eliminar"
+    back: "Volver"
+    add: "Añadir"
+    close: "Cerrar"
+    language: "Idioma"
+    confirm_delete: "¿Seguro?"
+  js:
+    common:
+      copy: "Copiar"
+      copied: "¡Copiado!"
+      loading: "Cargando…"

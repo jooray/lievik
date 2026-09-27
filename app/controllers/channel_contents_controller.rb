@@ -34,7 +34,7 @@ class ChannelContentsController < ApplicationController
 
       # Redirect to edit page with auto_generate flag to trigger streaming
       redirect_to edit_channel_content_path(@channel, @channel_content, auto_generate: true),
-                  notice: "Content draft created. Generating content..."
+                  notice: t(".notice")
     else
       render :new, status: :unprocessable_entity
     end
@@ -61,7 +61,7 @@ class ChannelContentsController < ApplicationController
             turbo_stream.replace("generation-prompt-panel", partial: "generation_prompt_panel")
           ]
         end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), notice: "Content saved." }
+        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), notice: t(".notice") }
       end
     else
       render :edit, status: :unprocessable_entity
@@ -70,7 +70,7 @@ class ChannelContentsController < ApplicationController
 
   def destroy
     @channel_content.destroy
-    redirect_to channel_contents_path(@channel), notice: "Content deleted."
+    redirect_to channel_contents_path(@channel), notice: t(".notice")
   end
 
   # GET /channels/:channel_id/contents/:id/generate_stream
@@ -83,7 +83,7 @@ class ChannelContentsController < ApplicationController
     events = @channel_content.events.includes(:source, :linked_contents)
 
     if events.empty?
-      response.stream.write "event: error\ndata: {\"message\": \"No source events found\"}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.no_source_events") }).to_json}\n\n"
       response.stream.close
       return
     end
@@ -139,7 +139,7 @@ class ChannelContentsController < ApplicationController
       response.stream.write "event: error\ndata: #{{ message: e.message }.to_json}\n\n"
     rescue => e
       Rails.logger.error("Streaming error: #{e.message}")
-      response.stream.write "event: error\ndata: #{{ message: "Unexpected error occurred" }.to_json}\n\n"
+      response.stream.write "event: error\ndata: #{{ message: t("channel_contents.errors.unexpected") }.to_json}\n\n"
     ensure
       response.stream.close
     end
@@ -156,13 +156,13 @@ class ChannelContentsController < ApplicationController
     existing_content = @channel_content.content
 
     if user_prompt.blank?
-      response.stream.write "event: error\ndata: #{({ message: "Please provide instructions for the AI." }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.instructions_required") }).to_json}\n\n"
       response.stream.close
       return
     end
 
     if existing_content.blank?
-      response.stream.write "event: error\ndata: #{({ message: "No content to refine." }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.nothing_to_refine") }).to_json}\n\n"
       response.stream.close
       return
     end
@@ -212,7 +212,7 @@ class ChannelContentsController < ApplicationController
       response.stream.write "event: error\ndata: #{({ message: e.message }).to_json}\n\n"
     rescue => e
       Rails.logger.error("Streaming error: #{e.message}")
-      response.stream.write "event: error\ndata: #{({ message: "Unexpected error occurred" }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.unexpected") }).to_json}\n\n"
     ensure
       response.stream.close
     end
@@ -223,7 +223,7 @@ class ChannelContentsController < ApplicationController
     @channel_content.publish!
 
     redirect_to channel_content_path(@channel, @channel_content),
-                notice: "Content published and source events marked as used."
+                notice: t(".notice")
   end
 
   # POST /channels/:channel_id/contents/:id/revert
@@ -236,7 +236,7 @@ class ChannelContentsController < ApplicationController
             turbo_stream.replace("content-status", partial: "content_status")
           ]
         end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), notice: "Reverted to previous version." }
+        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), notice: t(".notice") }
       end
     else
       respond_to do |format|
@@ -244,10 +244,10 @@ class ChannelContentsController < ApplicationController
           render turbo_stream: turbo_stream.replace(
             "content-status",
             partial: "content_status",
-            locals: { error: "No previous version available." }
+            locals: { error: t(".no_previous") }
           )
         end
-        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), alert: "No previous version available." }
+        format.html { redirect_to edit_channel_content_path(@channel, @channel_content), alert: t(".no_previous") }
       end
     end
   end

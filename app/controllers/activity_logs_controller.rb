@@ -47,9 +47,9 @@ class ActivityLogsController < ApplicationController
     activity_log = current_user.activity_logs.find(params[:id])
     if activity_log.active?
       activity_log.fail!(message: "Cancelled by user")
-      redirect_to activity_logs_path, notice: "Job cancelled."
+      redirect_to activity_logs_path, notice: t(".notice")
     else
-      redirect_to activity_logs_path, alert: "Job is already #{activity_log.status}."
+      redirect_to activity_logs_path, alert: t(".already_finished", status: t("activity_logs.statuses.#{activity_log.status}"))
     end
   end
 
@@ -58,18 +58,18 @@ class ActivityLogsController < ApplicationController
     channel_id = activity_log.metadata["channel_id"]
 
     if channel_id.blank?
-      redirect_to activity_logs_path, alert: "Cannot retry — no channel associated with this job."
+      redirect_to activity_logs_path, alert: t(".no_channel")
       return
     end
 
     channel = current_user.channels.find_by(id: channel_id)
     if channel.nil?
-      redirect_to activity_logs_path, alert: "Cannot retry — channel no longer exists."
+      redirect_to activity_logs_path, alert: t(".channel_missing")
       return
     end
 
     RateEventsJob.perform_later(channel.id)
-    redirect_to activity_logs_path, notice: "Re-queued rating job for #{channel.name}."
+    redirect_to activity_logs_path, notice: t(".notice", channel: channel.name)
   end
 
   def cleanup_stale
@@ -78,7 +78,7 @@ class ActivityLogsController < ApplicationController
       activity.fail!(message: "Job stale — no progress for #{activity.minutes_since_last_update} minutes")
     end
 
-    redirect_to activity_logs_path, notice: "Cleaned up #{stale_count} stale job(s)."
+    redirect_to activity_logs_path, notice: t(".notice", count: stale_count)
   end
 end
 

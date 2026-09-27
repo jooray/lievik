@@ -1,0 +1,42 @@
+es:
+  activerecord:
+    models:
+      source:
+        one: "Fuente"
+        other: "Fuentes"
+      activity_log:
+        one: "Actividad"
+        other: "Actividad"
+      user:
+        one: "Usuario"
+        other: "Usuarios"
+    attributes:
+      source:
+        identifier: "Identificador"
+        name: "Nombre"
+        description: "Descripción"
+        distance: "Distancia de relevancia"
+        source_type: "Tipo de fuente"
+        settings_include_replies: "Incluir respuestas"
+        settings_include_reposts: "Incluir reposts"
+        settings_import_days: "Días a importar"
+      activity_log:
+        activity_type: "Tipo de actividad"
+        status: "Estado"
+        message: "Mensaje"
+      user:
+        npub: "npub"
+        pubkey_hex: "Clave pública"
+        system_prompt: "Prompt de sistema"
+        event_link_template: "Plantilla de enlace a publicación"
+        naddr_link_template: "Plantilla de enlace a artículo"
+        profile_link_template: "Plantilla de enlace a perfil"
+        default_content_style: "Estilo de escritura predeterminado"
+        rating_engine: "Motor de valoración"
+        locale: "Idioma de la interfaz"
+    errors:
+      models:
+        source:
+          attributes:
+            identifier:
+              invalid_npub: "debe ser un npub válido o una clave pública hex de 64 caracteres"

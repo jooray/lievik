@@ -1,0 +1,77 @@
+sk:
+  events:
+    show_more: "Zobraziť viac"
+    from_source: "Zdroj: %{source}"
+    view_details: "Zobraziť detail"
+    rerate_one_confirm: "Znova ohodnotiť tento príspevok vo všetkých kanáloch?"
+    selected:
+      one: "%{count} vybraný"
+      few: "%{count} vybrané"
+      other: "%{count} vybraných"
+    index:
+      title: "Všetky príspevky"
+      subtitle:
+        one: "1 príspevok zo všetkých zdrojov"
+        few: "%{count} príspevky zo všetkých zdrojov"
+        other: "%{count} príspevkov zo všetkých zdrojov"
+      search: "Hľadať"
+      search_placeholder: "Hľadať v obsahu…"
+      source: "Zdroj"
+      all_sources: "Všetky zdroje"
+      type: "Typ"
+      all_types: "Všetky typy"
+      filter: "Filtrovať"
+      clear: "Zrušiť filtre"
+      rate_cap_note: "Ohodnotí sa len %{cap} najnovších z %{total} zodpovedajúcich príspevkov."
+      select_all_page: "Vybrať všetko na tejto stránke"
+      rerate_confirm:
+        one: "Znova ohodnotiť 1 zodpovedajúci príspevok vo všetkých kanáloch? Minie to AI kredity a nedá sa to vrátiť."
+        few: "Znova ohodnotiť %{count} zodpovedajúce príspevky vo všetkých kanáloch? Minie to AI kredity a nedá sa to vrátiť."
+        other: "Znova ohodnotiť %{count} zodpovedajúcich príspevkov vo všetkých kanáloch? Minie to AI kredity a nedá sa to vrátiť."
+      rerate_all: "Znova ohodnotiť všetko (%{count})"
+      rerate_one: "Znova ohodnotiť príspevok"
+      empty_title: "Zatiaľ žiadne príspevky"
+      empty_body: "Pridajte zdroje a obnovte ich, aby sa načítali príspevky."
+    show:
+      back: "Späť na príspevky"
+      title: "Detail príspevku"
+      open_in: "Otvoriť v %{client}"
+      nostr_client: "Nostr klientovi"
+      copy_id_title: "Skopírovať %{kind} do schránky"
+      copy_id: "Kopírovať %{kind}"
+      view_original: "Zobraziť originál"
+      rerate_event: "Znova ohodnotiť"
+      channel_relevance: "Relevancia v kanáloch (podľa skóre)"
+      select_all: "Vybrať všetko"
+      already_used: "V tomto kanáli už použité"
+      mark_used_selected: "Označiť ako použité vo vybraných kanáloch"
+      not_rated: "Tento príspevok zatiaľ nebol ohodnotený pre žiadny kanál."
+      rate_all_channels: "Ohodnotiť pre všetky kanály"
+      raw_data: "Surové dáta"
+      truncated: "skrátené"
+      raw_truncated_note: "Zobrazených je prvých %{shown} z %{total} znakov."
+    bulk_rate:
+      no_match: "Aktuálnym filtrom nezodpovedá žiadny príspevok"
+      no_channels: "Nemáte žiadny kanál, podľa ktorého by sa dalo hodnotiť. Najprv si ho vytvorte."
+      channels:
+        one: "pre 1 kanál"
+        few: "pre %{count} kanály"
+        other: "pre %{count} kanálov"
+      queued_selected:
+        one: "Hodnotenie 1 vybraného príspevku je vo fronte %{channels}."
+        few: "Hodnotenie %{count} vybraných príspevkov je vo fronte %{channels}."
+        other: "Hodnotenie %{count} vybraných príspevkov je vo fronte %{channels}."
+      queued_matching:
+        one: "Nové hodnotenie 1 zodpovedajúceho príspevku je vo fronte %{channels}."
+        few: "Nové hodnotenie %{count} zodpovedajúcich príspevkov je vo fronte %{channels}."
+        other: "Nové hodnotenie %{count} zodpovedajúcich príspevkov je vo fronte %{channels}."
+      skipped:
+        one: "1 starší príspevok sa preskočil: jedna požiadavka ohodnotí najviac %{max} príspevkov. Zúžte filtre alebo akciu zopakujte pre zvyšok."
+        few: "%{count} staršie príspevky sa preskočili: jedna požiadavka ohodnotí najviac %{max} príspevkov. Zúžte filtre alebo akciu zopakujte pre zvyšok."
+        other: "%{count} starších príspevkov sa preskočilo: jedna požiadavka ohodnotí najviac %{max} príspevkov. Zúžte filtre alebo akciu zopakujte pre zvyšok."
+    bulk_mark_used:
+      no_channels_selected: "Nevybrali ste žiadny kanál"
+      marked_used:
+        one: "Označené ako použité v 1 kanáli"
+        few: "Označené ako použité v %{count} kanáloch"
+        other: "Označené ako použité v %{count} kanáloch"

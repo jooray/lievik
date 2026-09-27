@@ -9,18 +9,20 @@ class UsersController < ApplicationController
 
   def update
     if current_user.update(user_params)
-      redirect_to edit_user_path, notice: "Settings saved."
+      cookies[LOCALE_COOKIE] = { value: current_user.locale, expires: 1.year, same_site: :lax } if current_user.locale
+      I18n.locale = current_user.locale || I18n.locale
+      redirect_to edit_user_path, notice: t(".notice")
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
   def add_template
-    name = params[:template_name].presence || "New Template"
+    name = params[:template_name].presence || t(".default_name")
     template = params[:template_content].presence || User.default_content_templates.first["template"]
 
     current_user.add_content_template(name: name, template: template)
-    redirect_to edit_user_path(anchor: "content-templates"), notice: "Template added."
+    redirect_to edit_user_path(anchor: "content-templates"), notice: t(".notice")
   end
 
   def update_template
@@ -29,9 +31,9 @@ class UsersController < ApplicationController
     template = params[:template_content]
 
     if current_user.update_content_template(index, name: name, template: template)
-      redirect_to edit_user_path(anchor: "content-templates"), notice: "Template updated."
+      redirect_to edit_user_path(anchor: "content-templates"), notice: t(".notice")
     else
-      redirect_to edit_user_path(anchor: "content-templates"), alert: "Failed to update template."
+      redirect_to edit_user_path(anchor: "content-templates"), alert: t(".alert")
     end
   end
 
@@ -39,15 +41,15 @@ class UsersController < ApplicationController
     index = params[:template_index].to_i
 
     if current_user.delete_content_template(index)
-      redirect_to edit_user_path(anchor: "content-templates"), notice: "Template deleted."
+      redirect_to edit_user_path(anchor: "content-templates"), notice: t(".notice")
     else
-      redirect_to edit_user_path(anchor: "content-templates"), alert: "Failed to delete template."
+      redirect_to edit_user_path(anchor: "content-templates"), alert: t(".alert")
     end
   end
 
   def reindex
     ReindexEmbeddingsJob.perform_later(current_user.id)
-    redirect_to edit_user_path, notice: "Reindexing started in background. This may take a few minutes."
+    redirect_to edit_user_path, notice: t(".notice")
   end
 
   private
@@ -61,6 +63,6 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:system_prompt, :event_link_template, :naddr_link_template, :profile_link_template, :default_content_style, :rating_engine)
+    params.require(:user).permit(:system_prompt, :event_link_template, :naddr_link_template, :profile_link_template, :default_content_style, :rating_engine, :locale)
   end
 end

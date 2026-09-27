@@ -1,0 +1,33 @@
+sk:
+  rag_chat:
+    date_format: "%-d. %-m. %Y"
+    unknown_source: "Neznámy"
+    errors:
+      question_required: "Zadajte otázku"
+      unexpected: "Nastala neočakávaná chyba"
+    index:
+      heading: "Opýtať sa obsahu"
+      intro: "Pýtajte sa na indexované príspevky bežným jazykom."
+      indexed_html:
+        one: "Indexované príspevky: <span class=\"font-medium\">%{indexed} z %{count}</span>."
+        few: "Indexované príspevky: <span class=\"font-medium\">%{indexed} z %{count}</span>."
+        other: "Indexované príspevky: <span class=\"font-medium\">%{indexed} z %{count}</span>."
+      clear_chat: "Vymazať chat"
+      empty_title: "Zatiaľ nie sú indexované žiadne príspevky"
+      empty_text_html: "Nové príspevky sa indexujú automaticky pri importe. Ručne ich môžete preindexovať v %{link}."
+      settings_link: "nastaveniach"
+      welcome:
+        one: "Dobrý deň! Pomôžem vám hľadať v %{count} indexovanom príspevku. Skúste sa opýtať napríklad:"
+        few: "Dobrý deň! Pomôžem vám hľadať v %{count} indexovaných príspevkoch. Skúste sa opýtať napríklad:"
+        other: "Dobrý deň! Pomôžem vám hľadať v %{count} indexovaných príspevkoch. Skúste sa opýtať napríklad:"
+      example_topics: "O akých témach sa v poslednom čase najviac hovorí?"
+      example_summary: "Zhrňte diskusie o [téme]"
+      example_person: "Čo povedal [človek] o [téme]?"
+      placeholder: "Opýtajte sa…"
+  js:
+    rag_chat:
+      thinking: "Premýšľam…"
+      sources: "Zdroje"
+      view: "Zobraziť"
+      generic_error: "Nastala chyba"
+      failed_to_connect: "Nepodarilo sa pripojiť: %{message}"

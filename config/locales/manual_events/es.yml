@@ -1,0 +1,15 @@
+es:
+  activerecord:
+    attributes:
+      event:
+        content: "Contenido"
+  manual_events:
+    new:
+      title: "Añadir publicación manual"
+      subtitle: "Introduce contenido a mano para seleccionarlo en tus canales."
+      not_saved: "No se pudo guardar la publicación"
+      content: "Contenido"
+      placeholder: "Pega o escribe el contenido aquí…"
+      submit: "Añadir publicación"
+    create:
+      added: "Publicación añadida. Se está valorando en segundo plano."

@@ -1,0 +1,24 @@
+en:
+  users:
+    api_tokens:
+      title: "API Tokens"
+      intro_html: "Tokens grant programmatic access to Lievik via the MCP endpoint at <code class=\"text-xs\">/mcp</code>. Each token authenticates as you. Use one token per agent so you can revoke them independently."
+      created_html: "Token <strong>%{name}</strong> created. Copy it now — it will not be shown again."
+      new_token_label: "Your new API token"
+      name_label: "Token name"
+      name_placeholder: "e.g. marketing-agent"
+      generate: "Generate token"
+      columns:
+        name: "Name"
+        created: "Created"
+        last_used: "Last used"
+      ago: "%{time} ago"
+      never: "Never"
+      revoke: "Revoke"
+      confirm_revoke: "Revoke this token? Anything using it will lose access."
+      empty: "No tokens yet."
+  api_tokens:
+    create:
+      name_required: "Token name required."
+    destroy:
+      notice: "Token revoked."

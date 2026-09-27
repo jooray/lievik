@@ -18,7 +18,7 @@ class RagChatController < ApplicationController
     conversation_history = params[:history] || []
 
     if question.blank?
-      render json: { success: false, error: "Please enter a question" }
+      render json: { success: false, error: t("rag_chat.errors.question_required") }
       return
     end
 
@@ -58,7 +58,7 @@ class RagChatController < ApplicationController
     conversation_history = [] unless conversation_history.is_a?(Array)
 
     if question.blank?
-      response.stream.write "event: error\ndata: #{({ message: "Please enter a question" }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("rag_chat.errors.question_required") }).to_json}\n\n"
       response.stream.close
       return
     end
@@ -86,7 +86,7 @@ class RagChatController < ApplicationController
       response.stream.write "event: error\ndata: #{({ message: e.message }).to_json}\n\n"
     rescue => e
       Rails.logger.error("Chat streaming error: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
-      response.stream.write "event: error\ndata: #{({ message: "An unexpected error occurred" }).to_json}\n\n"
+      response.stream.write "event: error\ndata: #{({ message: t("rag_chat.errors.unexpected") }).to_json}\n\n"
     ensure
       response.stream.close
     end
@@ -98,8 +98,8 @@ class RagChatController < ApplicationController
     {
       id: event.id,
       content: event.content.to_s.truncate(300),
-      source_name: event.source&.name || "Unknown",
-      published_at: event.published_at&.strftime("%b %d, %Y")
+      source_name: event.source&.name || t("rag_chat.unknown_source"),
+      published_at: event.published_at && l(event.published_at.to_date, format: t("rag_chat.date_format"))
     }
   end
 end

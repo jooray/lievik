@@ -7,14 +7,14 @@ class ChannelEventsController < ApplicationController
     event_ids = parse_event_ids(params[:event_ids])
 
     if event_ids.empty?
-      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: "No events selected"
+      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: t("channel_events.no_selection")
       return
     end
 
     channel_events = @channel.channel_events.where(event_id: event_ids)
     channel_events.update_all(used: true, used_at: Time.current)
 
-    notice = "Marked #{channel_events.size} events as used"
+    notice = t(".notice", count: channel_events.size)
     redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), notice: notice
   end
 
@@ -22,20 +22,20 @@ class ChannelEventsController < ApplicationController
     event_ids = parse_event_ids(params[:event_ids])
 
     if event_ids.empty?
-      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: "No events selected"
+      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: t("channel_events.no_selection")
       return
     end
 
     event_ids = current_user.events.where(id: event_ids).pluck(:id)
 
     if event_ids.empty?
-      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: "No events selected"
+      redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), alert: t("channel_events.no_selection")
       return
     end
 
     RateEventsJob.perform_later(@channel.id, event_ids)
 
-    notice = "Rerating queued for #{event_ids.size} event#{event_ids.size != 1 ? 's' : ''}"
+    notice = t(".notice", count: event_ids.size)
     redirect_to channel_path(@channel, show_used: params[:show_used], sort: sort_param), notice: notice
   end
 

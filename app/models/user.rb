@@ -55,6 +55,19 @@ class User < ApplicationRecord
     rating_engine == "decision" && Ai::DecisionClient.configured?
   end
 
+  # Interface language. nil means "not chosen yet": the request's cookie or
+  # Accept-Language decides (see ApplicationController#switch_locale).
+  def locale
+    value = settings&.dig("locale")
+    I18n.available_locales.map(&:to_s).include?(value) ? value : nil
+  end
+
+  def locale=(value)
+    value = value.to_s
+    value = nil unless I18n.available_locales.map(&:to_s).include?(value)
+    self.settings = (settings || {}).merge("locale" => value)
+  end
+
   DEFAULT_EVENT_LINK_TEMPLATE = "https://yakihonne.com/note/{eventid}"
   DEFAULT_NADDR_LINK_TEMPLATE = "https://yakihonne.com/article/{naddr}"
   DEFAULT_PROFILE_LINK_TEMPLATE = "https://yakihonne.com/profile/{npub}"

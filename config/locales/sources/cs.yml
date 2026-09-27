@@ -1,0 +1,84 @@
+cs:
+  sources:
+    index:
+      title: "Zdroje"
+      subtitle: "Nostr účty a RSS feedy, ze kterých vybíráte obsah"
+      refresh_all: "Obnovit vše"
+      add_source: "Přidat zdroj"
+      empty_title: "Žádné zdroje"
+      empty_hint: "Začněte tím, že přidáte Nostr účet, který chcete sledovat."
+      distance: "Vzdálenost: %{distance}"
+      events:
+        one: "%{count} příspěvek"
+        few: "%{count} příspěvky"
+        other: "%{count} příspěvků"
+      click_to_copy: "Kliknutím zkopírujete"
+      view_profile: "Zobrazit profil"
+    new:
+      title: "Přidat zdroj"
+      subtitle: "Přidejte Nostr účet, ze kterého chcete vybírat obsah"
+    edit:
+      title: "Upravit zdroj"
+      danger_zone: "Nebezpečná zóna"
+      danger_hint: "Spolu se zdrojem se smažou i všechny jeho příspěvky."
+      confirm_delete: "Smazat tento zdroj? Natrvalo se smažou i všechny jeho příspěvky. Tuto akci nelze vrátit."
+      delete: "Smazat zdroj"
+    show:
+      source_type:
+        nostr: "Nostr zdroj"
+        rss: "RSS zdroj"
+        manual: "Ručně přidaný zdroj"
+      distance: "vzdálenost %{distance}"
+      events: "Příspěvky"
+      ago: "před %{time}"
+      event_types:
+        original: "Původní"
+        reply: "Odpověď"
+        repost: "Repost"
+      view_details: "Zobrazit detail"
+      empty: "Z tohoto zdroje zatím nejsou žádné příspěvky."
+    form:
+      errors_header:
+        one: "Zdroj se nepodařilo uložit kvůli 1 chybě:"
+        few: "Zdroj se nepodařilo uložit kvůli %{count} chybám:"
+        other: "Zdroj se nepodařilo uložit kvůli %{count} chybám:"
+      source_type: "Typ zdroje"
+      types:
+        nostr: "Nostr účet"
+        rss: "RSS feed"
+      name_placeholder: "Zobrazovaný název (nepovinné)"
+      name_hint: "Když pole necháte prázdné, doplní se z profilu nebo feedu."
+      description_placeholder: "Jaký obsah tento zdroj přináší…"
+      distance: "Vzdálenost relevance (0–10)"
+      distance_hint: "0 = váš vlastní obsah (nejrelevantnější), 10 = vzdálený kontakt (nejméně relevantní)"
+      import_settings: "Nastavení importu"
+      include_replies: "Včetně odpovědí"
+      include_reposts: "Včetně repostů"
+      import_days: "Počet dní importu"
+      import_days_hint: "Kolik dní historie se má importovat (nejvýš 10 let)"
+      create: "Přidat zdroj"
+      update: "Uložit zdroj"
+    create:
+      importing: "Zdroj byl přidán. Poslední příspěvky se importují na pozadí, průběh najdete v Aktivitě."
+      notice: "Zdroj byl přidán."
+    update:
+      notice: "Zdroj byl uložen."
+    destroy:
+      notice: "Zdroj byl smazán."
+    refresh:
+      notice: "Zdroj %{name} se obnovuje na pozadí. Průběh najdete v Aktivitě."
+      notice_unnamed: "Zdroj se obnovuje na pozadí. Průběh najdete v Aktivitě."
+      unsupported: "Tento typ zdroje nelze obnovit."
+    refresh_all:
+      notice:
+        one: "Na pozadí se obnovuje %{count} zdroj. Průběh najdete v Aktivitě."
+        few: "Na pozadí se obnovují %{count} zdroje. Průběh najdete v Aktivitě."
+        other: "Na pozadí se obnovuje %{count} zdrojů. Průběh najdete v Aktivitě."
+  js:
+    source_form:
+      nostr_label: "Veřejný klíč Nostr (npub)"
+      rss_label: "URL feedu"
+      nostr_hint: "Zadejte npub nebo veřejný klíč účtu v hex formátu"
+      rss_hint: "Zadejte URL RSS nebo Atom feedu"
+    clipboard:
+      copy_failed: "Kopírování se nepodařilo"

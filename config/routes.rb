@@ -21,6 +21,8 @@ Rails.application.routes.draw do
 
   # Public landing page
   root "pages#landing"
+  # Localized copies of the landing page (hreflang alternates of "/").
+  get "/:locale", to: "pages#landing", as: :localized_landing, constraints: { locale: /en|sk|cs|es/ }
 
   # Dashboard
   get "/dashboard", to: "dashboard#index", as: :dashboard

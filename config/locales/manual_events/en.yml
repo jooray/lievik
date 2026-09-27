@@ -1,0 +1,15 @@
+en:
+  activerecord:
+    attributes:
+      event:
+        content: "Content"
+  manual_events:
+    new:
+      title: "Add Manual Event"
+      subtitle: "Manually enter content to be curated for your channels"
+      not_saved: "This event could not be saved"
+      content: "Content"
+      placeholder: "Paste or type content here..."
+      submit: "Add Event"
+    create:
+      added: "Event added successfully. Rating in background."

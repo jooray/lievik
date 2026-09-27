@@ -1,0 +1,70 @@
+sk:
+  pages:
+    landing:
+      title: "Lievik: správny obsah pre správne obecenstvo"
+      meta_description: "Lievik pomáha tvorcom na Nostri dostať obsah k ľuďom, ktorých naozaj zaujíma."
+      home_label: "Lievik, úvodná stránka"
+      github_label: "Zdrojový kód na GitHube"
+      theme_label: "Prepnúť farebný režim"
+      language_label: "Jazyk"
+      nav_launch: "Spustiť"
+      hero:
+        eyebrow: "Kurátorstvo obsahu pre Nostr"
+        headline_html: "Správny obsah<br />pre <em>správne obecenstvo.</em>"
+        lede: "V Lieviku si v pokoji ujasníte, kto čo potrebuje počuť. Natiahnite doň, čo publikujete, aj zdroje, ktoré sledujete, opíšte ľudí, pre ktorých píšete, a Lievik vám ukáže, čo stojí za to poslať komu."
+        launch: "Spustiť Lievik"
+        see_how: "Ako to funguje"
+        quiet_note: "Prihlásite sa Nostr identitou, e-mail ani heslo netreba."
+      desk:
+        aria_label: "Ukážka, ako Lievik priraďuje Nostr príspevok publiku"
+        label: "Váš triediaci pult"
+        source_kicker: "Niečo, čo ste vytvorili"
+        note_byline: "Mara zverejnila príspevok"
+        note_meta: "Nostr · pred 2 hodinami"
+        note_copy: "Krátky návod, ako vybrať súkromný messenger pre rodinnú skupinu. Na čo si dať pozor a nad čím netreba dlho premýšľať."
+        note_link: "dlhý článok · 6 min čítania"
+        audience_kicker: "Kto by to mal počuť?"
+        channel_privacy: "Kurz o súkromí"
+        channel_privacy_who: "študenti a absolventi"
+        channel_meetup: "Miestny meetup"
+        channel_meetup_who: "bitcoinoví začiatočníci"
+        channel_project: "Novinky z projektu"
+        channel_project_who: "prispievatelia do open source"
+        ready: "Pripravené do newslettera kurzu o súkromí"
+      statement:
+        eyebrow: "Lepšia otázka"
+        heading: "Obsah sa stráca, keď všetky publiká nosíte len v hlave."
+        copy: "Newsletter, kurz, chatová skupina: každé miesto má vlastný kontext a ten dnes poznáte len vy. Lievik ten zoznam v hlave nahradí niečím, čo si pamätá, čo ktorú skupinu zaujíma a čo ste jej už poslali."
+        make:
+          label: "01 / TVORIŤ"
+          title: "Niečo ste vytvorili"
+          copy: "Nájdite ľudí, ktorým to naozaj patrí. Netreba to trúbiť do sveta ani nechať ležať v šuplíku."
+        speak:
+          label: "02 / OSLOVIŤ"
+          title: "Máte koho osloviť"
+          copy: "V ich kanáli uvidíte užitočné veci, ktoré od vás ešte nepočuli."
+        remember:
+          label: "03 / PAMÄTAŤ"
+          title: "Už ste to raz robili"
+          copy: "Majte prehľad, čo ste ktorej skupine poslali. Pri ďalšej správe nebudete hádať, budete to vedieť."
+      how:
+        eyebrow: "Ako Lievik funguje"
+        heading: "Jedno miesto pre všetky vaše rozhovory."
+        subheading: "Stavia na tom, ako tvorcovia na Nostri už dnes publikujú a sledujú sa navzájom."
+        gather:
+          title: "Zozbierajte signál"
+          copy: "Pridajte svoju Nostr identitu, ľudí, ktorých sledujete, a RSS feedy, ktorým veríte. Ich poznámky, články aj odkazy sa zbehnú na jednom mieste."
+        name:
+          title: "Pomenujte publiká"
+          copy: "Vytvorte kanály pre skutočné skupiny, ktorým píšete, a vlastnými slovami opíšte, čo ich zaujíma."
+        share:
+          title: "Zdieľajte s rozmyslom"
+          copy: "Lievik zoradí, čo je relevantné, pomôže vám s konceptom správy a zapamätá si, čo ste už použili."
+      closing:
+        eyebrow: "Doma na Nostri"
+        heading: "Nech má každý pocit, že správa bola písaná práve preňho."
+        launch: "Spustiť aplikáciu"
+      footer:
+        tagline: "© Lievik. Správny obsah pre správne obecenstvo."
+        sign_in: "Prihláste sa cez NIP-07 alebo vzdialený podpisovač NIP-46."
+        github: "Open source na GitHube"

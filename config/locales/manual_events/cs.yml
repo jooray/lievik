@@ -1,0 +1,15 @@
+cs:
+  activerecord:
+    attributes:
+      event:
+        content: "Obsah"
+  manual_events:
+    new:
+      title: "Přidat příspěvek ručně"
+      subtitle: "Zadejte obsah, který chcete nabídnout svým kanálům."
+      not_saved: "Příspěvek se nepodařilo uložit"
+      content: "Obsah"
+      placeholder: "Sem vložte nebo napište obsah…"
+      submit: "Přidat příspěvek"
+    create:
+      added: "Příspěvek byl přidán. Hodnotí se na pozadí."

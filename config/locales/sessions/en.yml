@@ -1,0 +1,54 @@
+en:
+  sessions:
+    new:
+      subtitle: "Sign in with your Nostr identity"
+      extension_heading: "Browser extension"
+      extension_button: "Continue with extension"
+      signer_heading: "Signer app"
+      open_in_signer: "Open in your signer app"
+      signer_hint: "Amber, Amethyst, or any signer on this device"
+      scan_hint: "Scan with a signer on another device"
+      copy: "Copy"
+      bunker_heading: "Paste a bunker link"
+      bunker_hint: "Create a connection in your signer and paste the link it gives you."
+      bunker_label: "Bunker link"
+      connect: "Connect"
+      waiting: "Waiting for your signer…"
+      stale_notice: "Didn't get the approval? Keep this tab open while you approve, or start over with a new code."
+      new_code: "Get a new code"
+      auth_challenge: "Your signer needs you to approve this in its own window."
+      open_approval: "Open approval page"
+      expired: "This code expired for your security."
+      no_account: "No account needed. Your identity is your Nostr key."
+    unavailable:
+      try_again: "Try again"
+    unavailable_reasons:
+      busy:
+        title: "Login is busy right now"
+        message: "Too many people are signing in at once. Give it a few seconds and try again."
+      rate_limited:
+        title: "Slow down a moment"
+        message: "You have requested a few login codes in quick succession. Wait about a minute, then try again."
+    bunker:
+      invalid_link: "That does not look like a usable bunker link. It should start with bunker:// and include at least one relay."
+      failed: "Could not start the connection. Please try again."
+    refresh_profile:
+      notice: "Refreshing your profile from the relays in the background — reload in a moment to see it."
+    callback:
+      failed: "Authentication failed: Proof is invalid or expired"
+      welcome: "Welcome, %{name}!"
+    destroy:
+      notice: "Logged out successfully"
+  js:
+    nostr_login:
+      paste_bunker_first: "Paste the bunker link from your signer first."
+      connecting: "Connecting…"
+      bunker_unusable: "Could not use that bunker link."
+      waiting_approval: "Waiting for your signer to approve…"
+      server_unreachable: "Could not reach the server. Check your connection and try again."
+      no_extension: "No NIP-07 extension found. Please install nos2x, Alby, or another Nostr extension."
+      no_pubkey: "Failed to get public key from extension"
+      extension_error: "Extension error: %{message}"
+      unknown_error: "Unknown error"
+      lost_connection: "Lost connection to the server. Please reload the page to try again."
+      extension_button: "Continue with extension"

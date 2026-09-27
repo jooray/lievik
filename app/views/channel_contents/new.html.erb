@@ -7,10 +7,10 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
           </svg>
         <% end %>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">New Content</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".heading") %></h1>
       </div>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        <%= @channel.name %> &middot; Create new content from <%= @selected_events.size %> selected events
+        <%= @channel.name %> &middot; <%= t(".subtitle", count: @selected_events.size) %>
       </p>
     </div>
   </div>
@@ -18,9 +18,9 @@
   <% if @selected_events.empty? %>
     <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
       <p class="text-sm text-yellow-800 dark:text-yellow-200">
-        No events selected. Please go back to the channel and select some events first.
+        <%= t(".no_events") %>
       </p>
-      <%= link_to "← Back to Channel", channel_path(@channel), class: "mt-2 inline-block text-sm text-yellow-700 dark:text-yellow-300 underline" %>
+      <%= link_to t(".back_to_channel"), channel_path(@channel), class: "mt-2 inline-block text-sm text-yellow-700 dark:text-yellow-300 underline" %>
     </div>
   <% else %>
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -29,21 +29,21 @@
 
         <div class="space-y-6">
           <div>
-            <%= f.label :title, class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
-            <%= f.text_field :title, placeholder: "Optional title for this content", class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+            <%= f.label :title, t(".title_label"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= f.text_field :title, placeholder: t(".title_placeholder"), class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
           </div>
 
           <div>
-            <%= f.label :generation_prompt, "Theme / Direction (Optional)", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= f.label :generation_prompt, t(".direction_label"), class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
             <%= f.text_area :generation_prompt,
-                placeholder: "E.g., 'This issue will be mesh-network themed, weave the mesh-network themes into the text', 'Focus on the privacy aspects', 'Make it casual and fun'...",
-                rows: 2,
-                class: "mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional guidance for the AI when generating content.</p>
+                placeholder: t(".direction_placeholder"),
+                rows: 6,
+                class: "mt-1 block w-full min-h-32 resize-y px-3 py-2 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm" %>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= t(".direction_hint") %></p>
           </div>
 
           <div>
-            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selected Source Events (<%= @selected_events.size %>)</p>
+            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"><%= t(".selected_events", count: @selected_events.size) %></p>
             <div class="space-y-2 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-md p-3">
               <% @selected_events.each do |event| %>
                 <div class="text-sm bg-gray-50 dark:bg-gray-900 rounded p-2">
@@ -55,8 +55,8 @@
           </div>
 
           <div class="flex justify-end gap-3">
-            <%= link_to "Cancel", channel_path(@channel), class: "px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
-            <%= f.submit "Create Draft & Open Editor", class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer" %>
+            <%= link_to t("common.cancel"), channel_path(@channel), class: "px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
+            <%= f.submit t(".submit"), class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer" %>
           </div>
         </div>
       <% end %>

@@ -105,20 +105,31 @@ class ActivityLog < ApplicationRecord
   def broadcast_job_created
     return unless active?
 
-    broadcast_append_to "activity_logs_#{user_id}",
-      target: "job_progress_container",
-      partial: "activity_logs/job_progress_card",
-      locals: { job: self }
+    in_user_locale do
+      broadcast_append_to "activity_logs_#{user_id}",
+        target: "job_progress_container",
+        partial: "activity_logs/job_progress_card",
+        locals: { job: self }
+    end
   end
 
   def broadcast_job_updated
     if active?
-      broadcast_replace_to "activity_logs_#{user_id}",
-        partial: "activity_logs/job_progress_card",
-        locals: { job: self }
+      in_user_locale do
+        broadcast_replace_to "activity_logs_#{user_id}",
+          partial: "activity_logs/job_progress_card",
+          locals: { job: self }
+      end
     else
       broadcast_remove_to "activity_logs_#{user_id}"
     end
+  end
+
+  # The card is rendered here, usually inside a background job where
+  # I18n.locale is the default, so its tooltip/confirm text would otherwise
+  # always be English.
+  def in_user_locale(&block)
+    I18n.with_locale(user&.locale || I18n.locale, &block)
   end
 
   def broadcast_job_removed
