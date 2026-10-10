@@ -668,6 +668,22 @@
         border-color: var(--purple);
         color: var(--purple);
       }
+      .install-native.featured {
+        box-shadow: inset 0 3px 0 var(--purple);
+      }
+      .store-links a.button {
+        color: #fff;
+        border-color: var(--purple);
+        border-radius: 999px;
+      }
+      .store-links a.button:hover {
+        color: #fff;
+        border-color: var(--purple-dark);
+      }
+      .dark .store-links a.button,
+      .dark .store-links a.button:hover {
+        color: #1a1305;
+      }
       .price-card h3 {
         margin: 26px 0 0;
         font-size: 30px;
@@ -1222,33 +1238,43 @@
         </div>
       </section>
 
-      <section class="how install" id="install">
+      <%# Android visitors get the native app first (Zapstore as the main button),
+          everyone else the installable web app. android_device? sets Vary: User-Agent. %>
+      <% android = android_device? %>
+      <section class="how install<%= " install-android" if android %>" id="install">
         <div class="shell">
           <div class="how-heading">
             <div>
               <p class="eyebrow"><%= t(".install.eyebrow") %></p>
-              <h2><%= t(".install.heading") %></h2>
+              <h2><%= android ? t(".install.android.heading") : t(".install.heading") %></h2>
             </div>
-            <p><%= t(".install.subheading") %></p>
+            <p><%= android ? t(".install.android.subheading") : t(".install.subheading") %></p>
           </div>
-          <div class="steps">
-            <article class="step">
+          <% web_card = capture do %>
+            <article class="step install-web">
               <span class="step-index"><%= t(".install.web.label") %></span>
-              <h3><%= t(".install.web.title") %></h3>
+              <h3><%= android ? t(".install.android.web_title") : t(".install.web.title") %></h3>
               <p><%= t(".install.web.copy") %></p>
+              <% unless android %>
               <p class="install-howto"><%= t(".install.web.ios_html") %></p>
+              <% end %>
               <p><%= t(".install.web.other") %></p>
             </article>
-            <article class="step">
-              <span class="step-index"><%= t(".install.native.label") %></span>
-              <h3><%= t(".install.native.title") %></h3>
-              <p><%= t(".install.native.copy") %></p>
+          <% end %>
+          <% native_card = capture do %>
+            <article class="step install-native<%= " featured" if android %>">
+              <span class="step-index"><%= android ? t(".install.android.native_label") : t(".install.native.label") %></span>
+              <h3><%= android ? t(".install.android.native_title") : t(".install.native.title") %></h3>
+              <p><%= android ? t(".install.android.native_copy") : t(".install.native.copy") %></p>
               <ul class="store-links">
                 <% ApplicationHelper::ANDROID_APP_LINKS.each do |key, href| %>
-                <li><a href="<%= href %>" rel="noopener noreferrer"><%= t(".install.native.#{key}") %></a></li>
+                <li><a href="<%= href %>" rel="noopener noreferrer"<%= ' class="button"'.html_safe if android && key == :zapstore %>><%= t(".install.native.#{key}") %></a></li>
                 <% end %>
               </ul>
             </article>
+          <% end %>
+          <div class="steps">
+            <%= android ? native_card + web_card : web_card + native_card %>
           </div>
         </div>
       </section>

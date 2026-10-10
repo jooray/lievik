@@ -20,6 +20,17 @@ module ApplicationHelper
     github: "https://github.com/jooray/lievik/releases/latest"
   }.freeze
 
+  # True for an Android browser: the native app is then the first recommendation
+  # (landing #install, /user/edit). Marks the response as varying by User-Agent so
+  # no cache in between hands the Android variant to an iPhone or the reverse.
+  def android_device?
+    return @android_device if defined?(@android_device)
+
+    vary = response.headers["Vary"].to_s.split(/\s*,\s*/)
+    response.headers["Vary"] = (vary | ["User-Agent"]).join(", ")
+    @android_device = request.user_agent.to_s.match?(/Android/i)
+  end
+
   def locale_options
     I18n.available_locales.map { |l| [LOCALE_NAMES.fetch(l, l.to_s), l.to_s] }
   end

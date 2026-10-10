@@ -78,6 +78,13 @@ cs:
           zapstore: "Zapstore"
           obtainium: "Obtainium"
           github: "Stáhnout z GitHubu"
+        android:
+          heading: "Lievik ve vašem telefonu s Androidem."
+          subheading: "Stáhněte si nativní aplikaci. Pokud chcete, funguje i webová aplikace."
+          native_label: "Doporučujeme pro Android"
+          native_title: "Nativní aplikace pro Android"
+          native_copy: "Umí všechno, co webová aplikace. Přihlásíte se přes Amber nebo jiný Nostr podepisovač v tomto telefonu."
+          web_title: "Funguje i webová aplikace"
       pricing:
         eyebrow: "Ceník"
         heading: "Tři dny zdarma. Když se osvědčí, zaplatíte v satech."

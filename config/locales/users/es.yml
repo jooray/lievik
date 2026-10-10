@@ -5,6 +5,7 @@ es:
       intro: "Lievik para Android: tus canales, publicaciones y borradores en el móvil, sincronizados con esta cuenta. Inicia sesión con Amber u otro firmante de Nostr; cada móvil recibe su propio token en la lista de arriba."
       download: "Descargar el APK"
       web_app: "Aunque no la necesitas. Esta app web, añadida a tu pantalla de inicio, funciona igual de bien, también en iPhone y iPad."
+      android_web_app: "La app web también funciona. Para añadirla a la pantalla de inicio, elige Instalar aplicación en el menú del navegador."
       zapstore: "Zapstore"
       obtainium: "Obtainium"
       github: "Descargar en GitHub"

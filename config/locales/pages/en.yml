@@ -78,6 +78,13 @@ en:
           zapstore: "Zapstore"
           obtainium: "Obtainium"
           github: "Download on GitHub"
+        android:
+          heading: "Lievik on your Android phone."
+          subheading: "Get the native app. The web app works too, if you would rather use that."
+          native_label: "Recommended for Android"
+          native_title: "The native Android app"
+          native_copy: "It does everything the web app does. You sign in with Amber or another Nostr signer on this phone."
+          web_title: "The web app works too"
       pricing:
         eyebrow: "Pricing"
         heading: "Three days free. Pay in sats if it earns its keep."

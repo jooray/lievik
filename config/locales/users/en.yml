@@ -5,6 +5,7 @@ en:
       intro: "Lievik for Android: your channels, posts and drafts on your phone, kept in sync with this account. Sign in with Amber or another Nostr signer; each phone gets its own token in the list above."
       download: "Download the APK"
       web_app: "You do not need it, though. This web app added to your home screen works just as well, on iPhone and iPad too."
+      android_web_app: "The web app works too: choose Install app in your browser menu to add it to the home screen."
       zapstore: "Zapstore"
       obtainium: "Obtainium"
       github: "Download on GitHub"

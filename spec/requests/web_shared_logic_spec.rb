@@ -40,4 +40,17 @@ RSpec.describe "Web actions on shared logic", type: :request do
     get edit_user_path
     expect(response.body).to include("https://example.com/lievik.apk")
   end
+
+  it "makes the native app primary in settings on an Android device" do
+    get edit_user_path, headers: { "User-Agent" => "Mozilla/5.0 (Linux; Android 15; Pixel 9) Chrome/130.0 Mobile Safari/537.36" }
+    section = response.body[/<div id="android-app".*?<\/div>\s*<\/div>/m]
+    expect(section).to include('data-android-device="true"', I18n.t("users.android_app.android_web_app", locale: :en))
+    expect(section).not_to include(I18n.t("users.android_app.web_app", locale: :en))
+    expect(response.headers["Vary"]).to include("User-Agent")
+
+    get edit_user_path, headers: { "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) Safari/605.1.15" }
+    section = response.body[/<div id="android-app".*?<\/div>\s*<\/div>/m]
+    expect(section).not_to include("data-android-device")
+    expect(section).to include(I18n.t("users.android_app.web_app", locale: :en))
+  end
 end

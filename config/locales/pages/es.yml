@@ -78,6 +78,13 @@ es:
           zapstore: "Zapstore"
           obtainium: "Obtainium"
           github: "Descargar en GitHub"
+        android:
+          heading: "Lievik en tu móvil Android."
+          subheading: "Descarga la app nativa. Si lo prefieres, la app web también funciona."
+          native_label: "Recomendada para Android"
+          native_title: "La app nativa para Android"
+          native_copy: "Hace todo lo que hace la app web. Inicias sesión con Amber u otro firmante de Nostr en este móvil."
+          web_title: "La app web también funciona"
       pricing:
         eyebrow: "Precios"
         heading: "Tres días gratis. Si te sirve, pagas en sats."

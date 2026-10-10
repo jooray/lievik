@@ -1,16 +1,26 @@
 <%# The official app lives on Zapstore, Obtainium and GitHub releases. An instance
-    that publishes its own APK (ANDROID_DOWNLOAD_URL) gets that link as well. %>
-<% links = ApplicationHelper::ANDROID_APP_LINKS.map { |key, href| [t(".#{key}"), href] } %>
+    that publishes its own APK (ANDROID_DOWNLOAD_URL) gets that link as well.
+    On an Android device the native app is the main recommendation (Zapstore as
+    the primary button); elsewhere the installed web app is the full app. %>
+<% android = android_device? %>
+<% links = ApplicationHelper::ANDROID_APP_LINKS.map { |key, href| [key, t(".#{key}"), href] } %>
 <% own_apk = safe_external_url(ENV["ANDROID_DOWNLOAD_URL"]) %>
-<% links << [t(".download"), own_apk] if own_apk && ApplicationHelper::ANDROID_APP_LINKS.values.exclude?(own_apk) %>
-<div id="android-app" class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+<% links << [:download, t(".download"), own_apk] if own_apk && ApplicationHelper::ANDROID_APP_LINKS.values.exclude?(own_apk) %>
+<% primary = "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" %>
+<% secondary = "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" %>
+<div id="android-app" class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6"<%= ' data-android-device="true"'.html_safe if android %>>
   <h2 class="text-lg font-medium text-gray-900 dark:text-white"><%= t(".title") %></h2>
   <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= t(".intro") %></p>
-  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400"><%= t(".web_app") %></p>
+  <% unless android %>
+    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400"><%= t(".web_app") %></p>
+  <% end %>
   <div class="mt-3 flex flex-wrap gap-2">
-    <% links.each do |label, href| %>
+    <% links.each do |key, label, href| %>
       <%= link_to label, href, rel: "noopener noreferrer", target: "_blank",
-          class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" %>
+          class: (!android || key == :zapstore) ? primary : secondary %>
     <% end %>
   </div>
+  <% if android %>
+    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400"><%= t(".android_web_app") %></p>
+  <% end %>
 </div>

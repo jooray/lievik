@@ -52,4 +52,34 @@ RSpec.describe "Landing page", type: :request do
       end
     end
   end
+
+  describe "installing on an Android device" do
+    let(:android_ua) { "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36" }
+    let(:iphone_ua) { "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1" }
+
+    def install_section
+      response.body[/<section class="how install[^>]*>.*?<\/section>/m]
+    end
+
+    it "puts the native app first with Zapstore as the main button, and the web app second" do
+      get localized_landing_path(locale: :en), headers: { "User-Agent" => android_ua }
+
+      section = install_section
+      expect(section).to include("install-android", "Recommended for Android", "The web app works too")
+      expect(section.index("install-native")).to be < section.index("install-web")
+      expect(section).to include(%(href="#{ApplicationHelper::ANDROID_APP_LINKS[:zapstore]}" rel="noopener noreferrer" class="button"))
+      expect(section).not_to include("Add to Home Screen")
+      expect(response.headers["Vary"]).to include("User-Agent")
+    end
+
+    it "keeps the web app first with the iOS how-to everywhere else" do
+      get localized_landing_path(locale: :en), headers: { "User-Agent" => iphone_ua }
+
+      section = install_section
+      expect(section).not_to include("install-android", "Recommended for Android")
+      expect(section.index("install-web")).to be < section.index("install-native")
+      expect(section).to include("Add to Home Screen")
+      expect(section).not_to include('class="button"')
+    end
+  end
 end
