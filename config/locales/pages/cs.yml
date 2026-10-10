@@ -61,6 +61,23 @@ cs:
         share:
           title: "Sdílejte s rozmyslem"
           copy: "Lievik seřadí, co je relevantní, pomůže vám s konceptem zprávy a pamatuje si, co jste už použili."
+      install:
+        eyebrow: "Telefon, tablet, počítač"
+        heading: "Nainstalujte si ho jako aplikaci, na jakémkoli zařízení."
+        subheading: "Lievik je webová aplikace, kterou si přidáte na plochu. Otevře se ve vlastním okně a má všechny funkce na iPhonu, iPadu, Androidu i v počítači. Z obchodu s aplikacemi nemusíte stahovat nic."
+        web:
+          label: "Webová aplikace"
+          title: "Celá aplikace, všude"
+          copy: "Nainstalovaná webová aplikace je stejný Lievik jako v prohlížeči. Aktualizuje se sama, takže máte vždy nejnovější verzi."
+          ios_html: "<strong>iPhone a iPad:</strong> otevřete Lievik v Safari, klepněte na Sdílet a pak na Přidat na plochu."
+          other: "Android a počítač: v nabídce prohlížeče zvolte Nainstalovat aplikaci."
+        native:
+          label: "Volitelné"
+          title: "Chcete raději nativní aplikaci pro Android?"
+          copy: "I ta existuje. Umí totéž a přihlásíte se v ní přes Amber nebo jiný Nostr podepisovač v telefonu."
+          zapstore: "Zapstore"
+          obtainium: "Obtainium"
+          github: "Stáhnout z GitHubu"
       pricing:
         eyebrow: "Ceník"
         heading: "Tři dny zdarma. Když se osvědčí, zaplatíte v satech."

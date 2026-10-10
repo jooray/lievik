@@ -623,6 +623,51 @@
       .pricing {
         border-top: 1px solid var(--line);
       }
+
+      .install {
+        border-top: 1px solid var(--line);
+      }
+      .install .steps {
+        grid-template-columns: 3fr 2fr;
+      }
+      .install .step p + p {
+        margin-top: 12px;
+      }
+      .install-howto strong {
+        color: var(--ink);
+      }
+      .install-howto {
+        padding: 14px 16px;
+        border-radius: 9px;
+        background: var(--purple-soft);
+      }
+      .install .step p.install-howto {
+        margin-top: 18px;
+        color: var(--ink);
+      }
+      .store-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 20px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .store-links a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 650;
+      }
+      .store-links a:hover {
+        border-color: var(--purple);
+        color: var(--purple);
+      }
       .price-card h3 {
         margin: 26px 0 0;
         font-size: 30px;
@@ -811,7 +856,8 @@
           margin: 0 auto;
         }
         .answer-grid,
-        .steps {
+        .steps,
+        .install .steps {
           grid-template-columns: 1fr;
         }
         .answer-number {
@@ -1171,6 +1217,37 @@
               <p>
                 <%= t(".how.share.copy") %>
               </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="how install" id="install">
+        <div class="shell">
+          <div class="how-heading">
+            <div>
+              <p class="eyebrow"><%= t(".install.eyebrow") %></p>
+              <h2><%= t(".install.heading") %></h2>
+            </div>
+            <p><%= t(".install.subheading") %></p>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <span class="step-index"><%= t(".install.web.label") %></span>
+              <h3><%= t(".install.web.title") %></h3>
+              <p><%= t(".install.web.copy") %></p>
+              <p class="install-howto"><%= t(".install.web.ios_html") %></p>
+              <p><%= t(".install.web.other") %></p>
+            </article>
+            <article class="step">
+              <span class="step-index"><%= t(".install.native.label") %></span>
+              <h3><%= t(".install.native.title") %></h3>
+              <p><%= t(".install.native.copy") %></p>
+              <ul class="store-links">
+                <% ApplicationHelper::ANDROID_APP_LINKS.each do |key, href| %>
+                <li><a href="<%= href %>" rel="noopener noreferrer"><%= t(".install.native.#{key}") %></a></li>
+                <% end %>
+              </ul>
             </article>
           </div>
         </div>

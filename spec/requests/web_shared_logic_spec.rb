@@ -30,13 +30,14 @@ RSpec.describe "Web actions on shared logic", type: :request do
     expect(channel.relevance_threshold).to eq(65)
   end
 
-  it "links the Android app on the settings page only when a download URL is configured" do
+  it "links the Android app on the settings page, plus the instance's own APK when configured" do
     get edit_user_path
-    expect(response.body).not_to include('id="android-app"')
+    expect(response.body).to include('id="android-app"', *ApplicationHelper::ANDROID_APP_LINKS.values)
+    expect(response.body).not_to include("https://example.com/lievik.apk")
 
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with("ANDROID_DOWNLOAD_URL").and_return("https://example.com/lievik.apk")
     get edit_user_path
-    expect(response.body).to include('id="android-app"', "https://example.com/lievik.apk")
+    expect(response.body).to include("https://example.com/lievik.apk")
   end
 end

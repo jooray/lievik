@@ -12,6 +12,14 @@ module ApplicationHelper
   # Language names in their own language, for switchers.
   LOCALE_NAMES = { en: "English", sk: "Slovenčina", cs: "Čeština", es: "Español" }.freeze
 
+  # Where the native Android app is published (landing page and /user/edit).
+  # Order is the order shown: Zapstore, Obtainium, then the plain APK.
+  ANDROID_APP_LINKS = {
+    zapstore: "https://zapstore.dev/apps/today.cypherpunk.lievik",
+    obtainium: "obtainium://add/https://github.com/jooray/lievik",
+    github: "https://github.com/jooray/lievik/releases/latest"
+  }.freeze
+
   def locale_options
     I18n.available_locales.map { |l| [LOCALE_NAMES.fetch(l, l.to_s), l.to_s] }
   end

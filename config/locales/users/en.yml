@@ -3,7 +3,11 @@ en:
     android_app:
       title: "Android app"
       intro: "Lievik for Android: your channels, posts and drafts on your phone, kept in sync with this account. Sign in with Amber or another Nostr signer; each phone gets its own token in the list above."
-      download: "Download the Android app"
+      download: "Download the APK"
+      web_app: "You do not need it, though. This web app added to your home screen works just as well, on iPhone and iPad too."
+      zapstore: "Zapstore"
+      obtainium: "Obtainium"
+      github: "Download on GitHub"
     edit:
       language:
         label: "Interface language"

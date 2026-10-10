@@ -61,6 +61,23 @@ es:
         share:
           title: "Comparte con criterio"
           copy: "Lievik ordena por relevancia, te ayuda a redactar la actualización y recuerda lo que ya usaste."
+      install:
+        eyebrow: "Móvil, tablet, ordenador"
+        heading: "Instálalo como una app, en cualquier dispositivo."
+        subheading: "Lievik es una app web que puedes añadir a tu pantalla de inicio. Se abre en su propia ventana y tiene todas las funciones en iPhone, iPad, Android y ordenador. No hace falta bajar nada de una tienda de apps."
+        web:
+          label: "App web"
+          title: "La app completa, en todas partes"
+          copy: "La app web instalada es el mismo Lievik que usas en el navegador. Se actualiza sola, así que siempre tienes la última versión."
+          ios_html: "<strong>iPhone y iPad:</strong> abre Lievik en Safari, toca Compartir y luego Añadir a pantalla de inicio."
+          other: "Android y ordenador: elige Instalar aplicación en el menú del navegador."
+        native:
+          label: "Opcional"
+          title: "¿Prefieres una app nativa para Android?"
+          copy: "También la hay. Hace lo mismo, e inicias sesión con Amber u otro firmante de Nostr en el móvil."
+          zapstore: "Zapstore"
+          obtainium: "Obtainium"
+          github: "Descargar en GitHub"
       pricing:
         eyebrow: "Precios"
         heading: "Tres días gratis. Si te sirve, pagas en sats."

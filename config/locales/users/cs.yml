@@ -3,7 +3,11 @@ cs:
     android_app:
       title: "Aplikace pro Android"
       intro: "Lievik pro Android: vaše kanály, příspěvky a koncepty v telefonu, synchronizované s tímto účtem. Přihlaste se přes Amber nebo jiný Nostr podepisovač; každý telefon dostane vlastní token v seznamu výše."
-      download: "Stáhnout aplikaci pro Android"
+      download: "Stáhnout APK"
+      web_app: "Nepotřebujete ji. Tato webová aplikace přidaná na plochu funguje stejně dobře, i na iPhonu a iPadu."
+      zapstore: "Zapstore"
+      obtainium: "Obtainium"
+      github: "Stáhnout z GitHubu"
     edit:
       language:
         label: "Jazyk rozhraní"

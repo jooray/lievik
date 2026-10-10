@@ -61,6 +61,23 @@ en:
         share:
           title: "Share with intention"
           copy: "Lievik ranks what is relevant, helps you draft the update, and remembers what you have already used."
+      install:
+        eyebrow: "Phone, tablet, computer"
+        heading: "Install it like an app, on any device."
+        subheading: "Lievik is a web app you can add to your home screen. It opens in its own window and has every feature on iPhone, iPad, Android and desktop. There is nothing to get from an app store."
+        web:
+          label: "Web app"
+          title: "The full app, everywhere"
+          copy: "The installed web app is the same Lievik you use in the browser. It updates itself, so you always have the latest version."
+          ios_html: "<strong>iPhone and iPad:</strong> open Lievik in Safari, tap Share, then Add to Home Screen."
+          other: "Android and desktop: choose Install app in the browser menu."
+        native:
+          label: "Optional"
+          title: "Prefer a native Android app?"
+          copy: "There is one. It does the same things, and you sign in with Amber or another Nostr signer on the phone."
+          zapstore: "Zapstore"
+          obtainium: "Obtainium"
+          github: "Download on GitHub"
       pricing:
         eyebrow: "Pricing"
         heading: "Three days free. Pay in sats if it earns its keep."

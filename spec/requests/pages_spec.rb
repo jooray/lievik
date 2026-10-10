@@ -41,4 +41,15 @@ RSpec.describe "Landing page", type: :request do
       expect(response.body).to include("github.com/jooray/lievik")
     end
   end
+
+  describe "installing on the landing page" do
+    it "presents the web app as installable everywhere and the Android app as optional, in every locale" do
+      I18n.available_locales.each do |locale|
+        get localized_landing_path(locale: locale)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('id="install"', "Safari", *ApplicationHelper::ANDROID_APP_LINKS.values)
+      end
+    end
+  end
 end
