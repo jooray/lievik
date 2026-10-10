@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 
 /** Markdown blocks: the subset the AI writes (headings, lists, quotes, code, rules). */
 sealed interface MdBlock {
@@ -53,6 +54,8 @@ sealed interface MdInline {
     data class Strike(val children: List<MdInline>) : MdInline
     data class Code(val text: String) : MdInline
     data class Link(val children: List<MdInline>, val url: String) : MdInline
+    /** An "Ask your content" citation, `[EVENT:123]`. */
+    data class Citation(val eventId: Long) : MdInline
 }
 
 object MarkdownParser {
@@ -60,6 +63,7 @@ object MarkdownParser {
     private val BULLET = Regex("""^\s{0,3}[-*+]\s+(.*)$""")
     private val ORDERED = Regex("""^\s{0,3}(\d{1,9})[.)]\s+(.*)$""")
     private val RULE = Regex("""^\s{0,3}([-*_])(\s*\1){2,}\s*$""")
+    private val CITATION = Regex("""\[EVENT:(\d+)]""")
     private val AUTOLINK = Regex("""https?://[^\s<>()\[\]]+[^\s<>()\[\].,;:!?'"]""")
 
     fun blocks(markdown: String): List<MdBlock> {
@@ -182,6 +186,11 @@ object MarkdownParser {
                             flush(); out += MdInline.Italic(children); i = end + 1; continue
                         }
                     }
+                    c == '[' && s.startsWith("[EVENT:", i) -> {
+                        val m = CITATION.matchAt(s, i)
+                        val id = m?.groupValues?.get(1)?.toLongOrNull()
+                        if (m != null && id != null) { flush(); out += MdInline.Citation(id); i = m.range.last + 1; continue }
+                    }
                     c == '[' -> {
                         val close = s.indexOf(']', i + 1)
                         if (close > i && close + 1 < s.length && s[close + 1] == '(') {
@@ -223,27 +232,49 @@ object MarkdownParser {
     }
 }
 
-fun AnnotatedString.Builder.appendInline(spans: List<MdInline>, linkColor: Color, codeBackground: Color) {
+/** Colours of a citation badge; [onClick] opens the cited event (no badge link without it). */
+class CitationStyle(val text: Color, val background: Color, val onClick: ((Long) -> Unit)?)
+
+fun AnnotatedString.Builder.appendInline(spans: List<MdInline>, linkColor: Color, codeBackground: Color, citation: CitationStyle? = null) {
     for (span in spans) when (span) {
         is MdInline.Plain -> append(span.text)
-        is MdInline.Bold -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { appendInline(span.children, linkColor, codeBackground) }
-        is MdInline.Italic -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { appendInline(span.children, linkColor, codeBackground) }
-        is MdInline.Strike -> withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) { appendInline(span.children, linkColor, codeBackground) }
+        is MdInline.Bold -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { appendInline(span.children, linkColor, codeBackground, citation) }
+        is MdInline.Italic -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { appendInline(span.children, linkColor, codeBackground, citation) }
+        is MdInline.Strike -> withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) { appendInline(span.children, linkColor, codeBackground, citation) }
         is MdInline.Code -> withStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = codeBackground)) { append(span.text) }
         is MdInline.Link -> withLink(
             LinkAnnotation.Url(span.url, TextLinkStyles(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline))),
-        ) { appendInline(span.children, linkColor, codeBackground) }
+        ) { appendInline(span.children, linkColor, codeBackground, citation) }
+        is MdInline.Citation -> {
+            val style = SpanStyle(
+                color = citation?.text ?: linkColor,
+                background = citation?.background ?: Color.Unspecified,
+                fontWeight = FontWeight.Medium,
+                fontSize = 0.85.em,
+            )
+            val label = "\u00A0${span.eventId}\u00A0"
+            val onClick = citation?.onClick
+            if (onClick != null) {
+                withLink(LinkAnnotation.Clickable("event:${span.eventId}", TextLinkStyles(style)) { onClick(span.eventId) }) { append(label) }
+            } else {
+                withStyle(style) { append(label) }
+            }
+        }
     }
 }
 
-/** Renders generated content and chat answers. Text is selectable; links open in the browser. */
+/**
+ * Renders generated content and chat answers. Text is selectable; links open in the browser;
+ * `[EVENT:id]` citations become badges that call [onCitation].
+ */
 @Composable
-fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
+fun MarkdownText(markdown: String, modifier: Modifier = Modifier, onCitation: ((Long) -> Unit)? = null) {
     val blocks = remember(markdown) { MarkdownParser.blocks(markdown) }
     val link = MaterialTheme.colorScheme.primary
     val codeBg = MaterialTheme.colorScheme.surfaceVariant
+    val citation = CitationStyle(MaterialTheme.colorScheme.onTertiaryContainer, MaterialTheme.colorScheme.tertiaryContainer, onCitation)
     val typography = MaterialTheme.typography
-    fun inline(text: String) = buildAnnotatedString { appendInline(MarkdownParser.inline(text), link, codeBg) }
+    fun inline(text: String) = buildAnnotatedString { appendInline(MarkdownParser.inline(text), link, codeBg, citation) }
     SelectionContainer(modifier) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             for (block in blocks) when (block) {

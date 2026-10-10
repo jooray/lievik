@@ -2,18 +2,19 @@ package today.cypherpunk.lievik.ui.screens.ask
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material3.AssistChip
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -131,7 +133,32 @@ class AskViewModel(private val container: AppContainer) : ViewModel() {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/** One source under an answer, like the web's sources column: id badge, source, date, preview. */
+@Composable
+private fun CitedEventCard(c: CitedEvent, onClick: () -> Unit) {
+    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "${c.id}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(4.dp)).padding(horizontal = 6.dp, vertical = 1.dp),
+                )
+                Text(
+                    c.sourceName ?: stringResource(R.string.source_label_unknown),
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
+                )
+                c.publishedAt?.takeIf { it.isNotBlank() }?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
+            c.content?.takeIf { it.isNotBlank() }?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
 @Composable
 fun AskScreen(nav: NavController) {
     val vm = appViewModel { AskViewModel(it) }
@@ -179,23 +206,10 @@ fun AskScreen(nav: NavController) {
                     val shown = if (turn.message.error && turn.message.content.isBlank()) {
                         turn.message.copy(content = turn.error?.let { errorText(it) } ?: stringResource(R.string.rag_generic_error))
                     } else turn.message
-                    ChatBubble(shown, stringResource(R.string.rag_thinking)) {
+                    ChatBubble(shown, stringResource(R.string.rag_thinking), onCitation = { nav.navigate(Routes.event(it)) }) {
                         if (turn.cited.isNotEmpty()) {
                             Text(stringResource(R.string.rag_sources), style = MaterialTheme.typography.labelLarge)
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                turn.cited.forEach { c ->
-                                    AssistChip(
-                                        onClick = { nav.navigate(Routes.event(c.id)) },
-                                        label = {
-                                            Text(
-                                                listOfNotNull(c.sourceName ?: stringResource(R.string.source_label_unknown), Times.date(c.publishedAt).takeIf { it.isNotEmpty() })
-                                                    .joinToString(" · "),
-                                                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 220.dp),
-                                            )
-                                        },
-                                    )
-                                }
-                            }
+                            turn.cited.forEach { c -> CitedEventCard(c) { nav.navigate(Routes.event(c.id)) } }
                         }
                     }
                 }

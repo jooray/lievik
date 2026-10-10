@@ -26,8 +26,8 @@ android {
         targetSdk = 37
         // The server compares this against ANDROID_MIN_VERSION_CODE /
         // ANDROID_LATEST_VERSION_CODE (GET /api/v1/meta). Bump on every release.
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         buildConfigField("String", "DEFAULT_SERVER", "\"https://lievik.cypherpunk.today\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

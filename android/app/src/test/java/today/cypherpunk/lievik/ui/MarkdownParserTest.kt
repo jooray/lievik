@@ -45,6 +45,24 @@ class MarkdownParserTest {
     }
 
     @Test
+    fun eventCitations() {
+        assertEquals(
+            listOf(
+                MdInline.Plain("update. "),
+                MdInline.Citation(2206),
+                MdInline.Plain(" more"),
+                MdInline.Citation(2207),
+                MdInline.Citation(3),
+            ),
+            MarkdownParser.inline("update. [EVENT:2206] more[EVENT:2207][EVENT:3]"),
+        )
+        assertEquals(MdInline.Bold(listOf(MdInline.Plain("x "), MdInline.Citation(5))), MarkdownParser.inline("**x [EVENT:5]**")[0])
+        // not a citation: plain text and ordinary links are untouched
+        assertEquals(listOf(MdInline.Plain("[EVENT:abc]")), MarkdownParser.inline("[EVENT:abc]"))
+        assertEquals(MdInline.Link(listOf(MdInline.Plain("EVENT")), "https://x.example"), MarkdownParser.inline("[EVENT](https://x.example)")[0])
+    }
+
+    @Test
     fun proposalJsonIsHiddenFromTheChatText() {
         assertEquals("Here you go:", stripJsonBlocks("Here you go:\n```json\n{\"channels\":[]}\n```"))
     }

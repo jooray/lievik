@@ -32,7 +32,13 @@ import today.cypherpunk.lievik.R
 data class ChatMessage(val role: String, val content: String, val streaming: Boolean = false, val error: Boolean = false)
 
 @Composable
-fun ChatBubble(message: ChatMessage, thinking: String, modifier: Modifier = Modifier, footer: @Composable () -> Unit = {}) {
+fun ChatBubble(
+    message: ChatMessage,
+    thinking: String,
+    modifier: Modifier = Modifier,
+    onCitation: ((Long) -> Unit)? = null,
+    footer: @Composable () -> Unit = {},
+) {
     val mine = message.role == "user"
     Box(modifier.fillMaxWidth(), contentAlignment = if (mine) Alignment.CenterEnd else Alignment.CenterStart) {
         Surface(
@@ -52,7 +58,7 @@ fun ChatBubble(message: ChatMessage, thinking: String, modifier: Modifier = Modi
                         Text(thinking, modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodyMedium)
                     }
                     mine || message.error -> Text(message.content, style = MaterialTheme.typography.bodyMedium)
-                    else -> MarkdownText(message.content)
+                    else -> MarkdownText(message.content, onCitation = onCitation)
                 }
                 footer()
             }
