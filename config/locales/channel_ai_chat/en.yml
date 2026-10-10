@@ -14,6 +14,10 @@ en:
       example_3: "“Set up 3 channels: newsletter, Telegram group, and social media — all about Nostr development”"
       placeholder: "Describe the channels you need..."
       send: "Send"
+    bulk_create:
+      notice:
+        one: "Created %{count} channel. Rating recent events in the background."
+        other: "Created %{count} channels. Rating recent events in the background."
     errors:
       invalid_history: "Invalid conversation history"
       empty_message: "Please enter a message"

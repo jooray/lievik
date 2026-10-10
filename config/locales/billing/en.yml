@@ -1,0 +1,60 @@
+---
+en:
+  billing:
+    nav: Billing
+    start_trial: Start free trial
+    denied: Lievik needs a trial or paid time to fetch and rate posts.
+    paywall: The AI features need a trial or paid time.
+    daily_cap: You've reached today's limit for this feature. It resets at midnight UTC.
+    unavailable: Billing isn't answering, so this is paused. Try again in a minute.
+    source_saved_paused: Source saved. Lievik will start fetching it once your trial or paid time starts.
+    mcp_payment_required: Lievik needs a trial or paid time for this. Open Billing in Lievik to start the free trial or pay.
+    paid: Paid. Lievik is active until %{date}.
+    trial_started: Your free trial runs until %{date}. Lievik is fetching your sources now.
+    banner:
+      none: Lievik isn't fetching or rating anything yet. Your free 3-day trial starts when you add or refresh a source, rate posts or use the AI, or right now with this button.
+      trial: Free trial until %{date}.
+      expired: Your access ended on %{date}, so Lievik has stopped fetching and rating. Your data is still here.
+      plans: Plans and payment
+    errors:
+      unknown_plan: That plan doesn't exist.
+      sats_range: Enter between %{min} and %{max} sats.
+      unavailable: Billing can't create an invoice right now. Try again in a minute.
+    show:
+      title: Billing
+      intro: Lievik fetches your sources, rates posts and answers with AI while you have a trial or paid time. It is prepaid in sats, so there is no subscription to cancel. Without it you can still sign in and use everything already in Lievik.
+      status:
+        title: Your access
+        active: Paid until %{date}.
+        trial: Free trial until %{date}.
+        expired: Your access ended on %{date}. Pay below to continue.
+        none: You haven't started your free 3-day trial yet.
+        unknown: Billing can't be reached right now. Try again in a minute.
+        other: "%{product} is also active until %{date}."
+        npub: 'Payments are tied to your login key: %{npub}'
+      products:
+        nalgorithm: nalgorithm
+        emanator_ai: Emanator AI
+        lievik: Lievik
+      plans:
+        price: "%{sats} sats / %{days} days"
+        pay: Pay %{sats} sats
+        unavailable: Prices can't be loaded because billing isn't answering. Try again in a minute.
+        lievik:
+          name: Lievik
+          covers: Fetching and rating your sources, AI chat over your content, and AI-written posts.
+        all_access:
+          name: All-access
+          covers: Lievik, hosted nalgorithm (a ranked feed and voice digests) and Emanator's AI writing. Separately they cost 35,000 sats.
+      custom:
+        title: Pay any amount
+        help: Time is credited pro rata and added to what you already have. The minimum is %{min} sats, which buys %{days} days of Lievik.
+        plan: Plan
+        sats: Sats
+        pay: Create invoice
+      self_host_html: 'Lievik is open source. Run it yourself with your own AI key and none of this applies: %{link}'
+      terms: "Terms, refunds and support"
+      terms_url: "https://cypherpunk.today/terms/"
+  js:
+    billing:
+      open_plans: See plans

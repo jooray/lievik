@@ -76,13 +76,7 @@ module ApplicationHelper
   # has none), so never interpolate `source.name` straight into a view — that
   # renders a dangling "from ".
   def source_label(source)
-    return t("app.source_label.unknown") if source.nil?
-    return source.name if source.name.present?
-
-    case source.source_type
-    when "manual" then t("app.source_label.manual")
-    else source.identifier.presence&.truncate(30) || t("app.source_label.unnamed")
-    end
+    source.nil? ? t("app.source_label.unknown") : source.display_label
   end
 
   def relevance_score_class(score)
@@ -94,10 +88,7 @@ module ApplicationHelper
   end
 
   def top_relevant_channels(event, limit: 3)
-    event.channel_events
-      .select { |ce| !ce.used? }
-      .sort_by { |ce| -(ce.relevance_score || 0) }
-      .first(limit)
+    event.top_channel_events(limit: limit)
   end
 
   # Feed/relay-supplied URLs must never reach an href unfiltered — a

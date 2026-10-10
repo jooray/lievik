@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_19_161119) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_120000) do
   create_table "activity_logs", force: :cascade do |t|
     t.string "activity_type", null: false
     t.datetime "completed_at"
@@ -77,6 +77,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_19_161119) do
     t.datetime "used_at"
     t.index ["channel_id", "event_id"], name: "index_channel_events_on_channel_id_and_event_id", unique: true
     t.index ["channel_id", "relevance_score"], name: "index_channel_events_on_channel_id_and_relevance_score"
+    t.index ["channel_id", "updated_at", "id"], name: "index_channel_events_on_channel_updated_id"
     t.index ["channel_id", "used", "relevance_score"], name: "index_channel_events_on_channel_used_relevance"
     t.index ["channel_id", "used"], name: "index_channel_events_on_channel_id_and_used"
     t.index ["channel_id"], name: "index_channel_events_on_channel_id"
@@ -141,6 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_19_161119) do
     t.index ["source_id", "d_tag"], name: "index_events_on_source_id_and_d_tag"
     t.index ["source_id", "external_id"], name: "index_events_on_source_id_and_external_id", unique: true
     t.index ["source_id", "published_at"], name: "index_events_on_source_id_and_published_at"
+    t.index ["source_id", "updated_at", "id"], name: "index_events_on_source_updated_id"
     t.index ["source_id"], name: "index_events_on_source_id"
   end
 
@@ -168,6 +170,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_19_161119) do
     t.datetime "listener_started_at"
     t.string "listener_token"
     t.string "pending_rpc_id"
+    t.string "poll_token_digest"
     t.string "relay_url", null: false
     t.string "secret", null: false
     t.string "session_id", null: false

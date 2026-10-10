@@ -12,6 +12,7 @@ class Channel < ApplicationRecord
   validates :language, presence: true
 
   after_initialize :set_default_settings, if: :new_record?
+  before_validation :normalize_settings
 
   def self.default_settings
     {
@@ -98,5 +99,21 @@ class Channel < ApplicationRecord
 
   def set_default_settings
     self.settings ||= self.class.default_settings
+  end
+
+  # Forms post strings: a threshold of "60" and a humanize checkbox whose
+  # hidden field sends "false" — and "false" != false, so unticking the box
+  # used to leave humanizing on. Store real types whatever the caller sent.
+  def normalize_settings
+    return unless settings.is_a?(Hash)
+
+    normalized = settings.stringify_keys
+    if normalized.key?("relevance_threshold") && !normalized["relevance_threshold"].nil?
+      normalized["relevance_threshold"] = normalized["relevance_threshold"].to_i.clamp(0, 100)
+    end
+    if normalized.key?("humanize_output") && !normalized["humanize_output"].nil?
+      normalized["humanize_output"] = ActiveModel::Type::Boolean.new.cast(normalized["humanize_output"])
+    end
+    self.settings = normalized unless normalized == settings
   end
 end

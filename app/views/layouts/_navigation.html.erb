@@ -78,6 +78,16 @@
             <%= t(".ask_content") %>
           <% end %>
         </li>
+        <% if Billing.enabled? %>
+          <li>
+            <%= link_to billing_path, class: "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 #{request.path.start_with?('/billing') ? 'bg-gray-100 dark:bg-gray-700' : ''}" do %>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <%= t("billing.nav") %>
+            <% end %>
+          </li>
+        <% end %>
       </ul>
     </div>
 
@@ -235,6 +245,16 @@
             <%= t(".ask_content") %>
           <% end %>
         </li>
+        <% if Billing.enabled? %>
+          <li>
+            <%= link_to billing_path, class: "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 #{request.path.start_with?('/billing') ? 'bg-gray-100 dark:bg-gray-700' : ''}", data: { action: "click->mobile-nav#close" } do %>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <%= t("billing.nav") %>
+            <% end %>
+          </li>
+        <% end %>
       </ul>
     </div>
 

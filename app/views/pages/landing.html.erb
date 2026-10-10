@@ -620,6 +620,56 @@
         line-height: 1.55;
       }
 
+      .pricing {
+        border-top: 1px solid var(--line);
+      }
+      .price-card h3 {
+        margin: 26px 0 0;
+        font-size: 30px;
+      }
+      .step .price-then {
+        margin: 4px 0 18px;
+        color: var(--ink);
+        font-weight: 650;
+      }
+      .price-card ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+      .price-card li + li {
+        margin-top: 7px;
+      }
+      .price-card a {
+        color: var(--purple);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .price-card.featured {
+        box-shadow: inset 0 3px 0 var(--purple);
+      }
+      .pricing-terms {
+        margin: 22px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .pricing-terms a {
+        color: var(--purple);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .nav-link {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 650;
+        padding: 0 4px;
+      }
+      .nav-link:hover {
+        color: var(--ink);
+      }
+
       .closing {
         padding: 76px 0;
         color: #fff;
@@ -788,6 +838,12 @@
           margin-top: 30px;
         }
       }
+      @media (max-width: 430px) {
+        /* Keeps "Launch app" on one line; pricing is one scroll away. */
+        .nav-link {
+          display: none;
+        }
+      }
       @media (max-width: 520px) {
         .shell {
           width: min(100% - 28px, 1160px);
@@ -884,6 +940,7 @@
           ><span class="mark" aria-hidden="true"></span>Lievik</a
         >
         <div class="nav-actions">
+          <a class="nav-link" href="#pricing"><%= t(".nav_pricing") %></a>
           <a
             class="theme-toggle nav-github"
             href="https://github.com/jooray/lievik"
@@ -1116,6 +1173,50 @@
               </p>
             </article>
           </div>
+        </div>
+      </section>
+
+      <section class="how pricing" id="pricing">
+        <div class="shell">
+          <div class="how-heading">
+            <div>
+              <p class="eyebrow"><%= t(".pricing.eyebrow") %></p>
+              <h2><%= t(".pricing.heading") %></h2>
+            </div>
+            <p><%= t(".pricing.subheading") %></p>
+          </div>
+          <div class="steps">
+            <article class="step price-card">
+              <span class="step-index"><%= t(".pricing.lievik.label") %></span>
+              <h3><%= t(".pricing.lievik.price") %></h3>
+              <p class="price-then"><%= t(".pricing.lievik.then") %></p>
+              <ul>
+                <li><%= t(".pricing.lievik.trial") %></li>
+                <li><%= t(".pricing.lievik.paused") %></li>
+                <li><%= t(".pricing.lievik.pro_rata") %></li>
+                <li><%= t(".pricing.lievik.keep_days") %></li>
+              </ul>
+            </article>
+            <article class="step price-card featured">
+              <span class="step-index"><%= t(".pricing.bundle.label") %></span>
+              <h3><%= t(".pricing.bundle.price") %></h3>
+              <p class="price-then"><%= t(".pricing.bundle.then") %></p>
+              <ul>
+                <li><%= t(".pricing.bundle.covers_html") %></li>
+                <li><%= t(".pricing.bundle.saving") %></li>
+                <li><%= t(".pricing.bundle.keep_days") %></li>
+              </ul>
+            </article>
+            <article class="step price-card">
+              <span class="step-index"><%= t(".pricing.self_host.label") %></span>
+              <h3><%= t(".pricing.self_host.price") %></h3>
+              <p class="price-then"><%= t(".pricing.self_host.then") %></p>
+              <ul>
+                <li><%= t(".pricing.self_host.copy_html") %></li>
+              </ul>
+            </article>
+          </div>
+          <p class="pricing-terms"><%= t(".pricing.terms_html") %></p>
         </div>
       </section>
 

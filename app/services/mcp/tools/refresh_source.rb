@@ -20,6 +20,7 @@ module Mcp
 
       def call
         source = find_user_source!(args[:source_id])
+        require_paid_access!
         SourceIngestionJob.perform_later(source.id)
 
         { ok: true, source: serialize_source(source), enqueued: true }

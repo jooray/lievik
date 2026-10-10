@@ -1,0 +1,10 @@
+en:
+  api:
+    errors:
+      unauthorized: "Sign in again: this device's access token is missing, revoked or expired."
+      not_found: "Not found."
+      invalid: "Some of the values are not valid."
+      bad_request: "The request is missing a required value."
+      missing: "is missing"
+      rate_limited: "Too many requests. Wait a minute and try again."
+      invalid_cursor: "The sync position is not valid. Start a full sync."

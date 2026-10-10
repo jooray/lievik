@@ -100,6 +100,13 @@ Rails.application.routes.draw do
   post "/user/reindex", to: "users#reindex", as: :reindex_user
 
   # RAG Chat
+  # Paid access on the hosted instance (404 when billing is not configured)
+  get "billing", to: "billing#show", as: :billing
+  get "billing/app_return", to: "billing_returns#show", as: :billing_app_return
+  get "billing/status", to: "billing#status", as: :billing_status
+  post "billing/trial", to: "billing#start_trial", as: :billing_trial
+  post "billing/charges", to: "billing#create_charge", as: :billing_charges
+
   get "/chat", to: "rag_chat#index", as: :rag_chat
   post "/chat/ask", to: "rag_chat#ask", as: :rag_chat_ask
   post "/chat/ask_stream", to: "rag_chat#ask_stream", as: :rag_chat_ask_stream
@@ -109,6 +116,99 @@ Rails.application.routes.draw do
 
   # MCP (Model Context Protocol) endpoint — auth via Authorization: Bearer <api token>
   post "/mcp", to: "mcp/server#handle"
+
+  # App API (Android). docs/API_V1.md is the contract; auth via
+  # Authorization: Bearer <api token>, except meta and auth.
+  namespace :api do
+    namespace :v1 do
+      get "meta", to: "meta#show"
+
+      post "auth/challenge", to: "auth#challenge"
+      post "auth/token", to: "auth#token"
+      post "auth/nostrconnect", to: "auth#nostrconnect"
+      post "auth/poll", to: "auth#poll"
+      delete "session", to: "auth#destroy"
+      post "auth/bunker", to: "auth#bunker"
+
+      get "me", to: "me#show"
+      patch "me", to: "me#update"
+      post "me/refresh_profile", to: "me#refresh_profile"
+      post "me/reindex", to: "me#reindex"
+
+      resources :templates, only: [:index, :create, :update, :destroy], param: :index
+      resources :api_tokens, only: [:index, :create, :destroy]
+
+      get "dashboard", to: "dashboard#show"
+      post "dashboard/rate_all", to: "dashboard#rate_all"
+
+      get "sync", to: "sync#show"
+
+      resources :sources, except: [:new, :edit] do
+        member do
+          get :events
+          post :refresh
+        end
+        collection do
+          post :refresh_all
+        end
+      end
+
+      # Before `resources :channels`, so "ai" is never taken for a channel id.
+      post "channels/ai/stream", to: "channel_ai_chat#stream"
+      post "channels/ai/bulk_create", to: "channel_ai_chat#bulk_create"
+
+      resources :channels, except: [:edit] do
+        member do
+          post :rate
+        end
+        resources :events, controller: "channel_events", only: [:index] do
+          collection do
+            post :mark_used
+            post :mark_unused
+            post :rate
+          end
+        end
+        resources :contents, controller: "channel_contents", except: [:new, :edit] do
+          member do
+            post :generate
+            post :refine
+            post :publish
+            post :revert
+          end
+        end
+      end
+
+      resources :events, only: [:index, :show] do
+        collection do
+          post :rate
+        end
+        member do
+          post :mark_used
+        end
+      end
+      resources :manual_events, only: [:create]
+
+      get "chat", to: "chat#show"
+      post "chat/stream", to: "chat#stream"
+
+      resources :activity_logs, only: [:index] do
+        collection do
+          get :active
+          post :cleanup_stale
+        end
+        member do
+          get :dev_logs
+          post :cancel
+          post :retry, action: :retry_job
+        end
+      end
+
+      get "billing", to: "billing#show"
+      post "billing/trial", to: "billing#start_trial"
+      post "billing/charges", to: "billing#create_charge"
+      get "billing/charges/:invoice_id", to: "billing#charge", as: :billing_charge, constraints: { invoice_id: %r{[^/]+} }
+    end
+  end
 
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check

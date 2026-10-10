@@ -5,6 +5,10 @@ en:
       notice:
         one: "Marked %{count} event as used"
         other: "Marked %{count} events as used"
+    bulk_mark_unused:
+      notice:
+        one: "Marked %{count} event as unused"
+        other: "Marked %{count} events as unused"
     bulk_rate:
       notice:
         one: "Rerating queued for %{count} event"

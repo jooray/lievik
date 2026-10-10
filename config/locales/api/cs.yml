@@ -1,0 +1,10 @@
+cs:
+  api:
+    errors:
+      unauthorized: "Přihlaste se znovu: přístupový token tohoto zařízení chybí, byl zrušen nebo vypršel."
+      not_found: "Nenalezeno."
+      invalid: "Některé hodnoty nejsou platné."
+      bad_request: "V požadavku chybí povinná hodnota."
+      missing: "chybí"
+      rate_limited: "Příliš mnoho požadavků. Počkejte minutu a zkuste to znovu."
+      invalid_cursor: "Pozice synchronizace není platná. Spusťte úplnou synchronizaci."

@@ -5,6 +5,10 @@ es:
       notice:
         one: "%{count} publicación marcada como usada"
         other: "%{count} publicaciones marcadas como usadas"
+    bulk_mark_unused:
+      notice:
+        one: "%{count} publicación marcada como no usada"
+        other: "%{count} publicaciones marcadas como no usadas"
     bulk_rate:
       notice:
         one: "Nueva valoración en cola para %{count} publicación"

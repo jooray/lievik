@@ -25,6 +25,13 @@ class ApiToken < ApplicationRecord
   end
 
   def self.authenticate(plain)
+    authenticate_token(plain)&.user
+  end
+
+  # Like .authenticate, but returns the token record itself, for callers that
+  # need to know which token was used (the app API revokes it on sign-out and
+  # marks it as "current" in the token list).
+  def self.authenticate_token(plain)
     return nil if plain.blank?
 
     token = find_by(token_digest: digest_for(plain))
@@ -32,7 +39,7 @@ class ApiToken < ApplicationRecord
     return nil if token.expired?
 
     token.update_columns(last_used_at: Time.current)
-    token.user
+    token
   end
 
   def self.digest_for(plain)

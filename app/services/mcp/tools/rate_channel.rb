@@ -20,6 +20,7 @@ module Mcp
 
       def call
         channel = find_user_channel!(args[:channel_id])
+        require_paid_access!
         RateEventsJob.perform_later(channel.id)
 
         { ok: true, channel: serialize_channel(channel), enqueued: true }

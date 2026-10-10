@@ -1,0 +1,21 @@
+repository: https://github.com/jooray/lievik
+metadata_sources:
+    - github
+name: Lievik
+summary: Curate Nostr and RSS content for your newsletters and chat groups
+description: |
+  Lievik pulls posts from the Nostr accounts and RSS feeds you follow, rates each one for every channel you run (a newsletter, a Signal group, a social account) and drafts the post for you from the ones you pick.
+
+  This is the Android app for the hosted service at lievik.cypherpunk.today, or for your own self-hosted instance. Sign in with Amber or any NIP-46 signer. Your sources, channels and ratings are cached on the phone, so lists open instantly and work offline; drafting, asking questions about your content and rating need a connection.
+
+  The interface is in English, Slovak, Czech and Spanish.
+website: https://lievik.cypherpunk.today
+icon: ./public/icon.png
+tags:
+    - nostr
+    - rss
+    - newsletter
+    - curation
+    - ai
+license: MIT
+pubkey: npub1m2mvvpjugwdehtaskrcl7ksvdqnnhnjur9v6g9v266nss504q7mqvlr8p9

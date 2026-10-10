@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ActivityLogsController < ApplicationController
+  requires_paid_access only: :retry_job
+
   def index
     @activity_logs = current_user.activity_logs.recent.page(params[:page]).per(50)
     @active_jobs = current_user.activity_logs.active
@@ -44,41 +46,16 @@ class ActivityLogsController < ApplicationController
   end
 
   def cancel
-    activity_log = current_user.activity_logs.find(params[:id])
-    if activity_log.active?
-      activity_log.fail!(message: "Cancelled by user")
-      redirect_to activity_logs_path, notice: t(".notice")
-    else
-      redirect_to activity_logs_path, alert: t(".already_finished", status: t("activity_logs.statuses.#{activity_log.status}"))
-    end
+    result = ActivityLogs::Actions.cancel(current_user.activity_logs.find(params[:id]))
+    redirect_to activity_logs_path, (result.ok? ? :notice : :alert) => result.message
   end
 
   def retry_job
-    activity_log = current_user.activity_logs.find(params[:id])
-    channel_id = activity_log.metadata["channel_id"]
-
-    if channel_id.blank?
-      redirect_to activity_logs_path, alert: t(".no_channel")
-      return
-    end
-
-    channel = current_user.channels.find_by(id: channel_id)
-    if channel.nil?
-      redirect_to activity_logs_path, alert: t(".channel_missing")
-      return
-    end
-
-    RateEventsJob.perform_later(channel.id)
-    redirect_to activity_logs_path, notice: t(".notice", channel: channel.name)
+    result = ActivityLogs::Actions.retry(current_user, current_user.activity_logs.find(params[:id]))
+    redirect_to activity_logs_path, (result.ok? ? :notice : :alert) => result.message
   end
 
   def cleanup_stale
-    stale_count = current_user.activity_logs.stale.count
-    current_user.activity_logs.stale.find_each do |activity|
-      activity.fail!(message: "Job stale — no progress for #{activity.minutes_since_last_update} minutes")
-    end
-
-    redirect_to activity_logs_path, notice: t(".notice", count: stale_count)
+    redirect_to activity_logs_path, notice: ActivityLogs::Actions.cleanup_stale(current_user).message
   end
 end
-

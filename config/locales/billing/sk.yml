@@ -1,0 +1,60 @@
+---
+sk:
+  billing:
+    nav: Platby
+    start_trial: Spustiť skúšku zadarmo
+    denied: Na načítavanie a hodnotenie príspevkov potrebuje Lievik skúšku alebo zaplatený čas.
+    paywall: Funkcie s AI potrebujú skúšku alebo zaplatený čas.
+    daily_cap: Dosiahli ste dnešný limit pre túto funkciu. Obnoví sa o polnoci UTC.
+    unavailable: Platobný systém neodpovedá, preto je toto pozastavené. Skúste to o minútu.
+    source_saved_paused: Zdroj je uložený. Lievik ho začne načítavať, keď sa začne vaša skúška alebo zaplatený čas.
+    mcp_payment_required: Lievik na toto potrebuje skúšku alebo zaplatený čas. V Lieviku otvorte Platby a spustite skúšku zadarmo alebo zaplaťte.
+    paid: Zaplatené. Lievik máte aktívny do %{date}.
+    trial_started: Skúška zadarmo vám beží do %{date}. Lievik práve načítava vaše zdroje.
+    banner:
+      none: Lievik zatiaľ nič nenačítava ani nehodnotí. Trojdňová skúška zadarmo sa začne, keď pridáte alebo obnovíte zdroj, ohodnotíte príspevky alebo použijete AI. Alebo hneď týmto tlačidlom.
+      trial: Skúška zadarmo do %{date}.
+      expired: Prístup skončil %{date}, Lievik preto prestal načítavať a hodnotiť. Vaše dáta tu zostávajú.
+      plans: Plány a platba
+    errors:
+      unknown_plan: Taký plán neexistuje.
+      sats_range: Zadajte %{min} až %{max} satov.
+      unavailable: Faktúru sa teraz nepodarilo vytvoriť. Skúste to o minútu.
+    show:
+      title: Platby
+      intro: Lievik načítava vaše zdroje, hodnotí príspevky a odpovedá s AI, kým máte skúšku alebo zaplatený čas. Platí sa vopred v satoch, takže nie je čo rušiť. Aj bez toho sa prihlásite a všetko, čo už v Lieviku je, môžete používať.
+      status:
+        title: Váš prístup
+        active: Zaplatené do %{date}.
+        trial: Skúška zadarmo do %{date}.
+        expired: Prístup skončil %{date}. Pokračovať môžete platbou nižšie.
+        none: Trojdňovú skúšku zadarmo ste ešte nespustili.
+        unknown: Platobný systém je teraz nedostupný. Skúste to o minútu.
+        other: "%{product} máte aktívny do %{date}."
+        npub: 'Platby sú viazané na váš prihlasovací kľúč: %{npub}'
+      products:
+        nalgorithm: nalgorithm
+        emanator_ai: Emanator AI
+        lievik: Lievik
+      plans:
+        price: "%{sats} satov / %{days} dní"
+        pay: Zaplatiť %{sats} satov
+        unavailable: Ceny sa teraz nedajú načítať, platobný systém neodpovedá. Skúste to o minútu.
+        lievik:
+          name: Lievik
+          covers: Načítavanie a hodnotenie vašich zdrojov, chat s AI nad vaším obsahom a príspevky písané s AI.
+        all_access:
+          name: Všetky aplikácie
+          covers: Lievik, hostovaný nalgorithm (zoradený feed a hlasové prehľady) a písanie s AI v Emanatore. Zvlášť stoja 35 000 satov.
+      custom:
+        title: Ľubovoľná suma
+        help: Čas sa pripíše pomerne a pridá k tomu, čo už máte. Minimum je %{min} satov, to stačí na %{days} dní Lievika.
+        plan: Plán
+        sats: Saty
+        pay: Vytvoriť faktúru
+      self_host_html: 'Lievik je open source. Keď si ho spustíte sami s vlastným kľúčom k AI, nič z tohto sa vás netýka: %{link}'
+      terms: "Podmienky, vrátenie peňazí a podpora"
+      terms_url: "https://cypherpunk.today/sk/terms/"
+  js:
+    billing:
+      open_plans: Pozrieť plány

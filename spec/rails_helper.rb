@@ -8,6 +8,8 @@ require_relative "spec_helper"
 
 ActiveRecord::Migration.maintain_test_schema!
 
+Dir[Rails.root.join("spec/support/**/*.rb")].each { |file| require file }
+
 RSpec.configure do |config|
   config.fixture_paths = [Rails.root.join("spec/fixtures")]
   config.use_transactional_fixtures = true

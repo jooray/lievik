@@ -133,6 +133,10 @@ items used, and more.
 
 A live instance runs at [lievik.cypherpunk.today](https://lievik.cypherpunk.today). Sign in with a Nostr browser extension (NIP-07) or remote signer (NIP-46) to try it with your own content — no installation required.
 
+The live instance has a 3-day free trial, then costs 15,000 sats per 30 days (or 25,000 sats
+for the all-access bundle with nalgorithm and Emanator). A self-hosted install with your own AI
+key has no billing at all: billing is off unless `BILLING_API_URL` is set.
+
 ## Getting Started
 
 ```bash

@@ -8,6 +8,7 @@ es:
       theme_label: "Cambiar el tema de color"
       language_label: "Idioma"
       nav_launch: "Abrir la app"
+      nav_pricing: "Precios"
       hero:
         eyebrow: "Selección de contenido hecha para Nostr"
         headline_html: "Lo que importa,<br />para <em>quien importa.</em>"
@@ -60,6 +61,31 @@ es:
         share:
           title: "Comparte con criterio"
           copy: "Lievik ordena por relevancia, te ayuda a redactar la actualización y recuerda lo que ya usaste."
+      pricing:
+        eyebrow: "Precios"
+        heading: "Tres días gratis. Si te sirve, pagas en sats."
+        subheading: "Tu clave de Nostr es la cuenta. Sin correo, sin tarjeta y sin suscripción que cancelar."
+        lievik:
+          label: "LIEVIK"
+          price: "3 días gratis"
+          then: "después, 15.000 sats cada 30 días"
+          trial: "La prueba empieza la primera vez que añades una fuente, la actualizas, pides valorar notas o le preguntas a la IA. Iniciar sesión no la activa."
+          paused: "Sin prueba ni tiempo pagado, Lievik deja de traer y valorar notas. Puedes seguir entrando y ver todo lo que has reunido."
+          pro_rata: "Paga la cantidad que quieras por Lightning y se abona por días: 7.500 sats son 15 días, mínimo 1.000."
+          keep_days: "Si pagas durante la prueba, conservas los días que te quedaban."
+        bundle:
+          label: "ACCESO TOTAL"
+          price: "25.000 sats"
+          then: "cada 30 días, para tres apps"
+          covers_html: "Lievik, <a href=\"https://nalgorithm.cypherpunk.today\">nalgorithm</a> alojado (un feed de Nostr ordenado y resúmenes de voz) y la escritura con IA de <a href=\"https://emanator.cypherpunk.today\">Emanator</a> (un programador de publicaciones para Nostr)."
+          saving: "Por separado cuestan 35.000 sats."
+          keep_days: "Conservas los días que ya hubieras pagado en cualquiera de ellas."
+        self_host:
+          label: "EN TU SERVIDOR"
+          price: "Gratis"
+          then: "con tu propia clave de IA"
+          copy_html: "Lievik es de código abierto. <a href=\"https://github.com/jooray/lievik\">Ejecútalo tú mismo</a> y no hay nada que pagar."
+        terms_html: "Prueba, reembolsos, privacidad y soporte: <a href=\"https://cypherpunk.today/es/terms/\">las condiciones</a>."
       closing:
         eyebrow: "Nuestra casa es Nostr"
         heading: "Que cada mensaje parezca escrito para quien lo lee."

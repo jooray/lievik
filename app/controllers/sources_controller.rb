@@ -2,6 +2,7 @@
 
 class SourcesController < ApplicationController
   before_action :set_source, only: [:show, :edit, :update, :destroy, :refresh]
+  requires_paid_access only: [:refresh, :refresh_all]
 
   def index
     @sources = current_user.sources.where.not(source_type: :manual).order(:name)
@@ -20,14 +21,8 @@ class SourcesController < ApplicationController
     @source = current_user.sources.build(source_params)
 
     if @source.save
-      # Without this the dashboard stays empty until the user discovers the
-      # small refresh icon — the first-run flow reads as broken.
-      if @source.nostr? || @source.rss?
-        SourceIngestionJob.perform_later(@source.id)
-        notice = t(".importing")
-      else
-        notice = t(".notice")
-      end
+      # Trial start and ingestion as in the app API (Sources::Actions).
+      notice = Sources::Actions.after_create(@source, current_user).message
 
       redirect_to sources_path, notice: notice
     else
@@ -52,21 +47,12 @@ class SourcesController < ApplicationController
   end
 
   def refresh
-    if @source.nostr? || @source.rss?
-      SourceIngestionJob.perform_later(@source.id)
-      redirect_to sources_path, notice: (@source.name.present? ? t(".notice", name: @source.name) : t(".notice_unnamed"))
-    else
-      redirect_to sources_path, alert: t(".unsupported")
-    end
+    result = Sources::Actions.refresh(@source)
+    redirect_to sources_path, (result.ok? ? :notice : :alert) => result.message
   end
 
   def refresh_all
-    sources = current_user.sources.where(source_type: [:nostr, :rss])
-    sources.find_each do |source|
-      SourceIngestionJob.perform_later(source.id)
-    end
-
-    redirect_to sources_path, notice: t(".notice", count: sources.count)
+    redirect_to sources_path, notice: Sources::Actions.refresh_all(current_user).message
   end
 
   private

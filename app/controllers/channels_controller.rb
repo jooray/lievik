@@ -7,57 +7,32 @@ class ChannelsController < ApplicationController
 
   MAX_BULK_RATE_EVENTS = RateEventsJob::MAX_BULK_RATE_EVENTS
 
-  # Whitelist: the value picks an ORDER BY, so it must never come straight from
-  # params. "relevance" is the default and is left out of generated URLs.
-  SORT_OPTIONS = %w[relevance newest oldest].freeze
-  DEFAULT_SORT = "relevance"
+  # Whitelist (ChannelEvents::Listing): the value picks an ORDER BY, so it must
+  # never come straight from params. "relevance" is the default and is left
+  # out of generated URLs.
+  SORT_OPTIONS = ChannelEvents::Listing::SORT_OPTIONS
+  DEFAULT_SORT = ChannelEvents::Listing::DEFAULT_SORT
 
   before_action :set_channel, only: [:show, :edit, :update, :destroy, :settings, :update_settings, :rate]
+  requires_paid_access only: :rate
 
   def index
     @channels = current_user.channels.order(:name)
-    @pending_event_counts = pending_event_counts(@channels)
+    @pending_event_counts = Channels::PendingCounts.for(@channels)
   end
 
   def show
-    @threshold = @channel.relevance_threshold
     @show_used = params[:show_used] == "true"
     @search_query = params[:search]
     @selected_event_id = params[:selected_event]&.to_i
-    @sort = SORT_OPTIONS.include?(params[:sort]) ? params[:sort] : DEFAULT_SORT
 
-    @channel_events = @channel.channel_events
-      .includes(event: :source)
-      .above_threshold(@threshold)
-
-    # Apply search filter
-    if @search_query.present?
-      # Escape LIKE metacharacters — an unescaped "%" would match every row.
-      # "!" as the escape char behaves the same on SQLite and MariaDB.
-      pattern = ActiveRecord::Base.sanitize_sql_like(@search_query.to_s, "!")
-      @channel_events = @channel_events.joins(:event).where("events.content LIKE ? ESCAPE '!'", "%#{pattern}%")
-    end
-
-    # Separate used and unused events. The chosen sort applies within each
-    # group — used events stay pinned to the bottom regardless of it.
-    @channel_events = if @show_used
-      # Show all events, with unused first, then used at bottom
-      @channel_events.order(used: :asc)
-    else
-      # Only show unused events
-      @channel_events.unused
-    end
-
-    @channel_events = apply_sort(@channel_events, @sort).page(params[:page]).per(PER_PAGE)
-
-    # One grouped query instead of two COUNTs. `used` is a boolean, so the keys
-    # come back as true/false (SQLite returns 0/1, hence the coercion).
-    counts = @channel.channel_events.above_threshold(@threshold).group(:used).count
-    @used_count = 0
-    @unused_count = 0
-    counts.each do |used, count|
-      ActiveModel::Type::Boolean.new.cast(used) ? @used_count += count : @unused_count += count
-    end
+    # Same listing as the app API (ChannelEvents::Listing).
+    listing = ChannelEvents::Listing.new(@channel, show_used: @show_used, search: @search_query, sort: params[:sort])
+    @threshold = listing.threshold
+    @sort = listing.sort
+    @channel_events = listing.scope.page(params[:page]).per(PER_PAGE)
+    @used_count = listing.counts[:used]
+    @unused_count = listing.counts[:unused]
 
     # Find the selected channel_event if specified and always put it at top
     if @selected_event_id
@@ -82,15 +57,8 @@ class ChannelsController < ApplicationController
 
     if @channel.save
       # Auto-rate recent events (past 3 months) for the new channel
-      queued = queue_initial_rating(@channel)
-      notice = if queued.zero?
-        t(".notice")
-      elsif queued >= MAX_BULK_RATE_EVENTS
-        t(".notice_capped", count: queued)
-      else
-        t(".notice_queued", count: queued)
-      end
-      redirect_to @channel, notice: notice
+      queued = Channels::InitialRating.queue(@channel)
+      redirect_to @channel, notice: Channels::InitialRating.created_notice(queued)
     else
       render :new, status: :unprocessable_entity
     end
@@ -130,32 +98,6 @@ class ChannelsController < ApplicationController
 
   private
 
-  # "Pending" must mean the same thing here as on the channel page: unused AND
-  # above that channel's own relevance threshold. Thresholds live in a JSON
-  # settings column, so instead of a (DB-specific) json_extract comparison we
-  # fold the already-loaded thresholds into a single OR'd predicate — still one
-  # query, no N+1, and identical on SQLite and MariaDB.
-  def pending_event_counts(channels)
-    thresholds = channels.map { |c| [c.id, c.relevance_threshold] }
-    return {} if thresholds.empty?
-
-    predicate = thresholds.map do |id, threshold|
-      ChannelEvent.sanitize_sql_array(
-        ["(channel_events.channel_id = ? AND channel_events.relevance_score >= ?)", id, threshold]
-      )
-    end.join(" OR ")
-
-    ChannelEvent.unused.where(predicate).group(:channel_id).count
-  end
-
-  def apply_sort(scope, sort)
-    case sort
-    when "newest" then scope.by_newest
-    when "oldest" then scope.by_oldest
-    else scope.by_relevance
-    end
-  end
-
   def set_channel
     @channel = current_user.channels.find(params[:id])
   end
@@ -166,17 +108,5 @@ class ChannelsController < ApplicationController
 
   def settings_params
     params.require(:channel).permit(:content_prompt, :content_language, :content_style, settings: [:relevance_threshold, :humanize_output])
-  end
-
-  # Rating an event costs up to 3 paid AI calls, so a brand-new channel only
-  # back-rates a bounded, most-recent slice; the rest can be rated later.
-  def queue_initial_rating(channel)
-    recent_event_ids = current_user.events
-      .where("events.published_at >= ?", 3.months.ago)
-      .order(published_at: :desc)
-      .limit(MAX_BULK_RATE_EVENTS)
-      .pluck(:id)
-
-    RateEventsJob.enqueue_batches(channel.id, recent_event_ids)
   end
 end

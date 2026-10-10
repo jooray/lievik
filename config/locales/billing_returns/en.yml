@@ -1,0 +1,8 @@
+---
+en:
+  billing_returns:
+    show:
+      title: Returning to Lievik
+      body: Lievik is opening again and checks your payment there.
+      open_app: Back to Lievik
+      close_hint: If the app does not open, close this page.

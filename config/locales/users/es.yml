@@ -1,5 +1,9 @@
 es:
   users:
+    android_app:
+      title: "App para Android"
+      intro: "Lievik para Android: tus canales, publicaciones y borradores en el móvil, sincronizados con esta cuenta. Inicia sesión con Amber u otro firmante de Nostr; cada móvil recibe su propio token en la lista de arriba."
+      download: "Descargar la app para Android"
     edit:
       language:
         label: "Idioma de la interfaz"

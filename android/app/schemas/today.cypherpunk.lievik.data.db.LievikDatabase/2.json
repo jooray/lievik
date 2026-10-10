@@ -1,0 +1,451 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "d5bb6ba0fc395a5064d1db3241223160",
+    "entities": [
+      {
+        "tableName": "sources",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `sourceType` TEXT NOT NULL, `identifier` TEXT, `name` TEXT, `description` TEXT, `distance` INTEGER NOT NULL, `includeReplies` INTEGER NOT NULL, `includeReposts` INTEGER NOT NULL, `importDays` INTEGER NOT NULL, `eventCount` INTEGER NOT NULL, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceType",
+            "columnName": "sourceType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "identifier",
+            "columnName": "identifier",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "distance",
+            "columnName": "distance",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "includeReplies",
+            "columnName": "includeReplies",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "includeReposts",
+            "columnName": "includeReposts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "importDays",
+            "columnName": "importDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventCount",
+            "columnName": "eventCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "channels",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `language` TEXT, `prompt` TEXT, `contentPrompt` TEXT, `contentLanguage` TEXT, `contentStyle` TEXT, `relevanceThreshold` INTEGER NOT NULL, `humanizeOutput` INTEGER NOT NULL, `pendingCount` INTEGER NOT NULL, `createdAt` TEXT, `updatedAt` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "prompt",
+            "columnName": "prompt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contentPrompt",
+            "columnName": "contentPrompt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contentLanguage",
+            "columnName": "contentLanguage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contentStyle",
+            "columnName": "contentStyle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "relevanceThreshold",
+            "columnName": "relevanceThreshold",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "humanizeOutput",
+            "columnName": "humanizeOutput",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pendingCount",
+            "columnName": "pendingCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `sourceId` INTEGER, `sourceName` TEXT, `sourceType` TEXT, `externalId` TEXT, `eventType` TEXT, `kind` INTEGER, `content` TEXT NOT NULL, `title` TEXT, `publishedAt` TEXT, `publishedAtMillis` INTEGER NOT NULL, `updatedAt` TEXT, `authorName` TEXT, `authorPicture` TEXT, `authorNpub` TEXT, `sourceUrl` TEXT, `nostrUri` TEXT, `imagesJson` TEXT NOT NULL, `referencesJson` TEXT NOT NULL, `topChannelsJson` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceId",
+            "columnName": "sourceId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sourceName",
+            "columnName": "sourceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sourceType",
+            "columnName": "sourceType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "externalId",
+            "columnName": "externalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eventType",
+            "columnName": "eventType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "publishedAt",
+            "columnName": "publishedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "publishedAtMillis",
+            "columnName": "publishedAtMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "authorName",
+            "columnName": "authorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "authorPicture",
+            "columnName": "authorPicture",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "authorNpub",
+            "columnName": "authorNpub",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sourceUrl",
+            "columnName": "sourceUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nostrUri",
+            "columnName": "nostrUri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imagesJson",
+            "columnName": "imagesJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "referencesJson",
+            "columnName": "referencesJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "topChannelsJson",
+            "columnName": "topChannelsJson",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_events_sourceId",
+            "unique": false,
+            "columnNames": [
+              "sourceId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_sourceId` ON `${TABLE_NAME}` (`sourceId`)"
+          },
+          {
+            "name": "index_events_publishedAtMillis",
+            "unique": false,
+            "columnNames": [
+              "publishedAtMillis"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_events_publishedAtMillis` ON `${TABLE_NAME}` (`publishedAtMillis`)"
+          }
+        ]
+      },
+      {
+        "tableName": "channel_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ce_id` INTEGER NOT NULL, `ce_channel_id` INTEGER NOT NULL, `ce_event_id` INTEGER NOT NULL, `ce_score` INTEGER, `ce_reason` TEXT, `ce_used` INTEGER NOT NULL, `ce_used_at` TEXT, `ce_updated_at` TEXT, `ce_engine` TEXT, PRIMARY KEY(`ce_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "ce_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "channelId",
+            "columnName": "ce_channel_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventId",
+            "columnName": "ce_event_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relevanceScore",
+            "columnName": "ce_score",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "relevanceReason",
+            "columnName": "ce_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "used",
+            "columnName": "ce_used",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usedAt",
+            "columnName": "ce_used_at",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "ce_updated_at",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "engine",
+            "columnName": "ce_engine",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ce_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_channel_events_ce_channel_id_ce_event_id",
+            "unique": true,
+            "columnNames": [
+              "ce_channel_id",
+              "ce_event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_channel_events_ce_channel_id_ce_event_id` ON `${TABLE_NAME}` (`ce_channel_id`, `ce_event_id`)"
+          },
+          {
+            "name": "index_channel_events_ce_event_id",
+            "unique": false,
+            "columnNames": [
+              "ce_event_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_channel_events_ce_event_id` ON `${TABLE_NAME}` (`ce_event_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "contents",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `channelId` INTEGER NOT NULL, `status` TEXT NOT NULL, `title` TEXT, `updatedAt` TEXT, `json` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "channelId",
+            "columnName": "channelId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "json",
+            "columnName": "json",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_contents_channelId",
+            "unique": false,
+            "columnNames": [
+              "channelId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_contents_channelId` ON `${TABLE_NAME}` (`channelId`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd5bb6ba0fc395a5064d1db3241223160')"
+    ]
+  }
+}

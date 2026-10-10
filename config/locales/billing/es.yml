@@ -1,0 +1,60 @@
+---
+es:
+  billing:
+    nav: Pagos
+    start_trial: Empezar la prueba gratuita
+    denied: Lievik necesita una prueba o tiempo pagado para traer y valorar publicaciones.
+    paywall: Las funciones de IA necesitan una prueba o tiempo pagado.
+    daily_cap: Has llegado al límite de hoy para esta función. Se reinicia a medianoche UTC.
+    unavailable: El sistema de pagos no responde, así que esto está en pausa. Inténtalo en un minuto.
+    source_saved_paused: Fuente guardada. Lievik empezará a traerla cuando empiece tu prueba o tu tiempo pagado.
+    mcp_payment_required: Lievik necesita una prueba o tiempo pagado para esto. Abre Pagos en Lievik para empezar la prueba gratuita o pagar.
+    paid: Pagado. Lievik está activo hasta el %{date}.
+    trial_started: Tu prueba gratuita dura hasta el %{date}. Lievik ya está trayendo tus fuentes.
+    banner:
+      none: Lievik aún no trae ni valora nada. Tu prueba gratuita de 3 días empieza cuando añades o actualizas una fuente, valoras publicaciones o usas la IA, o ahora mismo con este botón.
+      trial: Prueba gratuita hasta el %{date}.
+      expired: Tu acceso terminó el %{date}, así que Lievik ha dejado de traer y valorar publicaciones. Tus datos siguen aquí.
+      plans: Planes y pago
+    errors:
+      unknown_plan: Ese plan no existe.
+      sats_range: Introduce entre %{min} y %{max} sats.
+      unavailable: Ahora no se puede crear la factura. Inténtalo en un minuto.
+    show:
+      title: Pagos
+      intro: Lievik trae tus fuentes, valora publicaciones y responde con IA mientras tengas una prueba o tiempo pagado. Se paga por adelantado en sats, así que no hay suscripción que cancelar. Sin ello puedes seguir entrando y usar todo lo que ya está en Lievik.
+      status:
+        title: Tu acceso
+        active: Pagado hasta el %{date}.
+        trial: Prueba gratuita hasta el %{date}.
+        expired: Tu acceso terminó el %{date}. Paga abajo para seguir.
+        none: Aún no has empezado tu prueba gratuita de 3 días.
+        unknown: No se puede contactar con el sistema de pagos. Inténtalo en un minuto.
+        other: "%{product} también está activo hasta el %{date}."
+        npub: 'Los pagos van ligados a tu clave de inicio de sesión: %{npub}'
+      products:
+        nalgorithm: nalgorithm
+        emanator_ai: Emanator AI
+        lievik: Lievik
+      plans:
+        price: "%{sats} sats / %{days} días"
+        pay: Pagar %{sats} sats
+        unavailable: Ahora no se pueden cargar los precios porque el sistema de pagos no responde. Inténtalo en un minuto.
+        lievik:
+          name: Lievik
+          covers: Traer y valorar tus fuentes, chat con IA sobre tu contenido y publicaciones escritas con IA.
+        all_access:
+          name: Acceso total
+          covers: Lievik, nalgorithm alojado (un feed ordenado y resúmenes de voz) y la escritura con IA de Emanator. Por separado cuestan 35.000 sats.
+      custom:
+        title: Paga lo que quieras
+        help: El tiempo se acredita en proporción y se suma al que ya tienes. El mínimo es %{min} sats, que dan %{days} días de Lievik.
+        plan: Plan
+        sats: Sats
+        pay: Crear factura
+      self_host_html: 'Lievik es de código abierto. Si lo ejecutas tú con tu propia clave de IA, nada de esto te afecta: %{link}'
+      terms: "Condiciones, reembolsos y soporte"
+      terms_url: "https://cypherpunk.today/es/terms/"
+  js:
+    billing:
+      open_plans: Ver planes

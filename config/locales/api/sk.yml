@@ -1,0 +1,10 @@
+sk:
+  api:
+    errors:
+      unauthorized: "Prihláste sa znova: prístupový token tohto zariadenia chýba, bol zrušený alebo vypršal."
+      not_found: "Nenašlo sa."
+      invalid: "Niektoré hodnoty nie sú platné."
+      bad_request: "V požiadavke chýba povinná hodnota."
+      missing: "chýba"
+      rate_limited: "Príliš veľa požiadaviek. Počkajte minútu a skúste to znova."
+      invalid_cursor: "Pozícia synchronizácie nie je platná. Spustite úplnú synchronizáciu."

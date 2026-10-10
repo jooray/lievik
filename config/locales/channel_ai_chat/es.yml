@@ -14,6 +14,10 @@ es:
       example_3: "«Configura 3 canales: un boletín, un grupo de Telegram y redes sociales, todos sobre desarrollo en Nostr»"
       placeholder: "Describe los canales que necesitas…"
       send: "Enviar"
+    bulk_create:
+      notice:
+        one: "%{count} canal creado. Las publicaciones recientes se valoran en segundo plano."
+        other: "%{count} canales creados. Las publicaciones recientes se valoran en segundo plano."
     errors:
       invalid_history: "Historial de conversación no válido"
       empty_message: "Escribe un mensaje"

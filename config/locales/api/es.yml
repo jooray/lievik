@@ -1,0 +1,10 @@
+es:
+  api:
+    errors:
+      unauthorized: "Vuelve a iniciar sesión: el token de acceso de este dispositivo falta, se revocó o caducó."
+      not_found: "No encontrado."
+      invalid: "Algunos valores no son válidos."
+      bad_request: "A la solicitud le falta un valor obligatorio."
+      missing: "falta"
+      rate_limited: "Demasiadas solicitudes. Espera un minuto y vuelve a intentarlo."
+      invalid_cursor: "La posición de sincronización no es válida. Haz una sincronización completa."

@@ -8,6 +8,7 @@ en:
       theme_label: "Switch color theme"
       language_label: "Language"
       nav_launch: "Launch app"
+      nav_pricing: "Pricing"
       hero:
         eyebrow: "Nostr-first content curation"
         headline_html: "The right thing,<br />for the <em>right people.</em>"
@@ -60,6 +61,31 @@ en:
         share:
           title: "Share with intention"
           copy: "Lievik ranks what is relevant, helps you draft the update, and remembers what you have already used."
+      pricing:
+        eyebrow: "Pricing"
+        heading: "Three days free. Pay in sats if it earns its keep."
+        subheading: "Your Nostr key is the account. No email, no card, no subscription to cancel."
+        lievik:
+          label: "LIEVIK"
+          price: "3 days free"
+          then: "then 15,000 sats per 30 days"
+          trial: "The trial starts the first time you add a source, refresh, rate notes or ask the AI. Signing in does not start it."
+          paused: "Without a trial or paid time, Lievik stops pulling in and rating notes. You can still sign in and see everything you collected."
+          pro_rata: "Pay any amount over Lightning, credited by the day: 7,500 sats is 15 days, minimum 1,000."
+          keep_days: "Pay during the trial and the unused days are kept."
+        bundle:
+          label: "ALL-ACCESS"
+          price: "25,000 sats"
+          then: "per 30 days, for three apps"
+          covers_html: "Lievik, hosted <a href=\"https://nalgorithm.cypherpunk.today\">nalgorithm</a> (a ranked Nostr feed and voice digests) and the AI writing in <a href=\"https://emanator.cypherpunk.today\">Emanator</a> (a Nostr post scheduler)."
+          saving: "Bought separately they cost 35,000 sats."
+          keep_days: "Days you already paid for on any of them are kept."
+        self_host:
+          label: "SELF-HOSTED"
+          price: "Free"
+          then: "with your own AI key"
+          copy_html: "Lievik is open source. <a href=\"https://github.com/jooray/lievik\">Run it yourself</a> and there is no billing at all."
+        terms_html: "Trial, refunds, privacy and support: <a href=\"https://cypherpunk.today/terms/\">the terms page</a>."
       closing:
         eyebrow: "Nostr is home"
         heading: "Make every message feel like it was meant for them."

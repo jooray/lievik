@@ -25,6 +25,19 @@ class ChannelEvent < ApplicationRecord
   scope :by_newest, -> { joins(:event).order("events.published_at DESC, channel_events.id DESC") }
   scope :by_oldest, -> { joins(:event).order("events.published_at ASC, channel_events.id ASC") }
 
+  # Bulk flips for a relation (`channel.channel_events.where(...).mark_all_used!`).
+  # `update_all` skips callbacks and timestamps, so updated_at is set explicitly:
+  # the app API's incremental sync finds changed rows by updated_at, and a used
+  # flag that changed without it would never reach the phone. Every bulk
+  # used/unused change must go through these two.
+  def self.mark_all_used!(at: Time.current)
+    update_all(used: true, used_at: at, updated_at: at)
+  end
+
+  def self.mark_all_unused!(at: Time.current)
+    update_all(used: false, used_at: nil, updated_at: at)
+  end
+
   def mark_used!
     update!(used: true, used_at: Time.current)
   end

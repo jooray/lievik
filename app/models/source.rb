@@ -42,6 +42,18 @@ class Source < ApplicationRecord
     self.settings["import_days"] = value.to_i
   end
 
+  # What the UI calls this source (web views via ApplicationHelper#source_label,
+  # and the app API). The name is optional and the auto-created "manual" source
+  # has none, so never show `name` raw.
+  def display_label
+    return name if name.present?
+
+    case source_type
+    when "manual" then I18n.t("app.source_label.manual")
+    else identifier.presence&.truncate(30) || I18n.t("app.source_label.unnamed")
+    end
+  end
+
   # Default settings for new sources
   after_initialize :set_default_settings, if: :new_record?
 

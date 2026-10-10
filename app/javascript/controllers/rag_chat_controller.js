@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { t } from "../lib/i18n"
+import { readBillingDenial, showBillingDenial } from "../lib/billing_denial"
 
 export default class extends Controller {
   static targets = ["messageList", "input", "submitButton", "loadingSpinner", "submitIcon"]
@@ -63,6 +64,13 @@ export default class extends Controller {
       })
 
       if (!response.ok) {
+        const denial = await readBillingDenial(response)
+        if (denial) {
+          showBillingDenial(contentDiv, denial)
+          this.isStreaming = false
+          this.setLoading(false)
+          return
+        }
         throw new Error(`HTTP ${response.status}`)
       }
 

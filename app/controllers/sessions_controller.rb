@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 class SessionsController < ApplicationController
-  # One multiplexed supervisor (Nostr::Nip46Supervisor) serves every pending login
-  # at once with O(1) DB/WebSocket connections, so admission is no longer bound to
-  # one worker per login. The cap just guards memory / relay subscription fan-out.
-  MAX_ACTIVE_AUTH_SESSIONS = ENV.fetch("MAX_ACTIVE_NOSTR_AUTH_SESSIONS", 50).to_i
+  # See Nostr::LoginAdmission (shared with the app API).
+  MAX_ACTIVE_AUTH_SESSIONS = Nostr::LoginAdmission::MAX_ACTIVE_AUTH_SESSIONS
 
   skip_before_action :authenticate_user!
   rate_limit to: 5, within: 1.minute, only: :new, name: "nostr-login-ip", with: :rate_limit_exceeded
@@ -18,33 +16,13 @@ class SessionsController < ApplicationController
     # instead of holding a worker + capacity slot until the approval window ends.
     consume_pending_sessions!
 
-    # Serialize session creation so a burst can't slip past the capacity check.
-    admission_token = SecureRandom.hex(16)
-    admitted = Rails.cache.write("nostr-auth-session-admission", admission_token, expires_in: 10.seconds, unless_exist: true)
-    unless admitted
+    @connect_data = Nostr::LoginAdmission.start_connect(max_active: MAX_ACTIVE_AUTH_SESSIONS) do |connect_data|
+      session[:nostr_nip07_challenge] = SecureRandom.hex(32)
+      session[:nostr_connect_session_id] = connect_data[:session_id]
+    end
+    if @connect_data == :busy
       render_unavailable(:service_unavailable, :busy)
       return
-    end
-
-    begin
-      NostrAuthSession.cleanup_expired!
-      if NostrAuthSession.active.where(authenticated_pubkey: nil).count >= MAX_ACTIVE_AUTH_SESSIONS
-        render_unavailable(:service_unavailable, :busy)
-        return
-      end
-
-      session[:nostr_nip07_challenge] = SecureRandom.hex(32)
-      @connect_data = Nostr::AuthService.new.generate_connect_uri
-      session[:nostr_connect_session_id] = @connect_data[:session_id]
-
-      # Ensure the multiplexed listener is running — it will pick up this session
-      # from the DB within ~1s. Polls just check the DB for the persisted result.
-      Nip46SupervisorJob.ensure_running
-    rescue StandardError
-      NostrAuthSession.find_by(session_id: @connect_data&.dig(:session_id))&.destroy!
-      raise
-    ensure
-      Rails.cache.delete("nostr-auth-session-admission") if Rails.cache.read("nostr-auth-session-admission") == admission_token
     end
 
     # Generate QR code
@@ -57,7 +35,7 @@ class SessionsController < ApplicationController
   def bunker
     consume_pending_sessions!
 
-    result = Nostr::AuthService.new.start_bunker_session(params[:bunker_uri])
+    result = Nostr::LoginAdmission.start_bunker(params[:bunker_uri])
 
     if result.nil?
       render json: {
@@ -68,7 +46,6 @@ class SessionsController < ApplicationController
     end
 
     session[:nostr_connect_session_id] = result[:session_id]
-    Nip46SupervisorJob.ensure_running
 
     render json: { ok: true, relays: result[:relay_urls] }
   rescue StandardError => e

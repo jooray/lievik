@@ -15,6 +15,11 @@ sk:
       example_3: "„Nastav 3 kanály: newsletter, Telegram skupinu a sociálne siete, všetky o vývoji pre Nostr“"
       placeholder: "Opíšte, aké kanály potrebujete…"
       send: "Odoslať"
+    bulk_create:
+      notice:
+        one: "Vytvoril sa %{count} kanál. Nedávne príspevky sa hodnotia na pozadí."
+        few: "Vytvorili sa %{count} kanály. Nedávne príspevky sa hodnotia na pozadí."
+        other: "Vytvorilo sa %{count} kanálov. Nedávne príspevky sa hodnotia na pozadí."
     errors:
       invalid_history: "Neplatná história konverzácie"
       empty_message: "Napíšte správu"

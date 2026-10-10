@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class SourceIngestionJob < ApplicationJob
+  include BillingGated
+
   queue_as :default
 
   # The 30-minute recurring refresh, the manual refresh buttons, the MCP
@@ -17,6 +19,7 @@ class SourceIngestionJob < ApplicationJob
   def perform(source_id)
     source = Source.find_by(id: source_id)
     return unless source
+    return if billing_denies?(source.user, "ingesting source #{source.id}")
 
     key = self.class.lock_key(source_id)
     token = SecureRandom.hex(16)

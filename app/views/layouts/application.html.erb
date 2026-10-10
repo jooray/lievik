@@ -69,6 +69,12 @@
           <%= render "layouts/flash", kind: :alert, message: flash[:alert] %>
         <% end %>
 
+        <%# Trial and payment status on the hosted instance, loaded after the
+            page so no page waits on billing. %>
+        <% if user_signed_in? && Billing.enabled? && controller_name != "billing" %>
+          <turbo-frame id="billing-status" src="<%= billing_status_path %>"></turbo-frame>
+        <% end %>
+
         <%= yield %>
       </div>
     </main>

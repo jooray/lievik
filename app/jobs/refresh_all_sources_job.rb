@@ -15,8 +15,11 @@ class RefreshAllSourcesJob < ApplicationJob
       Source.where.not(source_type: :manual)
     end
 
+    # Users without a trial or paid time are filtered here, once per user, so
+    # their sources are never queued (SourceIngestionJob checks again anyway).
+    allowed = Hash.new { |cache, id| cache[id] = Billing.allows?(User.find(id)) }
     sources.find_each do |source|
-      SourceIngestionJob.perform_later(source.id)
+      SourceIngestionJob.perform_later(source.id) if allowed[source.user_id]
     end
   end
 end

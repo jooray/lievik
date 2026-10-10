@@ -6,6 +6,11 @@ sk:
         one: "%{count} príspevok bol označený ako použitý"
         few: "%{count} príspevky boli označené ako použité"
         other: "%{count} príspevkov bolo označených ako použité"
+    bulk_mark_unused:
+      notice:
+        one: "%{count} príspevok bol označený ako nepoužitý"
+        few: "%{count} príspevky boli označené ako nepoužité"
+        other: "%{count} príspevkov bolo označených ako nepoužité"
     bulk_rate:
       notice:
         one: "Nové hodnotenie %{count} príspevku je vo fronte"

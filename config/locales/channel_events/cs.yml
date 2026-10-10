@@ -6,6 +6,11 @@ cs:
         one: "%{count} příspěvek byl označen jako použitý."
         few: "%{count} příspěvky byly označeny jako použité."
         other: "%{count} příspěvků bylo označeno jako použité."
+    bulk_mark_unused:
+      notice:
+        one: "%{count} příspěvek byl označen jako nepoužitý."
+        few: "%{count} příspěvky byly označeny jako nepoužité."
+        other: "%{count} příspěvků bylo označeno jako nepoužité."
     bulk_rate:
       notice:
         one: "Opětovné hodnocení %{count} příspěvku je ve frontě."

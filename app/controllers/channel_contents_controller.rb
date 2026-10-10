@@ -2,10 +2,14 @@
 
 class ChannelContentsController < ApplicationController
   include ActionController::Live
+  include SseStreaming
 
   before_action :set_channel
   before_action :set_channel_content, only: [:show, :edit, :update, :destroy, :generate_stream, :refine_stream, :publish, :revert]
   before_action :set_events_from_params, only: [:new, :create]
+  # After set_channel_content, so a 404 wins and a denied generation saves no version.
+  requires_paid_ai kind: "content", only: :generate_stream
+  requires_paid_ai kind: "content", prompt: :user_prompt, only: :refine_stream
 
   def index
     @channel_contents = @channel.channel_contents.recent
@@ -25,13 +29,9 @@ class ChannelContentsController < ApplicationController
   end
 
   def create
-    @channel_content = @channel.channel_contents.build(channel_content_params)
-    @channel_content.user = current_user
+    @channel_content = ChannelContents::Editor.create(@channel, current_user, channel_content_params, params[:event_ids])
 
-    if @channel_content.save
-      # Associate selected events
-      attach_events(@channel_content, params[:event_ids])
-
+    if @channel_content.persisted?
       # Redirect to edit page with auto_generate flag to trigger streaming
       redirect_to edit_channel_content_path(@channel, @channel_content, auto_generate: true),
                   notice: t(".notice")
@@ -49,11 +49,8 @@ class ChannelContentsController < ApplicationController
       params[:channel_content] = { generation_prompt: params[:generation_prompt] }
     end
 
-    # Save current version before updating
-    submitted_content = params.dig(:channel_content, :content)
-    @channel_content.add_version(@channel_content.content) if !submitted_content.nil? && @channel_content.content != submitted_content
-
-    if @channel_content.update(channel_content_params)
+    # Saves a version first when the text changes (shared with the app API).
+    if ChannelContents::Editor.update(@channel_content, channel_content_params)
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: [
@@ -73,149 +70,17 @@ class ChannelContentsController < ApplicationController
     redirect_to channel_contents_path(@channel), notice: t(".notice")
   end
 
-  # GET /channels/:channel_id/contents/:id/generate_stream
-  # SSE endpoint for streaming AI content generation
+  # POST /channels/:channel_id/contents/:id/generate_stream
+  # SSE endpoint for streaming AI content generation (ChannelContents::Generation,
+  # shared with the app API)
   def generate_stream
-    response.headers["Content-Type"] = "text/event-stream"
-    response.headers["Cache-Control"] = "no-cache"
-    response.headers["X-Accel-Buffering"] = "no" # Disable nginx buffering
-
-    events = @channel_content.events.includes(:source, :linked_contents)
-
-    if events.empty?
-      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.no_source_events") }).to_json}\n\n"
-      response.stream.close
-      return
-    end
-
-    # Save current version before generating
-    @channel_content.add_version(@channel_content.content) if @channel_content.content.present?
-
-    service = Ai::ContentBuilderService.new(
-      channel: @channel,
-      events: events,
-      title: @channel_content.title,
-      generation_prompt: @channel_content.generation_prompt
-    )
-    full_content = ""
-
-    begin
-      # Phase 1: Generation
-      response.stream.write "event: phase\ndata: #{({ phase: "generating" }).to_json}\n\n"
-
-      generation_result = service.generate_stream do |chunk|
-        full_content += chunk
-        # Send chunk as SSE event
-        escaped_chunk = chunk.to_json
-        response.stream.write "event: chunk\ndata: #{escaped_chunk}\n\n"
-      end
-
-      if generation_result[:error]
-        response.stream.write "event: error\ndata: #{({ message: generation_result[:error] }).to_json}\n\n"
-        return
-      end
-
-      full_content = generation_result[:content] if generation_result[:content].present?
-
-      # Phase 2: Humanization (if enabled)
-      if service.humanize_enabled?
-        response.stream.write "event: phase\ndata: #{({ phase: "humanizing" }).to_json}\n\n"
-
-        humanized_content = ""
-        service.humanize_stream(full_content) do |chunk|
-          humanized_content += chunk
-          response.stream.write "event: chunk\ndata: #{chunk.to_json}\n\n"
-        end
-        full_content = humanized_content if humanized_content.present?
-      end
-
-      # Save the completed content (post-process to strip fences and replace nostr URIs)
-      @channel_content.update!(content: post_process_content(full_content))
-
-      # Send completion event
-      response.stream.write "event: complete\ndata: {\"success\": true}\n\n"
-    rescue Ai::Client::ApiError => e
-      Rails.logger.error("Streaming generation failed: #{e.message}")
-      response.stream.write "event: error\ndata: #{{ message: e.message }.to_json}\n\n"
-    rescue => e
-      Rails.logger.error("Streaming error: #{e.message}")
-      response.stream.write "event: error\ndata: #{{ message: t("channel_contents.errors.unexpected") }.to_json}\n\n"
-    ensure
-      response.stream.close
-    end
+    stream_sse { |sse| ChannelContents::Generation.new(@channel_content, current_user).generate(sse) }
   end
 
-  # GET /channels/:channel_id/contents/:id/refine_stream
+  # POST /channels/:channel_id/contents/:id/refine_stream
   # SSE endpoint for streaming AI content refinement
   def refine_stream
-    response.headers["Content-Type"] = "text/event-stream"
-    response.headers["Cache-Control"] = "no-cache"
-    response.headers["X-Accel-Buffering"] = "no"
-
-    user_prompt = params[:user_prompt]
-    existing_content = @channel_content.content
-
-    if user_prompt.blank?
-      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.instructions_required") }).to_json}\n\n"
-      response.stream.close
-      return
-    end
-
-    if existing_content.blank?
-      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.nothing_to_refine") }).to_json}\n\n"
-      response.stream.close
-      return
-    end
-
-    # Save current version before refining
-    @channel_content.add_version(existing_content)
-
-    events = @channel_content.events.includes(:source, :linked_contents)
-    service = Ai::ContentBuilderService.new(channel: @channel, events: events)
-    full_content = ""
-
-    begin
-      # Phase 1: Refinement
-      response.stream.write "event: phase\ndata: #{({ phase: "refining" }).to_json}\n\n"
-
-      refinement_result = service.refine_stream(existing_content: existing_content, user_prompt: user_prompt) do |chunk|
-        full_content += chunk
-        escaped_chunk = chunk.to_json
-        response.stream.write "event: chunk\ndata: #{escaped_chunk}\n\n"
-      end
-
-      if refinement_result[:error]
-        response.stream.write "event: error\ndata: #{({ message: refinement_result[:error] }).to_json}\n\n"
-        return
-      end
-
-      full_content = refinement_result[:content] if refinement_result[:content].present?
-
-      # Phase 2: Humanization (if enabled)
-      if service.humanize_enabled?
-        response.stream.write "event: phase\ndata: #{({ phase: "humanizing" }).to_json}\n\n"
-
-        humanized_content = ""
-        service.humanize_stream(full_content) do |chunk|
-          humanized_content += chunk
-          response.stream.write "event: chunk\ndata: #{chunk.to_json}\n\n"
-        end
-        full_content = humanized_content if humanized_content.present?
-      end
-
-      # Save the completed content (post-process to strip fences and replace nostr URIs)
-      @channel_content.update!(content: post_process_content(full_content))
-
-      response.stream.write "event: complete\ndata: #{({ success: true }).to_json}\n\n"
-    rescue Ai::Client::ApiError => e
-      Rails.logger.error("Streaming refinement failed: #{e.message}")
-      response.stream.write "event: error\ndata: #{({ message: e.message }).to_json}\n\n"
-    rescue => e
-      Rails.logger.error("Streaming error: #{e.message}")
-      response.stream.write "event: error\ndata: #{({ message: t("channel_contents.errors.unexpected") }).to_json}\n\n"
-    ensure
-      response.stream.close
-    end
+    stream_sse { |sse| ChannelContents::Generation.new(@channel_content, current_user).refine(sse, params[:user_prompt]) }
   end
 
   # POST /channels/:channel_id/contents/:id/publish
@@ -263,118 +128,12 @@ class ChannelContentsController < ApplicationController
   end
 
   def set_events_from_params
-    event_ids = parse_event_ids(params[:event_ids])
+    event_ids = ChannelContents::Editor.parse_event_ids(params[:event_ids])
     @selected_events = current_user.events.where(id: event_ids).includes(:source) if event_ids.present?
     @selected_events ||= []
   end
 
-  def parse_event_ids(event_ids_param)
-    return [] if event_ids_param.blank?
-
-    if event_ids_param.is_a?(String)
-      JSON.parse(event_ids_param)
-    else
-      Array.wrap(event_ids_param).reject(&:blank?)
-    end
-  rescue JSON::ParserError
-    []
-  end
-
   def channel_content_params
     params.require(:channel_content).permit(:title, :content, :generation_prompt)
-  end
-
-  def attach_events(channel_content, event_ids_param)
-    event_ids = parse_event_ids(event_ids_param)
-    return if event_ids.empty?
-
-    event_ids = current_user.events.where(id: event_ids).pluck(:id)
-    return if event_ids.empty?
-
-    # All-or-nothing: a silently dropped association would give the generator a
-    # different event set than the user selected.
-    ChannelContentEvent.transaction do
-      event_ids.each do |event_id|
-        channel_content.channel_content_events.create!(event_id: event_id)
-      end
-    end
-  end
-
-  # Post-process AI-generated content: strip markdown fences and replace nostr: URIs
-  def post_process_content(content)
-    return content if content.blank?
-
-    result = strip_markdown_fences(content)
-    replace_nostr_uris(result)
-  end
-
-  # Strip markdown code fences from the beginning and end of AI responses
-  def strip_markdown_fences(content)
-    return content if content.blank?
-
-    result = content.dup
-
-    # Strip opening fence at the very beginning
-    if result.start_with?("```markdown\n")
-      result = result.sub(/\A```markdown\n/, "")
-    elsif result.start_with?("```markdown\r\n")
-      result = result.sub(/\A```markdown\r\n/, "")
-    elsif result.start_with?("```\n")
-      result = result.sub(/\A```\n/, "")
-    elsif result.start_with?("```\r\n")
-      result = result.sub(/\A```\r\n/, "")
-    end
-
-    # Strip closing fence at the very end
-    if result.end_with?("\n```")
-      result = result.sub(/\n```\z/, "")
-    elsif result.end_with?("\r\n```")
-      result = result.sub(/\r\n```\z/, "")
-    elsif result.end_with?("```")
-      result = result.sub(/```\z/, "")
-    end
-
-    result.strip
-  end
-
-  # Replace nostr: URIs with web links using the user's link templates
-  # Prefers nevent1 > note1 > hex for event identifiers
-  def replace_nostr_uris(content)
-    return content if content.blank?
-
-    event_template = current_user.event_link_template
-    naddr_template = current_user.naddr_link_template
-
-    content.gsub(/nostr:(note1[a-z0-9]+|nevent1[a-z0-9]+|naddr1[a-z0-9]+|[0-9a-f]{64})/i) do |match|
-      identifier = match.sub(/\Anostr:/i, "")
-      parsed = Nostr::KeyConverter.parse_nostr_identifier(identifier)
-
-      if parsed.nil?
-        match
-      elsif parsed[:type] == :naddr
-        naddr_template.gsub("{naddr}", identifier)
-      elsif parsed[:type] == :nevent
-        event_template.gsub("{eventid}", identifier)
-      elsif parsed[:type] == :note
-        # Try to find event and get nevent with relay hints
-        event = Event.find_by(external_id: parsed[:event_id])
-        if event&.nevent_id.present?
-          event_template.gsub("{eventid}", event.nevent_id)
-        else
-          event_template.gsub("{eventid}", identifier)
-        end
-      elsif parsed[:type] == :hex && parsed[:event_id].present?
-        # Try to convert to nevent, fallback to note1
-        event = Event.find_by(external_id: parsed[:event_id])
-        if event&.nevent_id.present?
-          event_template.gsub("{eventid}", event.nevent_id)
-        else
-          note_id = Nostr::KeyConverter.hex_to_note(parsed[:event_id])
-          event_template.gsub("{eventid}", note_id || parsed[:event_id])
-        end
-      else
-        match
-      end
-    end
   end
 end

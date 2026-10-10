@@ -1,0 +1,25 @@
+<%# Lazily loaded into the layout's billing-status frame. Silent for a paying
+    user and while billing cannot be reached. %>
+<turbo-frame id="billing-status">
+  <% unless @snapshot.active? || @snapshot.unknown? %>
+    <div class="mb-4 rounded-md border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 p-4 flex flex-wrap items-center gap-3"
+         data-billing-banner="<%= @snapshot.state %>">
+      <p class="flex-1 min-w-[16rem] text-sm text-purple-900 dark:text-purple-100">
+        <% case @snapshot.state %>
+        <% when "none" %>
+          <%= t("billing.banner.none") %>
+        <% when "trial" %>
+          <%= t("billing.banner.trial", date: billing_date(@snapshot.until_time)) %>
+        <% when "expired" %>
+          <%= t("billing.banner.expired", date: billing_date(@snapshot.until_time)) %>
+        <% end %>
+      </p>
+      <% if @snapshot.none? %>
+        <%= button_to t("billing.start_trial"), billing_trial_path, method: :post, form: { data: { turbo_frame: "_top" } },
+              class: "px-3 py-1.5 text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" %>
+      <% end %>
+      <%= link_to t("billing.banner.plans"), billing_path, data: { turbo_frame: "_top" },
+            class: "text-sm font-medium text-purple-700 dark:text-purple-300 hover:underline" %>
+    </div>
+  <% end %>
+</turbo-frame>

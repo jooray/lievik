@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { t, locale } from "../lib/i18n"
+import { readBillingDenial, showBillingDenial } from "../lib/billing_denial"
 
 // Plural-aware lookup: picks `<key>.one|few|other` for the page's locale
 // (Slovak and Czech need "few"), falling back to `other`.
@@ -74,6 +75,13 @@ export default class extends Controller {
       })
 
       if (!response.ok) {
+        const denial = await readBillingDenial(response)
+        if (denial) {
+          showBillingDenial(contentDiv, denial)
+          this.isStreaming = false
+          this.setLoading(false)
+          return
+        }
         throw new Error(`HTTP ${response.status}`)
       }
 

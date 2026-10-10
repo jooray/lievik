@@ -27,11 +27,15 @@ module ManualEvents
 
       if event.save
         linked_contents = Links::ExtractionService.new(event).extract_and_save
-        unfetched_ids = linked_contents.select { |lc| lc.fetched_at.nil? }.map(&:id)
-        FetchLinksJob.perform_later(unfetched_ids) if unfetched_ids.any?
+        # The event is always kept; summarizing its links and rating it are paid
+        # work, which Billing::Resume picks up once the user has access.
+        if Billing.allows?(@user)
+          unfetched_ids = linked_contents.select { |lc| lc.fetched_at.nil? }.map(&:id)
+          FetchLinksJob.perform_later(unfetched_ids) if unfetched_ids.any?
 
-        @user.channels.find_each do |channel|
-          RateEventsJob.perform_later(channel.id, [event.id])
+          @user.channels.find_each do |channel|
+            RateEventsJob.perform_later(channel.id, [event.id])
+          end
         end
 
         Result.new(event: event, errors: [])

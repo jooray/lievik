@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 class DashboardController < ApplicationController
+  requires_paid_access only: :rate_all
+
   def index
-    # Exclude manual sources to match what's shown on the sources index page
-    @sources_count = current_user.sources.where.not(source_type: :manual).count
-    @channels_count = current_user.channels.count
-    @events_count = current_user.events.count
-    @embedded_count = current_user.events.where.not(embedding: nil).count
+    # Same counters as the app API (Users::Stats).
+    stats = Users::Stats.for(current_user)
+    @sources_count = stats[:sources]
+    @channels_count = stats[:channels]
+    @events_count = stats[:events]
+    @embedded_count = stats[:embedded]
 
     # Active background jobs. Sweep this user's stale logs first: the recurring
     # sweep is the primary path, but it rides on a scheduler that can itself be
@@ -23,8 +26,7 @@ class DashboardController < ApplicationController
   end
 
   def rate_all
-    channels = current_user.channels
-    channels.each { |channel| RateEventsJob.perform_later(channel.id) }
-    redirect_to dashboard_path, notice: t(".queued", count: channels.count)
+    count = Channels::RateAll.call(current_user)
+    redirect_to dashboard_path, notice: Channels::RateAll.notice(count)
   end
 end

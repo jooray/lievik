@@ -1,0 +1,10 @@
+<%# Shown only when the instance publishes an APK (ANDROID_DOWNLOAD_URL). %>
+<% download_url = safe_external_url(ENV["ANDROID_DOWNLOAD_URL"]) %>
+<% if download_url %>
+  <div id="android-app" class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+    <h2 class="text-lg font-medium text-gray-900 dark:text-white"><%= t(".title") %></h2>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= t(".intro") %></p>
+    <%= link_to t(".download"), download_url, rel: "noopener noreferrer", target: "_blank",
+        class: "mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700" %>
+  </div>
+<% end %>

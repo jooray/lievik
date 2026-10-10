@@ -1,5 +1,9 @@
 sk:
   users:
+    android_app:
+      title: "Aplikácia pre Android"
+      intro: "Lievik pre Android: vaše kanály, príspevky a koncepty v telefóne, synchronizované s týmto účtom. Prihláste sa cez Amber alebo iný Nostr podpisovač; každý telefón dostane vlastný token v zozname vyššie."
+      download: "Stiahnuť aplikáciu pre Android"
     edit:
       language:
         label: "Jazyk rozhrania"

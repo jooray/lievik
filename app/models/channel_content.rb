@@ -74,9 +74,6 @@ class ChannelContent < ApplicationRecord
     event_ids = events.pluck(:id)
     return if event_ids.empty?
 
-    channel.channel_events.where(event_id: event_ids).update_all(
-      used: true,
-      used_at: Time.current
-    )
+    channel.channel_events.where(event_id: event_ids).mark_all_used!
   end
 end

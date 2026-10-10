@@ -12,6 +12,7 @@ module Mcp
     JSONRPC_INVALID_PARAMS = -32602
     JSONRPC_INTERNAL_ERROR = -32603
     APP_ERROR = -32000
+    PAYMENT_REQUIRED = -32001
 
     # A JSON-RPC batch is processed in one request, so an unbounded array is a
     # cheap way to pin a Puma thread for a very long time.
@@ -87,6 +88,8 @@ module Mcp
       { jsonrpc: "2.0", id: id, result: result }
     rescue Mcp::Tools::Base::InvalidParams => e
       jsonrpc_error(id, JSONRPC_INVALID_PARAMS, e.message)
+    rescue Mcp::Tools::Base::PaymentRequired => e
+      jsonrpc_error(id, PAYMENT_REQUIRED, e.message)
     rescue Mcp::Tools::Base::AppError => e
       jsonrpc_error(id, APP_ERROR, e.message)
     rescue ActiveRecord::RecordNotFound => e

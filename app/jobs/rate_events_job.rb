@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class RateEventsJob < ApplicationJob
+  include BillingGated
+
   queue_as :default
 
   # Rating an event costs up to 3 paid AI calls, so bulk work is bounded twice:
@@ -32,6 +34,9 @@ class RateEventsJob < ApplicationJob
   def perform(channel_id, event_ids = nil)
     channel = Channel.find_by(id: channel_id)
     return unless channel
+    # Before the batch split and the lock, so a denied job queues nothing and
+    # strands no lock.
+    return if billing_denies?(channel.user, "rating #{channel.name}")
 
     ids = Array(event_ids).compact.uniq
 

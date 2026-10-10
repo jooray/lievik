@@ -113,6 +113,15 @@ class Event < ApplicationRecord
     end
   end
 
+  # The channels this event fits best and has not been used in yet, best first.
+  # Works on preloaded channel_events (no query when they are included).
+  def top_channel_events(limit: 3)
+    channel_events
+      .reject(&:used?)
+      .sort_by { |ce| -(ce.relevance_score || 0) }
+      .first(limit)
+  end
+
   # Generate a full URL link to this event using the user's template
   def source_link(user = nil)
     identifier = source_identifier

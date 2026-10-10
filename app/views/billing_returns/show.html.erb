@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>">
+  <head>
+    <title><%= t(".title") %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex">
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application" %>
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900">
+    <main class="max-w-md mx-auto px-4 py-16 text-center space-y-6">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= t(".title") %></h1>
+      <p class="text-sm text-gray-600 dark:text-gray-300"><%= t(".body") %></p>
+      <a href="<%= BillingReturnsController::APP_URL %>" class="inline-flex justify-center items-center px-5 py-2.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm">
+        <%= t(".open_app") %>
+      </a>
+      <p class="text-xs text-gray-500 dark:text-gray-400"><%= t(".close_hint") %></p>
+    </main>
+    <%= javascript_tag nonce: true do %>
+      window.location.replace(<%= raw BillingReturnsController::APP_URL.to_json %>);
+    <% end %>
+  </body>
+</html>

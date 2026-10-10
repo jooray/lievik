@@ -9,6 +9,8 @@ module Nostr
     # than pinning them for the old 30-minute TTL.
     SESSION_EXPIRY = ENV.fetch("NOSTR_AUTH_WINDOW_MINUTES", 5).to_i.minutes
     NIP07_MAX_AGE = 5.minutes
+    NIP07_CONTENT = "Sign in to Lievik"
+    HTTP_AUTH_KIND = 27_235
 
     def initialize
       @config = Rails.application.config_for(:lievik)
@@ -143,17 +145,21 @@ module Nostr
     # holding a stale bundle would otherwise be locked out until it reloaded.
     # Once a release has been out long enough that no stale bundles remain,
     # make the tag mandatory.
-    def verify_nip07_auth(signed_event, challenge, domain: nil)
+    #
+    # The app API (a new client, no stale bundles) passes `require_domain: true`
+    # and the content its contract names (`content:` takes one value or a list).
+    def verify_nip07_auth(signed_event, challenge, domain: nil, content: NIP07_CONTENT, require_domain: false)
       return false if signed_event.blank? || challenge.blank?
 
       begin
         event_data = JSON.parse(signed_event)
         return false unless EventValidator.valid?(event_data, kind: 22_242)
         return false unless event_data["created_at"].between?(NIP07_MAX_AGE.ago.to_i, 1.minute.from_now.to_i)
-        return false unless event_data["content"] == "Sign in to Lievik"
+        return false unless Array(content).include?(event_data["content"])
         return false unless event_data["tags"].include?(["challenge", challenge])
 
         signed_domain = Array(event_data["tags"]).find { |t| t.is_a?(Array) && t.first == "domain" }&.second
+        return false if require_domain && (signed_domain.blank? || domain.blank?)
         if signed_domain.present? && domain.present? && !signed_domain.casecmp?(domain)
           Rails.logger.warn("NIP-07 proof signed for #{signed_domain.inspect}, expected #{domain.inspect}")
           return false
@@ -166,9 +172,45 @@ module Nostr
       end
     end
 
+    # Verify a NIP-98 HTTP-auth proof (kind 27235) for the app's token
+    # endpoint: the native apps sign this instead of a kind-22242 proof,
+    # because signers such as Amber treat 22242 as NIP-42 relay auth (scoped to
+    # a `relay` tag, subject to a relay whitelist) and may refuse it silently.
+    #
+    # The `u` tag must name `url` (scheme ignored: TLS ends at the proxy), the
+    # `method` tag POST, and the `challenge` tag the challenge we issued, which
+    # makes the proof single-use. Returns the pubkey hex, or false.
+    def verify_http_auth(signed_event, challenge, url:)
+      return false if signed_event.blank? || challenge.blank? || url.blank?
+
+      event_data = JSON.parse(signed_event)
+      return false unless EventValidator.valid?(event_data, kind: HTTP_AUTH_KIND)
+      return false unless event_data["created_at"].between?(NIP07_MAX_AGE.ago.to_i, 1.minute.from_now.to_i)
+      return false unless event_data["tags"].include?(["challenge", challenge])
+
+      tag = ->(name) { Array(event_data["tags"]).find { |t| t.is_a?(Array) && t.first == name }&.second.to_s }
+      return false unless tag.call("method").casecmp?("POST")
+      return false unless same_endpoint?(tag.call("u"), url)
+
+      event_data["pubkey"].downcase
+    rescue JSON::ParserError, TypeError, URI::InvalidURIError => e
+      Rails.logger.error("HTTP auth verification failed: #{e.message}")
+      false
+    end
+
     # Cleanup expired sessions
     def cleanup_expired_sessions
       NostrAuthSession.cleanup_expired!
+    end
+
+    private
+
+    # Host and path, case-insensitive host; scheme and port are left out
+    # because TLS ends at the reverse proxy.
+    def same_endpoint?(signed, expected)
+      a = URI.parse(signed)
+      b = URI.parse(expected)
+      a.host.present? && a.host.casecmp?(b.host.to_s) && a.path.chomp("/") == b.path.chomp("/") && a.query.blank?
     end
   end
 end

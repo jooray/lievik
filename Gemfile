@@ -79,6 +79,10 @@ gem "dotenv-rails", groups: [:development, :test]
 # Pagination
 gem "kaminari"
 
+# Billing client for the hosted service (vendored from nostr-billing; inert
+# unless BILLING_API_URL is set)
+gem "nostr_billing", path: "vendor/gems/nostr_billing"
+
 # QR Code generation
 gem "rqrcode"
 

@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { Turbo } from "@hotwired/turbo-rails"
 import { t } from "../lib/i18n"
+import { readBillingDenial, showBillingDenial } from "../lib/billing_denial"
 
 // Both stream endpoints mutate the draft (they save a version and overwrite the
 // content), so they are POST — which rules out EventSource. We POST with fetch()
@@ -108,7 +109,8 @@ export default class extends Controller {
     }
 
     if (!response.ok || !response.body) {
-      handlers.error({ message: t("content_builder.request_failed", { status: response.status }) })
+      const denial = await readBillingDenial(response)
+      handlers.error(denial || { message: t("content_builder.request_failed", { status: response.status }) })
       return
     }
 
@@ -204,7 +206,11 @@ export default class extends Controller {
         this.abortStream()
         this.endStreaming()
         const message = (data && data.message) || t("content_builder.generic_error")
-        statusEl.textContent = t("content_builder.error", { message })
+        if (data && data.billingUrl !== undefined) {
+          showBillingDenial(statusEl, data, "")
+        } else {
+          statusEl.textContent = t("content_builder.error", { message })
+        }
         spinnerEl.classList.remove("animate-spin")
         spinnerEl.innerHTML = `
           <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

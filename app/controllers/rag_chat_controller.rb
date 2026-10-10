@@ -2,6 +2,9 @@
 
 class RagChatController < ApplicationController
   include ActionController::Live
+  include SseStreaming
+
+  requires_paid_ai kind: "chat", prompt: :question, only: [:ask, :ask_stream]
 
   def index
     @embedded_count = Event.joins(source: :user)
@@ -38,68 +41,14 @@ class RagChatController < ApplicationController
   end
 
   def ask_stream
-    response.headers["Content-Type"] = "text/event-stream"
-    response.headers["Cache-Control"] = "no-cache"
-    response.headers["X-Accel-Buffering"] = "no"
-
-    question = params[:question].to_s.strip
-    # Handle both JSON body (already parsed array) and query string (JSON string).
-    # Anything malformed is treated as "no history" rather than a 500.
-    history_param = params[:history]
-    conversation_history = if history_param.is_a?(Array)
-      history_param
-    else
-      begin
-        JSON.parse(history_param.presence || "[]")
-      rescue JSON::ParserError, TypeError
-        []
-      end
-    end
-    conversation_history = [] unless conversation_history.is_a?(Array)
-
-    if question.blank?
-      response.stream.write "event: error\ndata: #{({ message: t("rag_chat.errors.question_required") }).to_json}\n\n"
-      response.stream.close
-      return
-    end
-
-    chat_service = Rag::ChatService.new(current_user)
-
-    begin
-      result = chat_service.chat_stream(question, conversation_history: conversation_history) do |chunk|
-        escaped_chunk = chunk.to_json
-        response.stream.write "event: chunk\ndata: #{escaped_chunk}\n\n"
-      end
-
-      # Send cited events on completion
-      if result[:success] && result[:cited_event_ids].present?
-        # Scoped to the current user: citation ids ultimately originate from
-        # client-supplied conversation history, which must never be able to
-        # surface another user's content.
-        cited_events = current_user.events.where(id: result[:cited_event_ids]).includes(source: :user)
-        response.stream.write "event: complete\ndata: #{({ success: true, cited_events: cited_events.map { |e| event_summary(e) } }).to_json}\n\n"
-      else
-        response.stream.write "event: complete\ndata: #{({ success: true, cited_events: [] }).to_json}\n\n"
-      end
-    rescue Ai::Client::ApiError => e
-      Rails.logger.error("Chat streaming failed: #{e.message}")
-      response.stream.write "event: error\ndata: #{({ message: e.message }).to_json}\n\n"
-    rescue => e
-      Rails.logger.error("Chat streaming error: #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
-      response.stream.write "event: error\ndata: #{({ message: t("rag_chat.errors.unexpected") }).to_json}\n\n"
-    ensure
-      response.stream.close
+    stream_sse do |sse|
+      Streams::RagChat.new(current_user).call(sse, question: params[:question], history: params[:history])
     end
   end
 
   private
 
   def event_summary(event)
-    {
-      id: event.id,
-      content: event.content.to_s.truncate(300),
-      source_name: event.source&.name || t("rag_chat.unknown_source"),
-      published_at: event.published_at && l(event.published_at.to_date, format: t("rag_chat.date_format"))
-    }
+    Streams::RagChat.event_summary(event)
   end
 end

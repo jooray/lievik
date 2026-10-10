@@ -1,0 +1,8 @@
+---
+sk:
+  billing_returns:
+    show:
+      title: Návrat do Lievika
+      body: Lievik sa znova otvára a platbu skontroluje v aplikácii.
+      open_app: Späť do Lievika
+      close_hint: Ak sa aplikácia neotvorí, zatvorte túto stránku.

@@ -8,6 +8,7 @@ sk:
       theme_label: "Prepnúť farebný režim"
       language_label: "Jazyk"
       nav_launch: "Spustiť"
+      nav_pricing: "Cenník"
       hero:
         eyebrow: "Kurátorstvo obsahu pre Nostr"
         headline_html: "Správny obsah<br />pre <em>správne obecenstvo.</em>"
@@ -60,6 +61,31 @@ sk:
         share:
           title: "Zdieľajte s rozmyslom"
           copy: "Lievik zoradí, čo je relevantné, pomôže vám s konceptom správy a zapamätá si, čo ste už použili."
+      pricing:
+        eyebrow: "Cenník"
+        heading: "Tri dni zadarmo. Ak sa osvedčí, zaplatíte v satoch."
+        subheading: "Účtom je váš Nostr kľúč. Žiadny e-mail, karta ani predplatné, ktoré treba rušiť."
+        lievik:
+          label: "LIEVIK"
+          price: "3 dni zadarmo"
+          then: "potom 15 000 satov za 30 dní"
+          trial: "Skúška sa spustí, keď prvýkrát pridáte zdroj, obnovíte ho, necháte ohodnotiť príspevky alebo sa spýtate AI. Samotné prihlásenie ju nespustí."
+          paused: "Bez skúšky alebo zaplateného času Lievik prestane sťahovať a hodnotiť príspevky. Prihlásiť sa a pozrieť si, čo ste nazbierali, môžete stále."
+          pro_rata: "Zaplatiť môžete ľubovoľnú sumu cez Lightning, pripíše sa po dňoch: 7 500 satov je 15 dní, minimum 1 000."
+          keep_days: "Ak zaplatíte počas skúšky, nevyčerpané dni vám zostanú."
+        bundle:
+          label: "VŠETKY APLIKÁCIE"
+          price: "25 000 satov"
+          then: "za 30 dní, pre tri aplikácie"
+          covers_html: "Lievik, hostovaný <a href=\"https://nalgorithm.cypherpunk.today\">nalgorithm</a> (zoradený Nostr feed a hlasové prehľady) a písanie s AI v <a href=\"https://emanator.cypherpunk.today\">Emanatore</a> (plánovač príspevkov na Nostr)."
+          saving: "Samostatne by stáli 35 000 satov."
+          keep_days: "Dni, ktoré už máte zaplatené v ktorejkoľvek z nich, vám zostanú."
+        self_host:
+          label: "VLASTNÝ SERVER"
+          price: "Zadarmo"
+          then: "s vlastným kľúčom k AI"
+          copy_html: "Lievik je open source. <a href=\"https://github.com/jooray/lievik\">Spustite si ho sami</a> a žiadne platby sa vás netýkajú."
+        terms_html: "Skúšobná doba, vrátenie peňazí, súkromie a podpora: <a href=\"https://cypherpunk.today/sk/terms/\">podmienky</a>."
       closing:
         eyebrow: "Doma na Nostri"
         heading: "Nech má každý pocit, že správa bola písaná práve preňho."

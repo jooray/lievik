@@ -1,0 +1,183 @@
+# Strings only the Android app needs (the rest come from the web's locale
+# files, see generate.rb). Android format: positional %1$s / %1$d, literal %%.
+# sk/cs use the formal "vy", es uses "tú", as on the web.
+
+nav_ask_short: {en: Ask, sk: Opýtať sa, cs: Zeptat se, es: Preguntar}
+nav_more: {en: More, sk: Viac, cs: Více, es: Más}
+nav_settings: {en: Settings, sk: Nastavenia, cs: Nastavení, es: Ajustes}
+# Short labels for the tablet's side rail (about 80 dp wide).
+nav_ai_short: {en: AI channels, sk: Kanály s AI, cs: Kanály s AI, es: Canales IA}
+nav_add_event_short: {en: Add event, sk: Pridať, cs: Přidat, es: Añadir}
+
+# Event detail → View original: an installed nostr app, or the web link (host).
+event_open_in_app: {en: Open in %1$s, sk: Otvoriť v aplikácii %1$s, cs: Otevřít v aplikaci %1$s, es: Abrir en %1$s}
+event_open_on_web: {en: "%1$s (web)", sk: "%1$s (web)", cs: "%1$s (web)", es: "%1$s (web)"}
+
+error_session_ended:
+  en: Your session ended. Please sign in again.
+  sk: Vaše prihlásenie skončilo. Prihláste sa znova.
+  cs: Vaše přihlášení skončilo. Přihlaste se znovu.
+  es: Tu sesión ha terminado. Vuelve a iniciar sesión.
+error_unexpected:
+  en: The server sent a response the app can't read.
+  sk: Server poslal odpoveď, ktorej aplikácia nerozumie.
+  cs: Server poslal odpověď, které aplikace nerozumí.
+  es: El servidor envió una respuesta que la app no puede leer.
+error_server:
+  en: Something went wrong on the server (%1$d). Try again in a moment.
+  sk: Na serveri sa niečo pokazilo (%1$d). Skúste to o chvíľu znova.
+  cs: Na serveru se něco pokazilo (%1$d). Zkuste to za chvíli znovu.
+  es: Algo salió mal en el servidor (%1$d). Inténtalo de nuevo en un momento.
+error_rate_limited:
+  en: Too many requests. Wait a moment and try again.
+  sk: Príliš veľa požiadaviek. Chvíľu počkajte a skúste to znova.
+  cs: Příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu.
+  es: Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.
+
+offline_title: {en: You're offline, sk: Ste offline, cs: Jste offline, es: Estás sin conexión}
+offline_body:
+  en: This needs a connection to the server. Everything already synced is still available.
+  sk: Toto potrebuje spojenie so serverom. Všetko, čo je už synchronizované, máte stále k dispozícii.
+  cs: Tohle potřebuje spojení se serverem. Vše, co už je synchronizované, máte stále k dispozici.
+  es: Esto necesita conexión con el servidor. Todo lo ya sincronizado sigue disponible.
+offline_banner:
+  en: Offline — showing saved data
+  sk: Offline – zobrazujú sa uložené údaje
+  cs: Offline – zobrazují se uložená data
+  es: Sin conexión, mostrando datos guardados
+
+sync_now: {en: Sync now, sk: Synchronizovať, cs: Synchronizovat, es: Sincronizar ahora}
+sync_last:
+  en: Last synced %1$s
+  sk: Naposledy synchronizované %1$s
+  cs: Naposledy synchronizováno %1$s
+  es: Última sincronización %1$s
+sync_never: {en: Not synced yet, sk: Zatiaľ nesynchronizované, cs: Zatím nesynchronizováno, es: Aún sin sincronizar}
+sync_running: {en: Syncing…, sk: Synchronizuje sa…, cs: Synchronizuje se…, es: Sincronizando…}
+sync_full: {en: Download everything again, sk: Stiahnuť všetko znova, cs: Stáhnout vše znovu, es: Descargar todo de nuevo}
+sync_full_hint:
+  en: Clears the data saved on this phone and syncs it again from the server.
+  sk: Vymaže údaje uložené v tomto telefóne a znova ich synchronizuje zo servera.
+  cs: Smaže data uložená v tomto telefonu a znovu je synchronizuje ze serveru.
+  es: Borra los datos guardados en este teléfono y los vuelve a sincronizar desde el servidor.
+sync_failed:
+  en: Sync failed. Showing saved data.
+  sk: Synchronizácia zlyhala. Zobrazujú sa uložené údaje.
+  cs: Synchronizace selhala. Zobrazují se uložená data.
+  es: La sincronización falló. Mostrando datos guardados.
+
+update_required_title: {en: Update required, sk: Je potrebná aktualizácia, cs: Je nutná aktualizace, es: Actualización necesaria}
+update_required_body:
+  en: This version of Lievik is too old for the server. Install the latest version to continue.
+  sk: Táto verzia Lieviku je pre server príliš stará. Ak chcete pokračovať, nainštalujte si najnovšiu verziu.
+  cs: Tato verze Lieviku je pro server příliš stará. Chcete-li pokračovat, nainstalujte si nejnovější verzi.
+  es: Esta versión de Lievik es demasiado antigua para el servidor. Instala la última versión para continuar.
+update_download: {en: Download update, sk: Stiahnuť aktualizáciu, cs: Stáhnout aktualizaci, es: Descargar actualización}
+update_available:
+  en: A new version of Lievik is available.
+  sk: Je dostupná nová verzia Lieviku.
+  cs: Je k dispozici nová verze Lieviku.
+  es: Hay una nueva versión de Lievik disponible.
+update_later: {en: Later, sk: Neskôr, cs: Později, es: Más tarde}
+
+login_this_phone_heading: {en: Signer on this phone, sk: Podpisovač v tomto telefóne, cs: Podepisovač v tomto telefonu, es: Firmante en este teléfono}
+login_sign_in_with: {en: Sign in with %1$s, sk: Prihlásiť sa cez %1$s, cs: Přihlásit se přes %1$s, es: Iniciar sesión con %1$s}
+login_nip55_hint:
+  en: "The signer asks twice: to share your public key, then to sign the login request."
+  sk: "Podpisovač sa opýta dvakrát: či môže zdieľať váš verejný kľúč a potom či môže podpísať žiadosť o prihlásenie."
+  cs: "Podepisovač se zeptá dvakrát: zda může sdílet váš veřejný klíč a potom zda může podepsat žádost o přihlášení."
+  es: "El firmante te preguntará dos veces: para compartir tu clave pública y para firmar la solicitud de inicio de sesión."
+login_no_signer:
+  en: No signer app is installed on this phone. Install Amber, or connect a signer on another device below.
+  sk: V tomto telefóne nie je nainštalovaný žiadny podpisovač. Nainštalujte si Amber alebo nižšie pripojte podpisovač na inom zariadení.
+  cs: V tomto telefonu není nainstalovaný žádný podepisovač. Nainstalujte si Amber nebo níže připojte podepisovač na jiném zařízení.
+  es: No hay ninguna app firmante instalada en este teléfono. Instala Amber o conecta abajo un firmante en otro dispositivo.
+login_get_amber: {en: Get Amber, sk: Stiahnuť Amber, cs: Stáhnout Amber, es: Obtener Amber}
+login_signer_cancelled:
+  en: The signer did not return a signature.
+  sk: Podpisovač nevrátil podpis.
+  cs: Podepisovač nevrátil podpis.
+  es: El firmante no devolvió una firma.
+login_signer_rejected:
+  en: Signing was cancelled in the signer app.
+  sk: Podpisovanie bolo v podpisovači zrušené.
+  cs: Podepisování bylo v podepisovači zrušeno.
+  es: Se canceló la firma en la app firmante.
+login_hide_qr: {en: Hide QR code, sk: Skryť QR kód, cs: Skrýt QR kód, es: Ocultar código QR}
+login_qr_description: {en: QR code for your signer app, sk: QR kód pre podpisovač, cs: QR kód pro podepisovač, es: Código QR para tu app firmante}
+login_advanced: {en: Advanced, sk: Rozšírené, cs: Pokročilé, es: Avanzado}
+login_server_label: {en: Server, sk: Server, cs: Server, es: Servidor}
+login_server_hint:
+  en: For a self-hosted Lievik. Keep the default to use lievik.cypherpunk.today.
+  sk: Pre vlastnú inštaláciu Lieviku. Ak chcete používať lievik.cypherpunk.today, ponechajte predvolenú hodnotu.
+  cs: Pro vlastní instalaci Lieviku. Chcete-li používat lievik.cypherpunk.today, ponechte výchozí hodnotu.
+  es: Para un Lievik autoalojado. Deja el valor predeterminado para usar lievik.cypherpunk.today.
+login_server_invalid:
+  en: Enter an address that starts with https://
+  sk: Zadajte adresu, ktorá začína https://
+  cs: Zadejte adresu, která začíná https://
+  es: Introduce una dirección que empiece por https://
+login_server_insecure:
+  en: Without https:// your login travels unencrypted.
+  sk: Bez https:// sa prihlásenie posiela nešifrované.
+  cs: Bez https:// se přihlášení posílá nešifrovaně.
+  es: Sin https:// tu inicio de sesión viaja sin cifrar.
+login_server_reset: {en: Use default, sk: Použiť predvolený, cs: Použít výchozí, es: Usar el predeterminado}
+
+mark_unused: {en: Mark as Unused, sk: Označiť ako nepoužité, cs: Označit jako nepoužité, es: Marcar como no usadas}
+channel_rate_new: {en: Rate new events, sk: Ohodnotiť nové príspevky, cs: Ohodnotit nové příspěvky, es: Valorar publicaciones nuevas}
+select: {en: Select, sk: Vybrať, cs: Vybrat, es: Seleccionar}
+clear_selection: {en: Clear selection, sk: Zrušiť výber, cs: Zrušit výběr, es: Borrar selección}
+more_options: {en: More options, sk: Ďalšie možnosti, cs: Další možnosti, es: Más opciones}
+refresh: {en: Refresh, sk: Obnoviť, cs: Obnovit, es: Actualizar}
+open_link: {en: Open link, sk: Otvoriť odkaz, cs: Otevřít odkaz, es: Abrir enlace}
+profile_picture: {en: Profile picture, sk: Profilový obrázok, cs: Profilový obrázek, es: Foto de perfil}
+image: {en: Image, sk: Obrázok, cs: Obrázek, es: Imagen}
+stop: {en: Stop, sk: Zastaviť, cs: Zastavit, es: Detener}
+preview: {en: Preview, sk: Náhľad, cs: Náhled, es: Vista previa}
+share: {en: Share, sk: Zdieľať, cs: Sdílet, es: Compartir}
+done: {en: Done, sk: Hotovo, cs: Hotovo, es: Listo}
+filters: {en: Filters, sk: Filtre, cs: Filtry, es: Filtros}
+percent: {en: "%1$d%%", sk: "%1$d %%", cs: "%1$d %%", es: "%1$d %%"}
+relevance_description: {en: "Relevance %1$d%%", sk: "Relevancia %1$d %%", cs: "Relevance %1$d %%", es: "Relevancia %1$d %%"}
+linked_content: {en: Linked content, sk: Prepojený obsah, cs: Propojený obsah, es: Contenido enlazado}
+discard: {en: Discard, sk: Zahodiť, cs: Zahodit, es: Descartar}
+unsaved_changes: {en: You have unsaved changes., sk: Máte neuložené zmeny., cs: Máte neuložené změny., es: Tienes cambios sin guardar.}
+activity_stale: {en: stale, sk: zaseknuté, cs: zaseknuté, es: atascado}
+token_this_device: {en: This device, sk: Toto zariadenie, cs: Toto zařízení, es: Este dispositivo}
+
+settings_interface: {en: Interface, sk: Rozhranie, cs: Rozhraní, es: Interfaz}
+settings_account: {en: Account, sk: Účet, cs: Účet, es: Cuenta}
+settings_links: {en: Links in generated content, sk: Odkazy v generovanom obsahu, cs: Odkazy v generovaném obsahu, es: Enlaces en el contenido generado}
+settings_ai: {en: AI, sk: AI, cs: AI, es: IA}
+settings_data: {en: Data on this phone, sk: Údaje v tomto telefóne, cs: Data v tomto telefonu, es: Datos en este teléfono}
+settings_about: {en: About, sk: O aplikácii, cs: O aplikaci, es: Acerca de}
+settings_app_version: {en: App version %1$s, sk: Verzia aplikácie %1$s, cs: Verze aplikace %1$s, es: Versión de la app %1$s}
+settings_server_build: {en: "Server %1$s, build %2$s", sk: "Server %1$s, zostavenie %2$s", cs: "Server %1$s, sestavení %2$s", es: "Servidor %1$s, compilación %2$s"}
+settings_engine_unavailable:
+  en: Not available on this server.
+  sk: Na tomto serveri nie je k dispozícii.
+  cs: Na tomto serveru není k dispozici.
+  es: No disponible en este servidor.
+settings_sign_out_confirm:
+  en: Sign out of Lievik on this phone? Its API token is revoked.
+  sk: Odhlásiť sa z Lieviku v tomto telefóne? Jeho API token sa zruší.
+  cs: Odhlásit se z Lieviku v tomto telefonu? Jeho API token se zruší.
+  es: ¿Cerrar sesión en Lievik en este teléfono? Se revocará su token de API.
+settings_signed_in_as: {en: "Signed in as %1$s", sk: "Prihlásenie: %1$s", cs: "Přihlášení: %1$s", es: "Sesión iniciada como %1$s"}
+
+billing_waiting_payment: {en: Waiting for the payment…, sk: Čaká sa na platbu…, cs: Čeká se na platbu…, es: Esperando el pago…}
+billing_check_payment: {en: Check payment, sk: Skontrolovať platbu, cs: Zkontrolovat platbu, es: Comprobar el pago}
+billing_open_invoice: {en: Open invoice, sk: Otvoriť faktúru, cs: Otevřít fakturu, es: Abrir factura}
+billing_pending_title: {en: Unpaid invoices, sk: Nezaplatené faktúry, cs: Nezaplacené faktury, es: Facturas pendientes}
+billing_payment_hint:
+  en: Lievik opens the invoice in your browser. Come back here once it is paid.
+  sk: Lievik otvorí faktúru v prehliadači. Po zaplatení sa sem vráťte.
+  cs: Lievik otevře fakturu v prohlížeči. Po zaplacení se sem vraťte.
+  es: Lievik abre la factura en tu navegador. Vuelve aquí cuando esté pagada.
+billing_not_settled:
+  en: The payment hasn't arrived yet.
+  sk: Platba zatiaľ neprišla.
+  cs: Platba zatím nedorazila.
+  es: El pago aún no ha llegado.
+event_type_long_form: {en: Article, sk: Článok, cs: Článek, es: Artículo}

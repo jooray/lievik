@@ -5,6 +5,8 @@ module Mcp
     class Base
       class InvalidParams < StandardError; end
       class AppError < StandardError; end
+      # The work needs a trial or paid time on the hosted instance.
+      class PaymentRequired < AppError; end
 
       MAX_LIMIT = 200
 
@@ -50,6 +52,14 @@ module Mcp
         Time.iso8601(v.to_s)
       rescue ArgumentError
         raise InvalidParams, "#{key} must be ISO8601"
+      end
+
+      # For tools that queue rating or ingestion. Calling one is an explicit
+      # request, so it starts the trial like the matching buttons do.
+      def require_paid_access!
+        return if !Billing.enabled? || Billing.activate(user).allows?
+
+        raise PaymentRequired, I18n.t("billing.mcp_payment_required", locale: :en)
       end
 
       def find_user_channel!(channel_id)
