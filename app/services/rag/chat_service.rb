@@ -202,7 +202,7 @@ module Rag
     end
 
     def build_messages_with_history(question, context, history)
-      messages = [{ role: "system", content: SYSTEM_PROMPT }]
+      messages = [ { role: "system", content: SYSTEM_PROMPT } ]
 
       # Add conversation history (previous Q&A pairs)
       Array(history).each do |msg|

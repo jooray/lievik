@@ -13,7 +13,7 @@ class CreateEvents < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :events, [:source_id, :external_id], unique: true
+    add_index :events, [ :source_id, :external_id ], unique: true
     add_index :events, :published_at
   end
 end

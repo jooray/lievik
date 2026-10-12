@@ -41,28 +41,28 @@ RSpec.describe "Channel event sorting", type: :request do
       get channel_path(channel)
 
       expect(response).to have_http_status(:ok)
-      expect(rendered_event_ids).to eq([old_high.id, mid.id, new_low.id])
+      expect(rendered_event_ids).to eq([ old_high.id, mid.id, new_low.id ])
     end
 
     it "falls back to relevance for an unknown sort value" do
       get channel_path(channel, sort: "relevance_score DESC; DROP TABLE events")
 
       expect(response).to have_http_status(:ok)
-      expect(rendered_event_ids).to eq([old_high.id, mid.id, new_low.id])
+      expect(rendered_event_ids).to eq([ old_high.id, mid.id, new_low.id ])
     end
 
     it "sorts newest first" do
       get channel_path(channel, sort: "newest")
 
       expect(response).to have_http_status(:ok)
-      expect(rendered_event_ids).to eq([new_low.id, mid.id, old_high.id])
+      expect(rendered_event_ids).to eq([ new_low.id, mid.id, old_high.id ])
     end
 
     it "sorts oldest first" do
       get channel_path(channel, sort: "oldest")
 
       expect(response).to have_http_status(:ok)
-      expect(rendered_event_ids).to eq([old_high.id, mid.id, new_low.id])
+      expect(rendered_event_ids).to eq([ old_high.id, mid.id, new_low.id ])
     end
 
     it "still honours the relevance threshold when sorted by recency" do
@@ -84,19 +84,19 @@ RSpec.describe "Channel event sorting", type: :request do
     it "keeps used events at the bottom when Show used is on and sorted by recency" do
       get channel_path(channel, sort: "newest", show_used: "true")
 
-      expect(rendered_event_ids).to eq([new_low.id, mid.id, old_high.id, used_event.id])
+      expect(rendered_event_ids).to eq([ new_low.id, mid.id, old_high.id, used_event.id ])
     end
 
     it "keeps used events at the bottom when Show used is on and sorted oldest first" do
       get channel_path(channel, sort: "oldest", show_used: "true")
 
-      expect(rendered_event_ids).to eq([old_high.id, mid.id, new_low.id, used_event.id])
+      expect(rendered_event_ids).to eq([ old_high.id, mid.id, new_low.id, used_event.id ])
     end
 
     it "combines the recency sort with the search filter" do
       get channel_path(channel, sort: "newest", search: "note")
 
-      expect(rendered_event_ids).to eq([new_low.id, mid.id, old_high.id])
+      expect(rendered_event_ids).to eq([ new_low.id, mid.id, old_high.id ])
     end
 
     it "carries the sort through the Show used toggle link" do
@@ -120,20 +120,20 @@ RSpec.describe "Channel event sorting", type: :request do
 
       get channel_path(channel, sort: "newest")
 
-      expect(rendered_event_ids).to eq([new_low.id, mid.id])
+      expect(rendered_event_ids).to eq([ new_low.id, mid.id ])
       expect(response.body).to include(CGI.escapeHTML(channel_path(channel, page: 2, sort: "newest")))
     end
   end
 
   describe "bulk actions" do
     it "redirects back to the sorted view" do
-      post bulk_mark_used_channel_path(channel), params: { event_ids: [mid.id].to_json, sort: "newest" }
+      post bulk_mark_used_channel_path(channel), params: { event_ids: [ mid.id ].to_json, sort: "newest" }
 
       expect(response).to redirect_to(channel_path(channel, show_used: nil, sort: "newest"))
     end
 
     it "ignores an unknown sort value on the redirect" do
-      post bulk_mark_used_channel_path(channel), params: { event_ids: [mid.id].to_json, sort: "bogus" }
+      post bulk_mark_used_channel_path(channel), params: { event_ids: [ mid.id ].to_json, sort: "bogus" }
 
       expect(response).to redirect_to(channel_path(channel, show_used: nil))
     end

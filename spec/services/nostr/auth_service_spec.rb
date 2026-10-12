@@ -7,8 +7,8 @@ RSpec.describe Nostr::AuthService do
   let(:challenge) { SecureRandom.hex(32) }
 
   def signed_proof(proof_challenge = challenge, domain: nil)
-    tags = [["challenge", proof_challenge]]
-    tags << ["domain", domain] if domain
+    tags = [ [ "challenge", proof_challenge ] ]
+    tags << [ "domain", domain ] if domain
     event = Nostr::Event.new(
       pubkey: keypair.public_key.to_s,
       created_at: Time.current.to_i,

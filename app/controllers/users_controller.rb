@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class UsersController < ApplicationController
-  before_action :set_search_index_stats, only: [:edit, :update]
+  before_action :set_search_index_stats, only: [ :edit, :update ]
 
   def edit
     @content_templates = current_user.content_templates_list

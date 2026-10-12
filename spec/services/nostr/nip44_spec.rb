@@ -3,7 +3,7 @@
 require "rails_helper"
 
 RSpec.describe Nostr::Nip44 do
-  let(:conversation_key) { ["c41c775356fd92eadc63ff5a0dc1da211b268cbea22316767095b2871ea1412d"].pack("H*") }
+  let(:conversation_key) { [ "c41c775356fd92eadc63ff5a0dc1da211b268cbea22316767095b2871ea1412d" ].pack("H*") }
 
   it "decrypts an official NIP-44 v2 vector" do
     payload = "AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABee0G5VSK0/9YypIObAtDKfYEAjD35uVkHyB0F4DwrcNaCXlCWZKaArsGrY6M9wnuTMxWfp1RTN9Xga8no+kF5Vsb"

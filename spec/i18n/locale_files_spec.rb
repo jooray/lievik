@@ -12,7 +12,7 @@ RSpec.describe "Locale files" do
 
   def flatten(hash, prefix = nil)
     hash.each_with_object([]) do |(key, value), keys|
-      path = [prefix, key].compact.join(".")
+      path = [ prefix, key ].compact.join(".")
       if value.is_a?(Hash) && (value.keys.map(&:to_s) - PLURAL_KEYS).empty? && value.key?("other")
         keys << "#{path}(plural)"
       elsif value.is_a?(Hash)
@@ -49,7 +49,7 @@ RSpec.describe "Locale files" do
         if node.key?("one") && node.key?("other")
           expect(node).to have_key("few"), "#{path}: #{trail.join('.')} has no :few form"
         else
-          node.each { |k, v| walk.call(v, trail + [k]) }
+          node.each { |k, v| walk.call(v, trail + [ k ]) }
         end
       end
       walk.call(YAML.load_file(path).fetch(locale), [])

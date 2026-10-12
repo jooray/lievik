@@ -28,7 +28,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
   describe "POST /channels/:id/bulk_rate" do
     it "does not create a ChannelEvent for another user's event" do
       perform_enqueued_jobs do
-        post bulk_rate_channel_path(channel), params: { event_ids: [foreign_event.id].to_json }
+        post bulk_rate_channel_path(channel), params: { event_ids: [ foreign_event.id ].to_json }
       end
 
       expect(ChannelEvent.where(event_id: foreign_event.id)).to be_empty
@@ -37,7 +37,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
 
     it "rates only the caller's own events when the ids are mixed" do
       perform_enqueued_jobs do
-        post bulk_rate_channel_path(channel), params: { event_ids: [owner_event.id, foreign_event.id].to_json }
+        post bulk_rate_channel_path(channel), params: { event_ids: [ owner_event.id, foreign_event.id ].to_json }
       end
 
       expect(ChannelEvent.where(event_id: foreign_event.id)).to be_empty
@@ -48,7 +48,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
   describe "POST /events/bulk_rate" do
     it "does not create a ChannelEvent for another user's event" do
       perform_enqueued_jobs do
-        post bulk_rate_events_path, params: { event_ids: [foreign_event.id] }
+        post bulk_rate_events_path, params: { event_ids: [ foreign_event.id ] }
       end
 
       expect(ChannelEvent.where(event_id: foreign_event.id)).to be_empty
@@ -56,7 +56,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
 
     it "rates only the caller's own events when the ids are mixed" do
       perform_enqueued_jobs do
-        post bulk_rate_events_path, params: { event_ids: [owner_event.id, foreign_event.id] }
+        post bulk_rate_events_path, params: { event_ids: [ owner_event.id, foreign_event.id ] }
       end
 
       expect(ChannelEvent.where(event_id: foreign_event.id)).to be_empty
@@ -66,7 +66,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
 
   describe "RateEventsJob" do
     it "ignores event ids outside the channel owner's sources" do
-      RateEventsJob.perform_now(channel.id, [foreign_event.id])
+      RateEventsJob.perform_now(channel.id, [ foreign_event.id ])
 
       expect(ChannelEvent.where(event_id: foreign_event.id)).to be_empty
     end
@@ -74,7 +74,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
 
   describe "GET /channels/:id/contents/new" do
     it "does not render another user's event content" do
-      get new_channel_content_path(channel, event_ids: [foreign_event.id].to_json)
+      get new_channel_content_path(channel, event_ids: [ foreign_event.id ].to_json)
 
       expect(response).to have_http_status(:ok)
       expect(response.body).not_to include("SECRET-STRANGER-CONTENT")
@@ -82,7 +82,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
     end
 
     it "renders the caller's own event content" do
-      get new_channel_content_path(channel, event_ids: [owner_event.id].to_json)
+      get new_channel_content_path(channel, event_ids: [ owner_event.id ].to_json)
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Owner&#39;s own note about bitcoin")
@@ -93,7 +93,7 @@ RSpec.describe "Cross-user event_ids scoping", type: :request do
     it "does not attach another user's event to the created content" do
       post channel_contents_path(channel), params: {
         channel_content: { title: "Draft" },
-        event_ids: [foreign_event.id].to_json
+        event_ids: [ foreign_event.id ].to_json
       }
 
       content = ChannelContent.order(:created_at).last

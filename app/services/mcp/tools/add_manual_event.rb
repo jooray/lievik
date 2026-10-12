@@ -11,7 +11,7 @@ module Mcp
         {
           type: "object",
           additionalProperties: false,
-          required: ["content"],
+          required: [ "content" ],
           properties: {
             content: { type: "string", description: "Event content (may include URLs which will be extracted)." },
             published_at: { type: "string", description: "ISO8601 published_at; default: now." }

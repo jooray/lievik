@@ -16,7 +16,7 @@ module Nostr
       def hex_to_npub(hex_pubkey)
         return nil if hex_pubkey.blank?
 
-        bytes = [hex_pubkey].pack("H*").bytes
+        bytes = [ hex_pubkey ].pack("H*").bytes
         ::Bech32.encode("npub", convert_bits(bytes, 8, 5), ::Bech32::Encoding::BECH32)
       end
 
@@ -24,7 +24,7 @@ module Nostr
       def hex_to_note(hex_event_id)
         return nil if hex_event_id.blank?
 
-        bytes = [hex_event_id].pack("H*").bytes
+        bytes = [ hex_event_id ].pack("H*").bytes
         ::Bech32.encode("note", convert_bits(bytes, 8, 5), ::Bech32::Encoding::BECH32)
       end
 
@@ -36,7 +36,7 @@ module Nostr
         tlv_data = []
 
         # Type 0: Event ID (required, 32 bytes)
-        event_id_bytes = [hex_event_id].pack("H*").bytes
+        event_id_bytes = [ hex_event_id ].pack("H*").bytes
         tlv_data << TLV_SPECIAL
         tlv_data << 32
         tlv_data.concat(event_id_bytes)
@@ -51,7 +51,7 @@ module Nostr
 
         # Type 2: Author pubkey (optional, 32 bytes)
         if author_pubkey.present?
-          author_bytes = [author_pubkey].pack("H*").bytes
+          author_bytes = [ author_pubkey ].pack("H*").bytes
           tlv_data << TLV_AUTHOR
           tlv_data << 32
           tlv_data.concat(author_bytes)
@@ -59,7 +59,7 @@ module Nostr
 
         # Type 3: Kind (optional, 4 bytes big-endian)
         if kind.present?
-          kind_bytes = [kind.to_i].pack("N").bytes # big-endian uint32
+          kind_bytes = [ kind.to_i ].pack("N").bytes # big-endian uint32
           tlv_data << TLV_KIND
           tlv_data << 4
           tlv_data.concat(kind_bytes)
@@ -90,13 +90,13 @@ module Nostr
         end
 
         # Type 2: Author pubkey (required, 32 bytes)
-        author_bytes = [pubkey].pack("H*").bytes
+        author_bytes = [ pubkey ].pack("H*").bytes
         tlv_data << TLV_AUTHOR
         tlv_data << 32
         tlv_data.concat(author_bytes)
 
         # Type 3: Kind (required, 4 bytes big-endian)
-        kind_bytes = [kind.to_i].pack("N").bytes
+        kind_bytes = [ kind.to_i ].pack("N").bytes
         tlv_data << TLV_KIND
         tlv_data << 4
         tlv_data.concat(kind_bytes)
@@ -280,7 +280,7 @@ module Nostr
       def hex_to_nsec(hex_privkey)
         return nil if hex_privkey.blank?
 
-        bytes = [hex_privkey].pack("H*").bytes
+        bytes = [ hex_privkey ].pack("H*").bytes
         ::Bech32.encode("nsec", convert_bits(bytes, 8, 5), ::Bech32::Encoding::BECH32)
       end
 

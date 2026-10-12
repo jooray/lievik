@@ -53,7 +53,7 @@ module Ai
     def build_messages(message, conversation_history)
       system_prompt = build_system_prompt
 
-      messages = [{ role: "system", content: system_prompt }]
+      messages = [ { role: "system", content: system_prompt } ]
 
       # Add conversation history
       conversation_history.each do |msg|
@@ -67,7 +67,7 @@ module Ai
     end
 
     def build_system_prompt
-      parts = [@skill[:prompt]]
+      parts = [ @skill[:prompt] ]
 
       # Add existing channels context
       existing_channels = @user.channels.order(:name)

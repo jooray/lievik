@@ -240,7 +240,7 @@ RSpec.describe "Page rendering", type: :request do
       end
 
       it "renders the new content form for selected events" do
-        get new_channel_content_path(channel1, event_ids: [event1.id].to_json)
+        get new_channel_content_path(channel1, event_ids: [ event1.id ].to_json)
 
         expect(response).to have_http_status(:ok)
       end

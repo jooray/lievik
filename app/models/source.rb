@@ -13,7 +13,7 @@ class Source < ApplicationRecord
   before_validation :normalize_identifier
 
   validates :identifier, presence: true
-  validates :identifier, uniqueness: { scope: [:user_id, :source_type] }
+  validates :identifier, uniqueness: { scope: [ :user_id, :source_type ] }
   validates :distance, inclusion: { in: 0..10 }
   validate :nostr_identifier_is_decodable, if: :nostr?
 

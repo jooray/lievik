@@ -10,7 +10,7 @@ module Nostr
 
     def initialize
       @config = Rails.application.config_for(:lievik)
-      @relays = @config.dig(:nostr, :relays) || ["wss://relay.nsec.app"]
+      @relays = @config.dig(:nostr, :relays) || [ "wss://relay.nsec.app" ]
     end
 
     # Nostr event kinds
@@ -28,7 +28,7 @@ module Nostr
     #   - include_reposts: Include kind 6 reposts
     #   - include_long_form: Include kind 30023 long-form articles (default: true)
     def fetch(pubkey_hex, options = {})
-      kinds = options[:kinds] || [KIND_SHORT_TEXT]
+      kinds = options[:kinds] || [ KIND_SHORT_TEXT ]
       kinds << KIND_LONG_FORM if options.fetch(:include_long_form, true) && !kinds.include?(KIND_LONG_FORM)
       kinds << KIND_REPOST if options[:include_reposts] && !kinds.include?(KIND_REPOST)
 
@@ -37,7 +37,7 @@ module Nostr
       limit = options[:limit] || 100
 
       filter = {
-        "authors" => [pubkey_hex],
+        "authors" => [ pubkey_hex ],
         "kinds" => kinds.uniq,
         "limit" => limit
       }

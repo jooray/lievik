@@ -50,7 +50,7 @@ module Rag
         # Get all events for this user
         events = Event.joins(source: :user)
                       .where(sources: { user_id: user.id })
-                      .where.not(content: [nil, ""])
+                      .where.not(content: [ nil, "" ])
 
         events.find_each do |event|
           begin

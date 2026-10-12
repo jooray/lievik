@@ -7,8 +7,8 @@ class CreateDevLogs < ActiveRecord::Migration[8.1]
       t.json :details, default: {}
       t.string :parent_type
       t.bigint :parent_id
-      t.index [:user_id, :created_at]
-      t.index [:parent_type, :parent_id]
+      t.index [ :user_id, :created_at ]
+      t.index [ :parent_type, :parent_id ]
 
       t.timestamps
     end

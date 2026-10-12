@@ -74,7 +74,7 @@ gem "redcarpet"
 gem "rss"
 
 # Environment variables management
-gem "dotenv-rails", groups: [:development, :test]
+gem "dotenv-rails", groups: [ :development, :test ]
 
 # Pagination
 gem "kaminari"

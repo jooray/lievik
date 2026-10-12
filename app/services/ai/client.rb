@@ -195,7 +195,7 @@ module Ai
       if venice_reasoning_model? && normalized.key?(:max_tokens)
         requested = normalized.delete(:max_tokens)
         normalized[:max_completion_tokens] =
-          [requested + REASONING_HEADROOM_TOKENS, MODEL_MAX_COMPLETION_TOKENS].min
+          [ requested + REASONING_HEADROOM_TOKENS, MODEL_MAX_COMPLETION_TOKENS ].min
       end
 
       normalized

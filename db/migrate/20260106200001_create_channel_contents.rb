@@ -14,7 +14,7 @@ class CreateChannelContents < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :channel_contents, [:channel_id, :status]
-    add_index :channel_contents, [:channel_id, :created_at]
+    add_index :channel_contents, [ :channel_id, :status ]
+    add_index :channel_contents, [ :channel_id, :created_at ]
   end
 end

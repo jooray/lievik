@@ -121,8 +121,8 @@ module Nostr
 
         unless socket
           Rails.logger.error("NIP-46 listener: failed to connect to #{relay_url}, retrying in #{backoff}s")
-          sleep [backoff, deadline - Time.current].min
-          backoff = [backoff * 2, 15].min
+          sleep [ backoff, deadline - Time.current ].min
+          backoff = [ backoff * 2, 15 ].min
           next
         end
 
@@ -130,7 +130,7 @@ module Nostr
         backoff = 1
 
         sub_id = "nip46-#{SecureRandom.hex(4)}"
-        req = ["REQ", sub_id, { "kinds" => [24133], "#p" => [@temp_pubkey] }]
+        req = [ "REQ", sub_id, { "kinds" => [ 24133 ], "#p" => [ @temp_pubkey ] } ]
         socket.write(@client.frame_text(req.to_json))
 
         result = run_handshake(socket, relay_url, deadline, state)
@@ -140,8 +140,8 @@ module Nostr
         return result if result
 
         Rails.logger.info("NIP-46 listener: connection to #{relay_url} dropped before handshake completed, reconnecting in #{backoff}s")
-        sleep [backoff, [deadline - Time.current, 0].max].min
-        backoff = [backoff * 2, 15].min
+        sleep [ backoff, [ deadline - Time.current, 0 ].max ].min
+        backoff = [ backoff * 2, 15 ].min
       end
 
       nil
@@ -209,7 +209,7 @@ module Nostr
     def send_get_public_key(socket, relay_url, state)
       request = state.request(@client)
       @auth_session.update_columns(pending_rpc_id: request[:request_id]) if @auth_session.pending_rpc_id != request[:request_id]
-      socket.write(@client.frame_text(["EVENT", request[:event]].to_json))
+      socket.write(@client.frame_text([ "EVENT", request[:event] ].to_json))
       Rails.logger.info("NIP-46: sent get_public_key id=#{request[:request_id]} to #{state.signer_pubkey[0..7]}... via #{relay_url}")
     rescue => e
       Rails.logger.warn("NIP-46: failed to send get_public_key via #{relay_url}: #{e.class} - #{e.message}")
@@ -259,10 +259,10 @@ module Nostr
     def read_signer_event(socket, deadline)
       return nil unless Time.current < deadline
 
-      ready = WebsocketConnection.readable_now?(socket) || IO.select([socket], nil, nil, POLL_INTERVAL)
+      ready = WebsocketConnection.readable_now?(socket) || IO.select([ socket ], nil, nil, POLL_INTERVAL)
       return :idle unless ready
 
-      frame_deadline = [deadline, (NostrAuthSession::LISTENER_LEASE / 2).from_now].min
+      frame_deadline = [ deadline, (NostrAuthSession::LISTENER_LEASE / 2).from_now ].min
       data = @client.read_websocket_frame(socket, deadline: frame_deadline)
       return nil unless data
 
@@ -289,7 +289,7 @@ module Nostr
     end
 
     def close_socket(socket, sub_id)
-      socket.write(@client.frame_text(["CLOSE", sub_id].to_json)) rescue nil
+      socket.write(@client.frame_text([ "CLOSE", sub_id ].to_json)) rescue nil
       socket.close rescue nil
     end
   end

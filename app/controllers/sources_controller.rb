@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class SourcesController < ApplicationController
-  before_action :set_source, only: [:show, :edit, :update, :destroy, :refresh]
-  requires_paid_access only: [:refresh, :refresh_all]
+  before_action :set_source, only: [ :show, :edit, :update, :destroy, :refresh ]
+  requires_paid_access only: [ :refresh, :refresh_all ]
 
   def index
     @sources = current_user.sources.where.not(source_type: :manual).order(:name)

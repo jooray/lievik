@@ -5,8 +5,8 @@ class ChannelContentsController < ApplicationController
   include SseStreaming
 
   before_action :set_channel
-  before_action :set_channel_content, only: [:show, :edit, :update, :destroy, :generate_stream, :refine_stream, :publish, :revert]
-  before_action :set_events_from_params, only: [:new, :create]
+  before_action :set_channel_content, only: [ :show, :edit, :update, :destroy, :generate_stream, :refine_stream, :publish, :revert ]
+  before_action :set_events_from_params, only: [ :new, :create ]
   # After set_channel_content, so a 404 wins and a denied generation saves no version.
   requires_paid_ai kind: "content", only: :generate_stream
   requires_paid_ai kind: "content", prompt: :user_prompt, only: :refine_stream

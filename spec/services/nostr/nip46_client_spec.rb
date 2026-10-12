@@ -20,8 +20,8 @@ RSpec.describe Nostr::Nip46Client do
   it "only accepts a response-shaped connect result containing the secret" do
     expect(client.valid_connect_response?({ "id" => "request", "result" => "secret" })).to be(true)
     expect(client.valid_connect_response?({ "id" => "request", "result" => "ack" })).to be(false)
-    expect(client.valid_connect_response?({ "id" => "request", "method" => "connect", "params" => ["secret"] })).to be(false)
-    expect(client.valid_connect_response?({ "method" => "connect", "params" => ["secret"] })).to be(false)
+    expect(client.valid_connect_response?({ "id" => "request", "method" => "connect", "params" => [ "secret" ] })).to be(false)
+    expect(client.valid_connect_response?({ "method" => "connect", "params" => [ "secret" ] })).to be(false)
   end
 
   it "builds an NIP-44 encrypted get_public_key request" do

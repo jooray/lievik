@@ -49,7 +49,7 @@ module Ai
 
         if generation_looks_incomplete?(response)
           continuation = continue_generation(response, streaming: false)
-          response = [response, continuation].join if continuation.present?
+          response = [ response, continuation ].join if continuation.present?
         end
 
         log_response(response)
@@ -277,12 +277,12 @@ module Ai
 
     def full_system_prompt
       user_context = @channel.user.system_prompt
-      [user_context, SYSTEM_PROMPT].compact_blank.join("\n\n--- USER CONTEXT ---\n\n")
+      [ user_context, SYSTEM_PROMPT ].compact_blank.join("\n\n--- USER CONTEXT ---\n\n")
     end
 
     def refine_system_prompt
       user_context = @channel.user.system_prompt
-      [user_context, REFINE_SYSTEM_PROMPT].compact_blank.join("\n\n--- USER CONTEXT ---\n\n")
+      [ user_context, REFINE_SYSTEM_PROMPT ].compact_blank.join("\n\n--- USER CONTEXT ---\n\n")
     end
 
     def build_generate_prompt

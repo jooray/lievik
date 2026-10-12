@@ -13,7 +13,7 @@ class ChannelsController < ApplicationController
   SORT_OPTIONS = ChannelEvents::Listing::SORT_OPTIONS
   DEFAULT_SORT = ChannelEvents::Listing::DEFAULT_SORT
 
-  before_action :set_channel, only: [:show, :edit, :update, :destroy, :settings, :update_settings, :rate]
+  before_action :set_channel, only: [ :show, :edit, :update, :destroy, :settings, :update_settings, :rate ]
   requires_paid_access only: :rate
 
   def index
@@ -40,7 +40,7 @@ class ChannelsController < ApplicationController
       if @selected_channel_event
         # Remove from current position (if present) and prepend to top
         other_events = @channel_events.to_a.reject { |ce| ce.id == @selected_channel_event.id }
-        @channel_events_with_selected = [@selected_channel_event] + other_events
+        @channel_events_with_selected = [ @selected_channel_event ] + other_events
       end
     end
   end
@@ -107,6 +107,6 @@ class ChannelsController < ApplicationController
   end
 
   def settings_params
-    params.require(:channel).permit(:content_prompt, :content_language, :content_style, settings: [:relevance_threshold, :humanize_output])
+    params.require(:channel).permit(:content_prompt, :content_language, :content_style, settings: [ :relevance_threshold, :humanize_output ])
   end
 end

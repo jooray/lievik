@@ -6,7 +6,7 @@
 # rows on an active install, since logs are kept for 30 days).
 class AddStatusIndexToActivityLogs < ActiveRecord::Migration[8.1]
   def change
-    add_index :activity_logs, [:user_id, :status, :updated_at],
+    add_index :activity_logs, [ :user_id, :status, :updated_at ],
       name: "index_activity_logs_on_user_status_updated"
   end
 end

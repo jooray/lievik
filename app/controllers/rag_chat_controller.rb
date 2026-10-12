@@ -4,7 +4,7 @@ class RagChatController < ApplicationController
   include ActionController::Live
   include SseStreaming
 
-  requires_paid_ai kind: "chat", prompt: :question, only: [:ask, :ask_stream]
+  requires_paid_ai kind: "chat", prompt: :question, only: [ :ask, :ask_stream ]
 
   def index
     @embedded_count = Event.joins(source: :user)

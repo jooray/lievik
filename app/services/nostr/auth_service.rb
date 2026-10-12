@@ -15,8 +15,8 @@ module Nostr
     def initialize
       @config = Rails.application.config_for(:lievik)
       @auth_relays = @config.dig(:nostr, :auth_relays) ||
-                     [@config.dig(:nostr, :auth_relay)].compact.presence ||
-                     ["wss://relay.nsec.app"]
+                     [ @config.dig(:nostr, :auth_relay) ].compact.presence ||
+                     [ "wss://relay.nsec.app" ]
     end
 
     # Generate NIP-46 connection URI for QR code
@@ -156,7 +156,7 @@ module Nostr
         return false unless EventValidator.valid?(event_data, kind: 22_242)
         return false unless event_data["created_at"].between?(NIP07_MAX_AGE.ago.to_i, 1.minute.from_now.to_i)
         return false unless Array(content).include?(event_data["content"])
-        return false unless event_data["tags"].include?(["challenge", challenge])
+        return false unless event_data["tags"].include?([ "challenge", challenge ])
 
         signed_domain = Array(event_data["tags"]).find { |t| t.is_a?(Array) && t.first == "domain" }&.second
         return false if require_domain && (signed_domain.blank? || domain.blank?)
@@ -186,7 +186,7 @@ module Nostr
       event_data = JSON.parse(signed_event)
       return false unless EventValidator.valid?(event_data, kind: HTTP_AUTH_KIND)
       return false unless event_data["created_at"].between?(NIP07_MAX_AGE.ago.to_i, 1.minute.from_now.to_i)
-      return false unless event_data["tags"].include?(["challenge", challenge])
+      return false unless event_data["tags"].include?([ "challenge", challenge ])
 
       tag = ->(name) { Array(event_data["tags"]).find { |t| t.is_a?(Array) && t.first == name }&.second.to_s }
       return false unless tag.call("method").casecmp?("POST")

@@ -11,7 +11,7 @@ module Mcp
         {
           type: "object",
           additionalProperties: false,
-          required: ["channel_id"],
+          required: [ "channel_id" ],
           properties: {
             channel_id: { type: "integer" }
           }

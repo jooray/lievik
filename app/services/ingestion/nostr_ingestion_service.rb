@@ -182,10 +182,10 @@ module Ingestion
             d_tag: d_tag_key(d_tag),
             metadata: (existing_event.metadata || {}).merge("d_tag" => d_tag)
           )
-          return existing_event
+          existing_event
         else
           # Older version, skip
-          return nil
+          nil
         end
       else
         # New article, create it

@@ -65,10 +65,10 @@ Rails.application.routes.draw do
   end
 
   # Manual events
-  resources :manual_events, only: [:new, :create]
+  resources :manual_events, only: [ :new, :create ]
 
   # Events (all events view)
-  resources :events, only: [:index, :show] do
+  resources :events, only: [ :index, :show ] do
     collection do
       post :bulk_rate
     end
@@ -112,7 +112,7 @@ Rails.application.routes.draw do
   post "/chat/ask_stream", to: "rag_chat#ask_stream", as: :rag_chat_ask_stream
 
   # API tokens
-  resources :api_tokens, only: [:create, :destroy]
+  resources :api_tokens, only: [ :create, :destroy ]
 
   # MCP (Model Context Protocol) endpoint — auth via Authorization: Bearer <api token>
   post "/mcp", to: "mcp/server#handle"
@@ -135,15 +135,15 @@ Rails.application.routes.draw do
       post "me/refresh_profile", to: "me#refresh_profile"
       post "me/reindex", to: "me#reindex"
 
-      resources :templates, only: [:index, :create, :update, :destroy], param: :index
-      resources :api_tokens, only: [:index, :create, :destroy]
+      resources :templates, only: [ :index, :create, :update, :destroy ], param: :index
+      resources :api_tokens, only: [ :index, :create, :destroy ]
 
       get "dashboard", to: "dashboard#show"
       post "dashboard/rate_all", to: "dashboard#rate_all"
 
       get "sync", to: "sync#show"
 
-      resources :sources, except: [:new, :edit] do
+      resources :sources, except: [ :new, :edit ] do
         member do
           get :events
           post :refresh
@@ -157,18 +157,18 @@ Rails.application.routes.draw do
       post "channels/ai/stream", to: "channel_ai_chat#stream"
       post "channels/ai/bulk_create", to: "channel_ai_chat#bulk_create"
 
-      resources :channels, except: [:edit] do
+      resources :channels, except: [ :edit ] do
         member do
           post :rate
         end
-        resources :events, controller: "channel_events", only: [:index] do
+        resources :events, controller: "channel_events", only: [ :index ] do
           collection do
             post :mark_used
             post :mark_unused
             post :rate
           end
         end
-        resources :contents, controller: "channel_contents", except: [:new, :edit] do
+        resources :contents, controller: "channel_contents", except: [ :new, :edit ] do
           member do
             post :generate
             post :refine
@@ -178,7 +178,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :events, only: [:index, :show] do
+      resources :events, only: [ :index, :show ] do
         collection do
           post :rate
         end
@@ -186,12 +186,12 @@ Rails.application.routes.draw do
           post :mark_used
         end
       end
-      resources :manual_events, only: [:create]
+      resources :manual_events, only: [ :create ]
 
       get "chat", to: "chat#show"
       post "chat/stream", to: "chat#stream"
 
-      resources :activity_logs, only: [:index] do
+      resources :activity_logs, only: [ :index ] do
         collection do
           get :active
           post :cleanup_stale

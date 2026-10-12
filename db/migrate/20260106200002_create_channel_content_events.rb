@@ -9,6 +9,6 @@ class CreateChannelContentEvents < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :channel_content_events, [:channel_content_id, :event_id], unique: true
+    add_index :channel_content_events, [ :channel_content_id, :event_id ], unique: true
   end
 end

@@ -11,7 +11,7 @@ module Mcp
         {
           type: "object",
           additionalProperties: false,
-          required: ["event_id"],
+          required: [ "event_id" ],
           properties: {
             event_id: { type: "integer" }
           }

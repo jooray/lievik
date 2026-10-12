@@ -27,12 +27,12 @@ module ApplicationHelper
     return @android_device if defined?(@android_device)
 
     vary = response.headers["Vary"].to_s.split(/\s*,\s*/)
-    response.headers["Vary"] = (vary | ["User-Agent"]).join(", ")
+    response.headers["Vary"] = (vary | [ "User-Agent" ]).join(", ")
     @android_device = request.user_agent.to_s.match?(/Android/i)
   end
 
   def locale_options
-    I18n.available_locales.map { |l| [LOCALE_NAMES.fetch(l, l.to_s), l.to_s] }
+    I18n.available_locales.map { |l| [ LOCALE_NAMES.fetch(l, l.to_s), l.to_s ] }
   end
 
   MARKDOWN_RENDERER = Redcarpet::Markdown.new(

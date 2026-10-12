@@ -13,6 +13,6 @@ class CreateSources < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :sources, [:user_id, :source_type, :identifier], unique: true
+    add_index :sources, [ :user_id, :source_type, :identifier ], unique: true
   end
 end

@@ -12,7 +12,7 @@ class ReindexEmbeddingsJob < ApplicationJob
 
     events = Event.joins(source: :user)
                   .where(sources: { user_id: user.id })
-                  .where.not(content: [nil, ""])
+                  .where.not(content: [ nil, "" ])
 
     total = events.count
     embedded = 0

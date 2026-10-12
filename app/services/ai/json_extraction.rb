@@ -37,7 +37,7 @@ module Ai
           # Skip string contents (handle escaped quotes)
           i += 1
           while i < text.length
-            if text[i] == '\\'
+            if text[i] == "\\"
               i += 1 # skip escaped character
             elsif text[i] == '"'
               break

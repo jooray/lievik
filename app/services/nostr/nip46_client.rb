@@ -113,14 +113,14 @@ module Nostr
 
       group = ECDSA::Group::Secp256k1
       their_point = ECDSA::Format::PointOctetString.decode(
-        ["02#{their_pubkey_hex}"].pack("H*"),
+        [ "02#{their_pubkey_hex}" ].pack("H*"),
         group
       )
 
       our_private_key = @temp_privkey.to_i(16)
       shared_point = their_point.multiply_by_scalar(our_private_key)
 
-      [shared_point.x.to_s(16).rjust(64, "0")].pack("H*")
+      [ shared_point.x.to_s(16).rjust(64, "0") ].pack("H*")
     end
 
     def build_and_sign_event(content, recipient_pubkey)
@@ -128,15 +128,15 @@ module Nostr
         "pubkey" => @temp_pubkey,
         "created_at" => Time.now.to_i,
         "kind" => 24133,
-        "tags" => [["p", recipient_pubkey]],
+        "tags" => [ [ "p", recipient_pubkey ] ],
         "content" => content
       }
 
       event["id"] = EventValidator.event_id(event)
 
       require "schnorr"
-      message = [event["id"]].pack("H*")
-      privkey_bytes = [@temp_privkey].pack("H*")
+      message = [ event["id"] ].pack("H*")
+      privkey_bytes = [ @temp_privkey ].pack("H*")
       signature = Schnorr.sign(message, privkey_bytes)
       event["sig"] = signature.encode.unpack1("H*")
 
@@ -149,7 +149,7 @@ module Nostr
 
     def frame_text(data)
       bytes = data.bytes
-      frame = [0x81]
+      frame = [ 0x81 ]
 
       if bytes.length < 126
         frame << (0x80 | bytes.length)

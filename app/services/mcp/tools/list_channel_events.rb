@@ -13,7 +13,7 @@ module Mcp
         {
           type: "object",
           additionalProperties: false,
-          required: ["channel_id"],
+          required: [ "channel_id" ],
           properties: {
             channel_id: { type: "integer", description: "ID of the channel" },
             min_score: { type: "integer", minimum: 0, maximum: 100, description: "Minimum relevance score. Default: channel's own threshold." },
@@ -40,7 +40,7 @@ module Mcp
         ces = scope.offset(offset).limit(limit).to_a
 
         events = ces.map do |ce|
-          serialize_event(ce.event, channel_ratings: [serialize_channel_event_in_context(ce, channel)])
+          serialize_event(ce.event, channel_ratings: [ serialize_channel_event_in_context(ce, channel) ])
         end
 
         {

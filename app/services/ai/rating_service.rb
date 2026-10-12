@@ -35,7 +35,7 @@ module Ai
 
     def full_system_prompt
       user_context = @channel.user.system_prompt
-      [user_context, SYSTEM_PROMPT].compact_blank.join("\n\n--- USER CONTEXT / SCORING GUIDELINES ---\n\n")
+      [ user_context, SYSTEM_PROMPT ].compact_blank.join("\n\n--- USER CONTEXT / SCORING GUIDELINES ---\n\n")
     end
 
     def rate_event(event)
@@ -57,7 +57,7 @@ module Ai
             system_prompt: full_system_prompt,
             user_prompt: user_message
           },
-          parent_type: 'ActivityLog',
+          parent_type: "ActivityLog",
           parent_id: @activity_log_id
         )
       end
@@ -91,7 +91,7 @@ module Ai
               parsed_score: parsed[:score],
               parsed_reason: parsed[:reason]
             },
-            parent_type: 'ActivityLog',
+            parent_type: "ActivityLog",
             parent_id: @activity_log_id
           )
         end
@@ -111,7 +111,7 @@ module Ai
             log_type: :rating_error,
             message: "Rating failed: #{e.message}",
             details: { event_id: event.id, error: e.message },
-            parent_type: 'ActivityLog',
+            parent_type: "ActivityLog",
             parent_id: @activity_log_id
           )
         end

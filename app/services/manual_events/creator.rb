@@ -16,7 +16,7 @@ module ManualEvents
 
     def call
       manual_source = @user.sources.find_by(source_type: :manual)
-      return Result.new(event: nil, errors: ["No manual source configured for user"]) unless manual_source
+      return Result.new(event: nil, errors: [ "No manual source configured for user" ]) unless manual_source
 
       event = manual_source.events.build(
         content: @content,
@@ -34,7 +34,7 @@ module ManualEvents
           FetchLinksJob.perform_later(unfetched_ids) if unfetched_ids.any?
 
           @user.channels.find_each do |channel|
-            RateEventsJob.perform_later(channel.id, [event.id])
+            RateEventsJob.perform_later(channel.id, [ event.id ])
           end
         end
 

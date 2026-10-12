@@ -40,7 +40,7 @@ RSpec.describe Nostr::KeyConverter, "bunker:// parsing" do
 
       expect(described_class.parse_bunker_uri(uri)).to eq(
         pubkey: pubkey,
-        relays: ["wss://nos.lol", "wss://relay.primal.net"],
+        relays: [ "wss://nos.lol", "wss://relay.primal.net" ],
         secret: "s3cr3t"
       )
     end
@@ -48,7 +48,7 @@ RSpec.describe Nostr::KeyConverter, "bunker:// parsing" do
     it "accepts unescaped relay values, which signers do emit" do
       result = described_class.parse_bunker_uri("bunker://#{pubkey}?relay=wss://nos.lol")
 
-      expect(result[:relays]).to eq(["wss://nos.lol"])
+      expect(result[:relays]).to eq([ "wss://nos.lol" ])
     end
 
     it "treats a missing secret as nil rather than empty string" do
@@ -74,7 +74,7 @@ RSpec.describe Nostr::KeyConverter, "bunker:// parsing" do
     end
 
     it "returns nil rather than raising on junk" do
-      ["", "bunker://", "not a uri", "bunker://%%%?relay=x"].each do |junk|
+      [ "", "bunker://", "not a uri", "bunker://%%%?relay=x" ].each do |junk|
         expect { described_class.parse_bunker_uri(junk) }.not_to raise_error
         expect(described_class.parse_bunker_uri(junk)).to be_nil
       end

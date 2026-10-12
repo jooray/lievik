@@ -3,12 +3,12 @@
 class AddPerformanceIndexes < ActiveRecord::Migration[8.1]
   def change
     # Channel feed: channel_id = ? AND used = ? AND relevance_score >= ? ORDER BY relevance_score DESC
-    add_index :channel_events, [:channel_id, :used, :relevance_score],
+    add_index :channel_events, [ :channel_id, :used, :relevance_score ],
               name: "index_channel_events_on_channel_used_relevance",
               if_not_exists: true
 
     # Per-source event lists ordered by recency
-    add_index :events, [:source_id, :published_at], if_not_exists: true
+    add_index :events, [ :source_id, :published_at ], if_not_exists: true
 
     # nostr: reference resolution does Event.find_by(external_id:), which cannot
     # use the leftmost prefix of (source_id, external_id).

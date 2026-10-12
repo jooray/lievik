@@ -34,8 +34,8 @@ module Nostr
     MAX_RUNTIME = 10 * 60  # seconds; hard cap so deploys/restarts recycle cleanly
     RECONNECT_MAX = 15     # seconds; relay reconnect backoff ceiling
     CONNECT_DEADLINE = 12  # seconds; cap per connect attempt (TCP + TLS + upgrade)
-                           # so a TLS-stalled relay can't pin a thread for the
-                           # whole MAX_RUNTIME window.
+    # so a TLS-stalled relay can't pin a thread for the
+    # whole MAX_RUNTIME window.
 
     # Per-session state shared across relay threads. All mutation goes through the
     # mutex; pins one signer and one logical get_public_key request for the login.
@@ -78,7 +78,7 @@ module Nostr
       def connect_request
         @mutex.synchronize do
           @connect_request ||= @client.build_request_event(
-            @signer_pubkey, "connect", [@signer_pubkey, @bunker_secret.to_s]
+            @signer_pubkey, "connect", [ @signer_pubkey, @bunker_secret.to_s ]
           )
         end
       end
@@ -207,17 +207,17 @@ module Nostr
     # One relay: keep a socket alive, maintain one subscription per live session,
     # send get_public_key once a signer is known, and route replies back.
     def relay_loop(relay_url)
-      client = Nip46Client.new(NostrAuthSession.new(relay_url: [relay_url].to_json))
+      client = Nip46Client.new(NostrAuthSession.new(relay_url: [ relay_url ].to_json))
       backoff = 1
       uri = URI.parse(relay_url)
 
       until Time.current >= @stop_deadline || @stopping
-        connect_deadline = [Time.current + CONNECT_DEADLINE, @stop_deadline].min
+        connect_deadline = [ Time.current + CONNECT_DEADLINE, @stop_deadline ].min
         socket = client.create_websocket(uri, deadline: connect_deadline)
         unless socket
           Rails.logger.warn("NIP-46 supervisor: connect failed #{relay_url}, retry in #{backoff}s")
-          sleep [backoff, RECONNECT_MAX].min
-          backoff = [backoff * 2, RECONNECT_MAX].min
+          sleep [ backoff, RECONNECT_MAX ].min
+          backoff = [ backoff * 2, RECONNECT_MAX ].min
           next
         end
         Rails.logger.info("NIP-46 supervisor: connected #{relay_url}")
@@ -247,7 +247,7 @@ module Nostr
         live.each do |session|
           next if subs.key?(session.id)
           sub_id = "nip46-#{SecureRandom.hex(4)}"
-          req = ["REQ", sub_id, { "kinds" => [24133], "#p" => [session.temp_pubkey] }]
+          req = [ "REQ", sub_id, { "kinds" => [ 24133 ], "#p" => [ session.temp_pubkey ] } ]
           socket.write(client.frame_text(req.to_json))
           subs[session.id] = sub_id
         end
@@ -255,7 +255,7 @@ module Nostr
           sub_id = subs.delete(gone_id)
           gpk_sent.delete(gone_id)
           connect_sent.delete(gone_id)
-          socket.write(client.frame_text(["CLOSE", sub_id].to_json)) rescue nil
+          socket.write(client.frame_text([ "CLOSE", sub_id ].to_json)) rescue nil
         end
 
         # Bunker flow only: we speak first. The subscription above is already
@@ -363,7 +363,7 @@ module Nostr
 
     def send_connect(socket, relay_url, session)
       request = session.connect_request
-      socket.write(session.client.frame_text(["EVENT", request[:event]].to_json))
+      socket.write(session.client.frame_text([ "EVENT", request[:event] ].to_json))
       Rails.logger.info("NIP-46 supervisor: sent bunker connect session=#{session.id} via #{relay_url}")
     rescue => e
       Rails.logger.warn("NIP-46 supervisor: connect send failed #{relay_url}: #{e.class} - #{e.message}")
@@ -372,7 +372,7 @@ module Nostr
     def send_get_public_key(socket, relay_url, session)
       request = session.request
       persist_pending_rpc(session, request[:request_id])
-      socket.write(session.client.frame_text(["EVENT", request[:event]].to_json))
+      socket.write(session.client.frame_text([ "EVENT", request[:event] ].to_json))
       Rails.logger.info("NIP-46 supervisor: sent get_public_key session=#{session.id} via #{relay_url}")
     rescue => e
       Rails.logger.warn("NIP-46 supervisor: gpk send failed #{relay_url}: #{e.class} - #{e.message}")
@@ -429,7 +429,7 @@ module Nostr
     # :closed (socket dropped). Mirrors Nip46Listener#read_signer_event, and also
     # checks the SSL buffer since IO.select can miss OpenSSL-buffered frames.
     def read_frame(socket)
-      ready = WebsocketConnection.readable_now?(socket) || IO.select([socket], nil, nil, POLL_INTERVAL)
+      ready = WebsocketConnection.readable_now?(socket) || IO.select([ socket ], nil, nil, POLL_INTERVAL)
       return :idle unless ready
 
       data = read_ws_frame(socket)

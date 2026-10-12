@@ -15,7 +15,7 @@ module Mcp
         {
           type: "object",
           additionalProperties: false,
-          required: ["query"],
+          required: [ "query" ],
           properties: {
             query: { type: "string", description: "Free-text query." },
             limit: { type: "integer", minimum: 1, maximum: MAX_SEARCH_LIMIT, description: "Default 10, max 50." },

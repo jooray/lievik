@@ -10,7 +10,7 @@ module Nostr
 
     def initialize
       @config = Rails.application.config_for(:lievik)
-      @relays = @config.dig(:nostr, :relays) || ["wss://relay.nsec.app", "wss://nos.lol"]
+      @relays = @config.dig(:nostr, :relays) || [ "wss://relay.nsec.app", "wss://nos.lol" ]
     end
 
     def fetch(pubkey_hex, relay_hints: [])

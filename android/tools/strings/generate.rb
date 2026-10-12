@@ -338,7 +338,7 @@ WEB = {
   "tokens_generate" => "users.api_tokens.generate", "tokens_created_column" => "users.api_tokens.columns.created",
   "tokens_last_used" => "users.api_tokens.columns.last_used", "tokens_never" => "users.api_tokens.never",
   "tokens_revoke" => "users.api_tokens.revoke", "tokens_confirm_revoke" => "users.api_tokens.confirm_revoke",
-  "tokens_empty" => "users.api_tokens.empty", "tokens_name_required" => "api_tokens.create.name_required",
+  "tokens_empty" => "users.api_tokens.empty", "tokens_name_required" => "api_tokens.create.name_required"
 }.freeze
 
 # Per-key rewrites applied to the raw YAML text before conversion.
@@ -346,7 +346,7 @@ TRANSFORMS = {
   # The web names the model; the API doesn't expose it, so drop that clause.
   "settings_engine_chat_hint" => ->(s) { s.sub(/,?\s*(?:to|a|posílá se do|posiela sa do)\s*<code>%\{model\}<\/code>/, "") },
   "settings_engine_decision_hint" => ->(s) { s.sub(/,?\s*(?:to|a|posílá se do|posiela sa do)\s*<code>%\{model\}<\/code>/, "") },
-  "billing_self_host" => ->(s) { s.gsub("%{link}", "github.com/jooray/lievik") },
+  "billing_self_host" => ->(s) { s.gsub("%{link}", "github.com/jooray/lievik") }
 }.freeze
 
 def deep_merge(a, b)
@@ -387,11 +387,11 @@ def convert(text, names, html)
   s = s.gsub("%", "%%") if formatted
   s = xml_text(s)
   s = s.gsub("\u0001", "%").gsub("\u0002", "")
-  [s, formatted || !s.include?("%")]
+  [ s, formatted || !s.include?("%") ]
 end
 
 def placeholder_names(value)
-  texts = value.is_a?(Hash) ? [value["other"], value["one"]].compact : [value]
+  texts = value.is_a?(Hash) ? [ value["other"], value["one"] ].compact : [ value ]
   texts.flat_map { |t| t.scan(/%\{(\w+)\}/).flatten }.uniq
 end
 
@@ -408,7 +408,7 @@ end
 
 require "fileutils"
 
-locales = LANGS.to_h { |lang| [lang, load_locale(lang)] }
+locales = LANGS.to_h { |lang| [ lang, load_locale(lang) ] }
 english = locales["en"]
 args_report = []
 

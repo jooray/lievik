@@ -11,7 +11,7 @@ module Mcp
         {
           type: "object",
           additionalProperties: false,
-          required: ["source_id"],
+          required: [ "source_id" ],
           properties: {
             source_id: { type: "integer" }
           }

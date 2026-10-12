@@ -41,7 +41,7 @@ module NostrContentHelper
   end
 
   def resolve_nostr_reference(identifier, user)
-    cache_key = [identifier, user&.id]
+    cache_key = [ identifier, user&.id ]
     cache = nostr_reference_cache
     return cache[cache_key] if cache.key?(cache_key)
 

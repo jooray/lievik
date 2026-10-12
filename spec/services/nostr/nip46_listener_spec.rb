@@ -23,7 +23,7 @@ RSpec.describe Nostr::Nip46Listener do
     allow(client).to receive(:read_websocket_frame).and_return('{"EVENT":"bad"}')
     listener.instance_variable_set(:@client, client)
     socket = instance_double(IO)
-    allow(IO).to receive(:select).and_return([[socket]])
+    allow(IO).to receive(:select).and_return([ [ socket ] ])
 
     result = listener.send(:read_signer_event, socket, 1.second.from_now)
 
@@ -36,7 +36,7 @@ RSpec.describe Nostr::Nip46Listener do
     allow(client).to receive(:read_websocket_frame).and_return('["EVENT","sub","bad"]')
     listener.instance_variable_set(:@client, client)
     socket = instance_double(IO)
-    allow(IO).to receive(:select).and_return([[socket]])
+    allow(IO).to receive(:select).and_return([ [ socket ] ])
 
     result = listener.send(:read_signer_event, socket, 1.second.from_now)
 

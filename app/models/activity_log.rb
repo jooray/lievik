@@ -13,7 +13,7 @@ class ActivityLog < ApplicationRecord
   validates :activity_type, presence: true, inclusion: { in: ACTIVITY_TYPES }
 
   scope :recent, -> { order(created_at: :desc) }
-  scope :active, -> { where(status: [:pending, :running]) }
+  scope :active, -> { where(status: [ :pending, :running ]) }
   # Must exceed the worst-case retry chain of a job that is slow but alive
   # (3 attempts × a 300s AI operation timeout, plus backoff), or a healthy job
   # gets declared failed out from under itself mid-flight.
