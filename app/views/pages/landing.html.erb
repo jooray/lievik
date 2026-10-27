@@ -773,6 +773,22 @@
         color: var(--muted);
         font-size: 13px;
       }
+      .nostr-follow {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .nostr-follow strong {
+        color: var(--ink);
+      }
+      .nostr-npub {
+        overflow-wrap: anywhere;
+        user-select: all;
+        font-size: 12px;
+      }
+      .nostr-follow a:hover {
+        color: var(--ink);
+      }
       .footer-inner {
         display: flex;
         justify-content: space-between;
@@ -1337,6 +1353,17 @@
     </main>
 
     <footer>
+      <% npub = "npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s" %>
+      <div class="shell nostr-follow">
+        <strong><%= t(".footer.nostr_heading") %></strong>
+        <code class="nostr-npub"><%= npub %></code>
+        <ul class="footer-langs">
+          <li><a href="nostr:<%= npub %>"><%= t(".footer.nostr_app") %></a></li>
+          <li><a href="https://njump.me/<%= npub %>" target="_blank" rel="noopener">njump.me &#8599;</a></li>
+          <li><a href="https://primal.net/p/<%= npub %>" target="_blank" rel="noopener">Primal &#8599;</a></li>
+          <li><a href="https://yakihonne.com/users/<%= npub %>" target="_blank" rel="noopener">YakiHonne &#8599;</a></li>
+        </ul>
+      </div>
       <div class="shell footer-inner">
         <p><%= t(".footer.tagline") %></p>
         <p><%= t(".footer.sign_in") %></p>

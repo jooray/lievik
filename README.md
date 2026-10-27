@@ -2,6 +2,12 @@
 
 **A Nostr-first content curation tool for creators who manage multiple audiences**
 
+**Follow Lievik on Nostr** (NIP-05 `lievik@cypherpunk.today`)
+
+`npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s`
+
+[nostr:](nostr:npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s) · [njump.me](https://njump.me/npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s) · [Primal](https://primal.net/p/npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s) · [YakiHonne](https://yakihonne.com/users/npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s)
+
 <!-- jooray-links:start -->
 ### More from me
 

@@ -118,3 +118,5 @@ cs:
         tagline: "© Lievik. To pravé pro ty pravé."
         sign_in: "Přihlášení přes NIP-07 nebo vzdálený podepisovač NIP-46."
         github: "Open source na GitHubu"
+        nostr_heading: "Sledujte Lievik na Nostru"
+        nostr_app: "Otevřít v aplikaci Nostr"

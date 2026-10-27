@@ -118,3 +118,5 @@ es:
         tagline: "© Lievik. Lo que importa, para quien importa."
         sign_in: "Inicia sesión con NIP-07 o con un firmador remoto NIP-46."
         github: "Código abierto en GitHub"
+        nostr_heading: "Sigue a Lievik en Nostr"
+        nostr_app: "Abrir en tu app de Nostr"
