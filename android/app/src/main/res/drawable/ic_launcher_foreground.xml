@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- A funnel ("lievik"): many posts in at the top, a few curated ones out below. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp" android:height="108dp"
-    android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FFFFFFFF" android:pathData="M32,36h44l-16,20v14l-12,6v-20z" />
-    <path android:fillColor="#FFE9D5FF" android:pathData="M36,30h6v4h-6zM51,28h6v6h-6zM66,30h6v4h-6z" />
-</vector>
