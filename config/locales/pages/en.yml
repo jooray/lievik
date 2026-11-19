@@ -110,6 +110,12 @@ en:
           then: "with your own AI key"
           copy_html: "Lievik is open source. <a href=\"https://github.com/jooray/lievik\">Run it yourself</a> and there is no billing at all."
         terms_html: "Trial, refunds, privacy and support: <a href=\"https://cypherpunk.today/terms/\">the terms page</a>."
+      news:
+        eyebrow: "From the project"
+        heading: "Latest from Lievik."
+        subheading: "The posts of the Lievik account, read live from Nostr relays in your browser."
+        noscript_html: "Posts show up with JavaScript on. You can also find the Lievik account on <a href=\"%{url}\">njump.me</a>."
+        privacy: "Your browser connects to Nostr relays and to the hosts of images used in the posts."
       closing:
         eyebrow: "Nostr is home"
         heading: "Make every message feel like it was meant for them."

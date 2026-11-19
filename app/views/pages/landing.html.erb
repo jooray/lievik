@@ -731,6 +731,51 @@
         color: var(--ink);
       }
 
+      .nostr-news {
+        border-top: 1px solid var(--line);
+      }
+      .nostr-news .nl-frame {
+        min-height: 520px;
+        margin-top: 45px;
+        padding: 28px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+      .nostr-news .nl-note {
+        max-width: 640px;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .nostr-news .nl-note a {
+        text-decoration: underline;
+      }
+      .nostr-live-site {
+        --nl-fg: var(--ink);
+        --nl-muted: var(--muted);
+        --nl-border: var(--line);
+        --nl-card-bg: var(--canvas);
+        --nl-accent: var(--purple);
+        --nl-accent-fg: #fff;
+        --nl-link: var(--purple);
+        --nl-radius: 9px;
+        --nl-media-radius: 8px;
+        --nl-gap: 16px;
+        --nl-avatar-size: 52px;
+        font-size: 15px;
+      }
+      .dark .nostr-live-site {
+        --nl-accent-fg: #211c12;
+        --nl-card-bg: var(--canvas-deep);
+      }
+      @media (max-width: 640px) {
+        .nostr-news .nl-frame {
+          min-height: 640px;
+          padding: 16px;
+        }
+      }
+
       .closing {
         padding: 76px 0;
         color: #fff;
@@ -1339,6 +1384,36 @@
         </div>
       </section>
 
+      <%# Live posts of the Lievik Nostr account, read from relays in the visitor's
+          browser by the vendored nostr-live widget (vendor/assets/javascripts).
+          The relays are allowed for this page only, see PagesController. %>
+      <% nprofile = "nprofile1qqs844fzph76qhvqjy744v0nq6zetq8w455qhnq863ypq5eq4em7pwcpr3mhxue69uhkummnw3ezucmewp5x2unsw4hxktn5dajxz7gpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqg5waehxw309aex2mrp0yhxgctdw4eju6t0frag7u" %>
+      <section class="how nostr-news" id="news">
+        <div class="shell">
+          <div class="how-heading">
+            <div>
+              <p class="eyebrow"><%= t(".news.eyebrow") %></p>
+              <h2><%= t(".news.heading") %></h2>
+            </div>
+            <p><%= t(".news.subheading") %></p>
+          </div>
+          <div class="nl-frame">
+            <div
+              class="nostr-live-site"
+              data-nostr-live
+              data-nprofile="<%= nprofile %>"
+              data-relays="wss://nostr.cypherpunk.today,wss://relay.primal.net"
+              data-layout="cards"
+              data-limit="6"
+              data-lang="<%= I18n.locale %>"
+            >
+              <noscript><%= t(".news.noscript_html", url: "https://njump.me/#{nprofile}") %></noscript>
+            </div>
+          </div>
+          <p class="nl-note"><%= t(".news.privacy") %></p>
+        </div>
+      </section>
+
       <section class="closing">
         <div class="shell closing-grid">
           <div>
@@ -1353,10 +1428,10 @@
     </main>
 
     <footer>
-      <% npub = "npub10t2jyr0a5pwcpyfat2clxp59jkqwatfgp0xq04zgzpfjptnhuzasqv034s" %>
+      <% npub = nprofile %>
       <div class="shell nostr-follow">
         <strong><%= t(".footer.nostr_heading") %></strong>
-        <code class="nostr-npub"><%= npub %></code>
+        <code class="nostr-npub">lievik@cypherpunk.today</code>
         <ul class="footer-langs">
           <li><a href="nostr:<%= npub %>"><%= t(".footer.nostr_app") %></a></li>
           <li><a href="https://njump.me/<%= npub %>" target="_blank" rel="noopener">njump.me &#8599;</a></li>
@@ -1386,6 +1461,7 @@
       </nav>
     </footer>
 
+    <%= javascript_include_tag "nostr-live", defer: true %>
     <script nonce="<%= content_security_policy_nonce %>">
       (function () {
         var root = document.documentElement;

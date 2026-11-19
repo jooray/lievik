@@ -110,6 +110,12 @@ sk:
           then: "s vlastným kľúčom k AI"
           copy_html: "Lievik je open source. <a href=\"https://github.com/jooray/lievik\">Spustite si ho sami</a> a žiadne platby sa vás netýkajú."
         terms_html: "Skúšobná doba, vrátenie peňazí, súkromie a podpora: <a href=\"https://cypherpunk.today/sk/terms/\">podmienky</a>."
+      news:
+        eyebrow: "Z projektu"
+        heading: "Čo je nové v Lieviku."
+        subheading: "Príspevky účtu Lievik, načítané naživo z Nostr relayov v tvojom prehliadači."
+        noscript_html: "Príspevky sa zobrazia so zapnutým JavaScriptom. Účet Lievik nájdeš aj na <a href=\"%{url}\">njump.me</a>."
+        privacy: "Tvoj prehliadač sa pripája na Nostr relaye a na servery s obrázkami z príspevkov."
       closing:
         eyebrow: "Doma na Nostri"
         heading: "Nech má každý pocit, že správa bola písaná práve preňho."

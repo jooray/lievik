@@ -110,6 +110,12 @@ es:
           then: "con tu propia clave de IA"
           copy_html: "Lievik es de código abierto. <a href=\"https://github.com/jooray/lievik\">Ejecútalo tú mismo</a> y no hay nada que pagar."
         terms_html: "Prueba, reembolsos, privacidad y soporte: <a href=\"https://cypherpunk.today/es/terms/\">las condiciones</a>."
+      news:
+        eyebrow: "Del proyecto"
+        heading: "Lo último de Lievik."
+        subheading: "Las publicaciones de la cuenta de Lievik, leídas en directo desde relays de Nostr en tu navegador."
+        noscript_html: "Las publicaciones aparecen con JavaScript activado. También puedes encontrar la cuenta de Lievik en <a href=\"%{url}\">njump.me</a>."
+        privacy: "Tu navegador se conecta a relays de Nostr y a los servidores de las imágenes de las publicaciones."
       closing:
         eyebrow: "Nuestra casa es Nostr"
         heading: "Que cada mensaje parezca escrito para quien lo lee."
