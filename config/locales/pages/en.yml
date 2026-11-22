@@ -124,5 +124,6 @@ en:
         tagline: "© Lievik. Send the right thing to the right people."
         sign_in: "Sign in with NIP-07 or a NIP-46 remote signer."
         github: "Open source on GitHub"
+        support: "Support the project"
         nostr_heading: "Follow Lievik on Nostr"
         nostr_app: "Open in your Nostr app"

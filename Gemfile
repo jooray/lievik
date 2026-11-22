@@ -33,9 +33,9 @@ gem "solid_cache"
 # (RecurringTask.wrap raised NoMethodError: undefined method 'second' for
 # an instance of String) - revisit as its own migration, not bundled with
 # an unrelated Ruby security bump.
-gem "solid_queue", "~> 1.2.4"
+gem "solid_queue", "~> 1.7"
 # Pinned below 4.0: unreviewed major bump alongside the above, same reasoning.
-gem "solid_cable", "~> 3.0"
+gem "solid_cable", "~> 4.1"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -47,7 +47,7 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.2"
 
 # ViewComponent for reusable UI components
 gem "view_component"
